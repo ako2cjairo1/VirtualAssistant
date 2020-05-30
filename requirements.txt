@@ -1,0 +1,6 @@
+SpeechRecognition
+gTTS
+playsound
+wikipedia
+word2number
+PyAudio
