@@ -2,11 +2,13 @@ import os
 import webbrowser
 import time
 import sys
+import requests
 from random import randint
 import subprocess
 import warnings
 import calendar
 import wikipedia
+from urllib.parse import quote
 from datetime import datetime as dt
 from time import ctime
 from word2number import w2n
@@ -27,7 +29,7 @@ class VirtualAssistant(SpeechAssistant):
             return False
 
         def awake_greetings():
-            wake_responses = ["Yup. I'm listening...",
+            wake_responses = ["I'm listening...",
                               f"How can I help you {self.master_name}?"]
             self.speak(wake_responses[randint(
                 0, len(wake_responses) - 1)])
@@ -38,14 +40,9 @@ class VirtualAssistant(SpeechAssistant):
             if listen_timeout == 0:
                 voice_data = self.listen_to_audio()
 
-                # wake command is invoked and the user ask immediately.
+                # wake command is invoked and the user ask question immediately.
                 if len(voice_data.split(" ")) > 2 and keyword_match(voice_data, [self.assistant_name, f"Hey {self.assistant_name}"]):
-
-                    # remove the wake commands and the rest of voice_data will be use to formulate a response
-                    clean_voice_data = voice_data.lower().replace(f"hey {self.assistant_name.lower()}", "").replace(
-                        f"{self.assistant_name.lower()}", "").strip()
-
-                    formulate_responses(clean_voice_data)
+                    formulate_responses(clean_voice_data(voice_data))
                     return True
 
                 # wake commands is invoked and expected to ask for another command
@@ -62,40 +59,54 @@ class VirtualAssistant(SpeechAssistant):
             return False
 
         def unknown_responses():
-            unknown_responses = ["hmmm... I didn't quite get that",
-                                 "Sorry! I didn't get that..."]
+            unknown_responses = ["I'm not sure I understand.", "hmm... I didn't understand.", "Pardon me, what's that again?",
+                                 "Sorry, I didn't get that. Can you restate the question?", "Hmm.. I don't have an answer for that. Is there something else I can help you with?"]
             return unknown_responses[randint(0, len(unknown_responses) - 1)]
 
         def ask_time(voice_data):
             time_responses = ["It's", "The time is"]
             if "in" in voice_data.lower().split(" "):
-                return search_on_google(voice_data)
+                return google(voice_data)
             else:
                 return f"{time_responses[randint(0, len(time_responses) - 1)]} {dt.now().strftime('%I:%M %p')}\n"
 
-        def search_on_google(search_keyword):
-            url = "https://google.com/search?q=" + search_keyword.strip()
+        def google(search_keyword):
+            result = ""
+            if search_keyword:
+                # open a web browser and show results
+                webbrowser.get().open(
+                    f"https://google.com/search?q={quote(search_keyword.strip())}")
+                return f"Here's what i found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
 
-            # open a web browser and show results
-            webbrowser.get().open(url)
-            return f"Here's what i found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
+            return result
 
         def google_maps(location):
-            url = "https://google.nl/maps/place/" + location.strip() + "/&amp;"
-            webbrowser.get().open(url)
-            return f"Here\'s the map location of {location.strip()}\n"
+            result = ""
+            if location:
+                # open a web browser and map
+                webbrowser.get().open(
+                    f"https://google.nl/maps/place/{quote(location.strip())}/&amp;")
+                return f"Here\'s the map location of \"{location.strip()}\". Opening your browser..."
 
-        def search_on_wiki(wiki_keyword):
+            return result
+
+        def wikipedia_search(wiki_keyword):
+            result = ""
             if wiki_keyword:
                 try:
                     return wikipedia.summary(wiki_keyword.strip(), sentences=2)
-                except wikipedia.exceptions.WikipediaException as e:
-                    print(f"{e}\n")
-                    return f"I don't know who that is. But, {search_on_google(wiki_keyword.strip())}"
 
-            return ""
+                except wikipedia.exceptions.WikipediaException:
+                    if ("who" or "who's") in wiki_keyword.lower():
+                        result = f"I don't know who that is but,"
+                    else:
+                        result = f"I don't know what that is but,"
 
-        def simple_calculation(voice_data):
+                    return f"{result} {google(wiki_keyword.strip())}"
+
+            return result
+
+        def calculator(voice_data):
             operator = ""
             number1 = 0
             percentage = 0
@@ -126,13 +137,14 @@ class VirtualAssistant(SpeechAssistant):
                     number1 = 0
                 elif word.isdigit():
                     # build the equation
-                    new_voice_data += str(w2n.word_to_num(word))
+                    new_voice_data += str(w2n.word_to_num(word)
+                                          ).replace(" ", "")
                     if percentage:
                         number1 = word
 
             if percentage:
                 # evaluate percentage equation
-                compute = float(eval(f"{percentage} * .01 * {number1}"))
+                compute = float(eval(f"{percentage}*.01*{number1}"))
 
             if not compute and percentage:
                 # if no computation was made, just return equivalent value of percentage
@@ -214,19 +226,39 @@ class VirtualAssistant(SpeechAssistant):
             search_wiki = True
 
             # commands to terminate virtual assistant
-            if keyword_match(voice_data, ["shut up", f"close {self.assistant_name}", f"turn off {self.assistant_name}"]):
+            if keyword_match(voice_data, [f"turn off {self.assistant_name}", f"deactivate {self.assistant_name}", f"{self.assistant_name} deactivate"]):
                 self.speak("\nHappy to help! Goodbye!")
                 print(f"\n{self.assistant_name} assistant DEACTIVATED.\n")
                 exit()
 
-            # ask assistants name
+            # commands to interrupt virtual assistant
+            if keyword_match(voice_data, [f"{self.assistant_name} stop", f"shut up {self.assistant_name}", f"shut it {self.assistant_name}"]):
+                # return immediately, and listen again for commands
+                return
+
+            if greeting_commands(voice_data):
+                greeting_responses = ["very well, thanks",
+                                      "I'm fine", "I'm great!", "hi", "hello"]
+                self.speak(greeting_responses[randint(
+                    0, len(greeting_responses) - 1)])
+                # return immediately we don't need any answers below
+                return
+
+            # commands to ask for assistant's name
             if keyword_match(voice_data, ["what is your name", "what's your name"]):
                 prefix = ["My name is", "I'm"]
-                response_message = f"{prefix[randint(0,len(prefix) - 1)]} {self.assistant_name}.\n"
-                search_google = False
-                search_wiki = False
+                self.speak(
+                    f"{prefix[randint(0, len(prefix) - 1)]} {self.assistant_name}.")
+                # return immediately we don't need any answers below
+                return
 
-            # ask time
+            """ remove the assistant's name in voice_data
+                from this point forward of code block
+                to avoid misleading data.
+            """
+            voice_data = clean_voice_data(voice_data)
+
+            # commands to ask time
             if keyword_match(voice_data, ["what time is it", "what's the time", "what is the time"]):
                 response_time = ask_time(voice_data)
                 if response_time:
@@ -234,136 +266,172 @@ class VirtualAssistant(SpeechAssistant):
                     search_google = False
                     search_wiki = False
 
-            # use wikipedia
-            wiki_commands = ["what's", "who's", "who is",
-                             "define", "what is", "what is the", "what's the"]
-            if search_wiki and keyword_match(voice_data, wiki_commands):
-                wiki_keyword = voice_data
-                for command in wiki_commands:
-                    wiki_keyword = wiki_keyword.replace(command, "").strip()
-
-                wiki_result = search_on_wiki(wiki_keyword)
-
-                # if wiki_keyword contains more than 2 words
-                # and matched with voice_data, return the wiki_result
-                # else, return blank string value
-                keyword_list = wiki_keyword.split(" ")
-                if len(keyword_list) > 2:
-                    match_count = 0
-                    for word in keyword_list:
-                        # should contain words from voice_data
-                        if word in wiki_result.lower():
-                            match_count += 1
-                    if match_count < 3:
-                        wiki_result = ""
-
-                if wiki_result:
-                    response_message += wiki_result
-
             # commands for simple math calculations
-            calc = simple_calculation(voice_data)
+            calc = calculator(voice_data)
             if calc:
                 response_message += calc
                 search_google = False
+                search_wiki = False
 
             # commands to open apps
             if keyword_match(voice_data, ["open", "show", "run"]):
-                response_message += open_application(voice_data)
+                open_app_result = open_application(voice_data)
+                response_message += open_app_result
 
             # commands to find local files and document
             if keyword_match(voice_data, ["find file", "files", "documents"]):
                 response_message += find_file(voice_data)
 
+            # commands for wikipedia
+            wiki_commands = ["what is the", "who is the", "what's the",
+                             "who's the", "what is", "what's", "define", "who is", "who's"]
+            if search_wiki and keyword_match(voice_data, wiki_commands):
+                wiki_keyword = voice_data
+
+                for command in wiki_commands:
+                    # remove the first occurance of wiki command from voice data
+                    if command in voice_data.lower():
+                        wiki_keyword = voice_data[(voice_data.find(
+                            command) + len(command)):].strip()
+
+                # get aswers from wikipedia
+                wiki_result = wikipedia_search(wiki_keyword)
+
+                keyword_list = wiki_keyword.lower().split(" ")
+                # if answer from wikipedia contains more than 2 words
+                if len(keyword_list) > 2:
+                    match_count = 0
+                    for word in keyword_list:
+                        # and matched with context of question, return wikipedia answer
+                        if word in wiki_result.lower():
+                            match_count += 1
+                    if match_count < 3:
+                        # else, return nothing
+                        wiki_result = ""
+
+                if wiki_result:
+                    response_message += wiki_result
+                    # don't search into google we found answer from wikipedia
+                    search_google = False
+
             # commands to use google maps
-            if search_google and keyword_match(voice_data, ["where is", "map of", "location"]):
-                voice_data_list = voice_data.split(" ")
+            google_maps_commands = ["where is", "where's",
+                                    "map of", "location of", "location"]
+            if search_google and keyword_match(voice_data, google_maps_commands):
                 location = ""
 
-                if "where is" in voice_data:
-                    location = voice_data[(
-                        voice_data.find("where is") + 8):].strip()
-                elif "map of" in voice_data:
-                    location = voice_data[(
-                        voice_data.find("map of") + 6):].strip()
-                elif "location" in voice_data_list:
-                    location = voice_data[(
-                        voice_data.find("location") + 8):].strip()
-                response_message += google_maps(location)
+                for command in google_maps_commands:
+                    if command in voice_data.lower():
+                        print(f"A. {command}:{location}")
+                        location = voice_data[(
+                            voice_data.find(command) + len(command)):]
+
+                maps_response = google_maps(location)
+                if maps_response:
+                    response_message += maps_response
+                    # don't search on google we found answers from maps
+                    search_google = False
 
             # commands to search on google
-            if search_google and keyword_match(voice_data, ["find", "define", "what's", "what is", "what is the", "what's the", "look for", "search for", "search google for"]):
-                voice_data_list = voice_data.split(" ")
-                voice_data.replace("on google", "").replace("into google", "")
-                search_keyword = ""
+            google_commands = ["find", "look for", "search for", "search google for", "what is the", "who is the", "what's the", "who's the", "what is", "what's",
+                               "define", "who is", "who's", "where is the", "where's the", "where is", "where's", "when is the", "when's the", "when is", "when's"]
+            if search_google and keyword_match(voice_data, google_commands):
+                google_keyword = ""
+                # remove these commands on keyword to search on google
+                for command in google_commands:
+                    if command in voice_data.lower():
+                        google_keyword = voice_data[(
+                            voice_data.lower().find(command) + len(command)):].strip()
 
-                if "find" in voice_data_list:
-                    search_keyword = voice_data[(voice_data.find(
-                        "find") + 4):].strip()
-                elif "define" in voice_data_list:
-                    search_keyword = voice_data[(voice_data.find(
-                        "define") + 6):].strip()
-                elif "what's the" in voice_data:
-                    search_keyword = voice_data[(
-                        voice_data.find("what's the") + 10):].strip()
-                elif "what is the" in voice_data:
-                    search_keyword = voice_data[(
-                        voice_data.find("what is the") + 11):].strip()
-                elif "what is" in voice_data:
-                    search_keyword = voice_data[(
-                        voice_data.find("what is") + 7):].strip()
-                elif "look for" in voice_data:
-                    search_keyword = voice_data[(voice_data.find(
-                        "look for") + 8):].strip()
-                elif "search for" in voice_data:
-                    search_keyword = voice_data[(voice_data.find(
-                        "search for") + 10):].strip()
-                elif "search google for" in voice_data:
-                    search_keyword = voice_data[(voice_data.find(
-                        "search google for") + 17):].strip()
-                elif "search google" in voice_data:
-                    search_keyword = voice_data[(voice_data.find(
-                        "search google") + 13):].strip()
-                response_message += search_on_google(search_keyword)
+                # search on google if we have a keyword
+                if google_keyword:
+                    response_message += google(google_keyword)
 
             if not response_message:
+                # set the unknown response if no answers
                 response_message = unknown_responses()
 
             self.speak(response_message)
 
+        def check_connection():
+            while True:
+                try:
+                    response = requests.get("https://www.google.com")
+                    time.sleep(2)
+
+                    # 200 means we got connection to web
+                    if response.status_code == 200:
+                        # execute main function
+                        main()
+                        break
+                except Exception:
+                    print(
+                        "**Virtual assistant failed to initiate. No internet connection.\n")
+
+                time.sleep(5)
+
+        def greeting_commands(voice_data):
+            if keyword_match(voice_data, [f"what is up", "what's up", "hey", "hi", "hello"]) and len(voice_data.split(" ")) < 5:
+                return True
+            return False
+
+        def clean_voice_data(voice_data):
+            clean_data = voice_data
+
+            if not greeting_commands(voice_data):
+                if voice_data.lower().find(self.assistant_name.lower()) > 0:
+                    # remove all words starting from assistant's name
+                    clean_data = voice_data[(voice_data.lower().find(
+                        self.assistant_name.lower()) + len(self.assistant_name)):].strip()
+
+                    # if assitant name's the last word in sentence
+                    if len(clean_data.split(" ")) <= 1:
+                        # remove only the portion of assistant's name in voice_data
+                        clean_data = voice_data.replace(
+                            self.assistant_name.lower(), "").strip()
+
+            return clean_data
+
         """
         Main handler of virtual assistant
         """
-        print(f"\n{self.assistant_name} assistant is ACTIVE...")
-        announce_greeting = f"Hi, how can i help you {self.master_name}?"
-        listen_timeout = 0
+        def main():
+            print(
+                f"\nVirtual assistant \"{self.assistant_name}\" is active...")
+            announce_greeting = f"Hi, {self.master_name} how can i help you?"
+            listen_timeout = 0
 
-        while True:
-            # handles restarting of listen timeout
-            if listen_timeout == 5:
-                listen_timeout = 0
+            while True:
+                # handles restarting of listen timeout
+                if listen_timeout == 6:
+                    listen_timeout = 0
 
-            # try to wake the assistant
-            elif wake_assistant(listen_timeout):
-                listen_timeout += 1
-                print(f"Listening...{listen_timeout}")
-                # continue the loop without listening to another command
-                continue
+                # try to wake the assistant
+                elif wake_assistant(listen_timeout):
+                    listen_timeout += 1
+                    # continue the loop without listening to another command
+                    continue
 
-            # handles if assistant is still listening for commands.
-            if announce_greeting or listen_timeout > 0:
-                print(f"Listening...{listen_timeout}")
-                # listen for commands
-                voice_data = self.listen_to_audio(announce_greeting)
+                # handles if assistant is still listening for commands.
+                if announce_greeting or listen_timeout > 0:
+                    print(
+                        f"{self.assistant_name}: ... (listen timeout {listen_timeout} of 5)")
 
-                if voice_data:
-                    formulate_responses(voice_data)
-                    # deduct listen timeout
-                    if 1 < listen_timeout <= 5:
-                        listen_timeout -= 1
-                        continue
+                    # listen for commands
+                    voice_data = self.listen_to_audio(announce_greeting)
 
-                listen_timeout += 1
-            else:
-                print(f"\nSleeping...{listen_timeout}")
+                    if voice_data:
+                        formulate_responses(voice_data)
+                        # deduct listen timeout
+                        if 1 < listen_timeout <= 5:
+                            listen_timeout -= 1
+                            continue
 
-            announce_greeting = None
+                    listen_timeout += 1
+                else:
+                    print(f"{self.assistant_name}: ZzzzZz")
+
+                announce_greeting = None
+
+        # proceed to main() if we got internet connection
+        check_connection()
