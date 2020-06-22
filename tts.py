@@ -2,6 +2,7 @@ import speech_recognition as sr
 import os
 import random
 import playsound
+import colorama
 from gtts import gTTS
 from gtts.tts import gTTSError
 
@@ -38,7 +39,7 @@ class SpeechAssistant:
             except Exception as ex:
                 print(ex.__cause__)
 
-            print(f"{self.master_name}: {voice_text}")
+            print(f"\033[1;40;42m{self.master_name}: {voice_text}")
             return voice_text
 
     def speak(self, audio_string):
@@ -51,7 +52,7 @@ class SpeechAssistant:
             tts.save(audio_file)
 
             # announce/play the generated audio
-            print(f"{self.assistant_name}: {audio_string}")
+            print(f"\033[1;40;46m{self.assistant_name}: {audio_string}")
             playsound.playsound(audio_file)
 
             # delete the audio file after announcing to save mem space
