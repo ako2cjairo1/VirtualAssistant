@@ -1,0 +1,297 @@
+{
+    "command_db": [
+        {
+            "name": "start_greeting",
+            "commands": [
+                "Hi, <boss_name> how can i help you?"
+            ]
+        },
+        {
+            "name": "wakeup",
+            "commands": [
+                "hey <assistant_name>"
+            ]
+        },
+        {
+            "name": "wakeup_responses",
+            "commands": [
+                "I'm listening...",
+                "How can I help you <boss_name>?"
+            ]
+        },
+        {
+            "name": "mute",
+            "commands": [
+                "<assistant_name> stop",
+                "stop <assistant_name>",
+                "don't listen <assistant_name>",
+                "shut up <assistant_name>",
+                "<assistant_name> shut up"
+            ]
+        },
+        {
+            "name": "unknown_responses",
+            "commands": [
+                "I'm not sure I understand.",
+                "hmm... I didn't understand.",
+                "Pardon me, what's that again?",
+                "Sorry, I didn't get that. Can you restate the question?",
+                "Hmm.. I don't have an answer for that. Is there something else I can help you with?"
+            ]
+        },
+        {
+            "name": "greeting",
+            "commands": [
+                "what is up",
+                "what's up",
+                "how are you",
+                "hey",
+                "hi",
+                "hello"
+            ]
+        },
+        {
+            "name": "greeting_responses",
+            "commands": [
+                "very well, thanks",
+                "I'm fine",
+                "I'm great!",
+                "hi",
+                "hello"
+            ]
+        },
+        {
+            "name": "terminate",
+            "commands": [
+                "turn off <assistant_name>",
+                "deactivate <assistant_name>",
+                "<assistant_name> deactivate"
+            ]
+        },
+        {
+            "name": "ask_assistant_name",
+            "commands": [
+                "what is your name",
+                "what's your name"
+            ]
+        },
+        {
+            "name": "ask_assistant_name_response",
+            "commands": [
+                "My name is <assistant_name>",
+                "I'm <assistant_name>"
+            ]
+        },
+        {
+            "name": "confirmation",
+            "commands": [
+                "thank you <assistant_name>",
+                "thanks <assistant_name>",
+                "thanks a lot",
+                "thank you very much",
+                "ok <assistant_name>",
+                "ok",
+                "thank you",
+                "thanks",
+                "all right"
+            ]
+        },
+        {
+            "name": "confirmation_responses",
+            "commands": [
+                "ok",
+                "alright",
+                "that's great!",
+                "let me know if there's something else I can help you with."
+            ]
+        },
+        {
+            "name": "brightness",
+            "commands": [
+                "set the brightness to",
+                "set brightness to",
+                "bring up the brightness to",
+                "bring up brightness to",
+                "bring brightness to",
+                "turn up the brightness to",
+                "turn up brightness to",
+                "turn up brightness",
+                "change brightness to",
+                "change brightness",
+                "brightness by",
+                "brightness to",
+                "brightness",
+                "make the screen bright",
+                "make the screen dark"
+            ]
+        },
+        {
+            "name": "math_calculation",
+            "commands": [
+                "+",
+                "plus",
+                "add",
+                "-",
+                "minus",
+                "subtract",
+                "times",
+                "multiplied by",
+                "multiply by",
+                "multiply",
+                "/",
+                "divided by",
+                "divided to",
+                "divide with",
+                "divide by",
+                "divide",
+                "square root",
+                "cube root",
+                "%",
+                "percentage",
+                "percent"
+            ]
+        },
+        {
+            "name": "passwords",
+            "commands": [
+                "show my passwords",
+                "what is my <app_name> password"
+            ]
+        },
+        {
+            "name": "wifi",
+            "commands": [
+                "turn on the wi-fi",
+                "turn on wi-fi",
+                "turn off the wi-fi",
+                "turn off wi-fi",
+                "enable wi-fi",
+                "disable wi-fi"
+            ]
+        },
+        {
+            "name": "system_shutdown_restart",
+            "commands": [
+                "shutdown system",
+                "system shutdown",
+                "shutdown computer",
+                "restart system",
+                "system restart",
+                "restart computer"
+            ]
+        },
+        {
+            "name": "time",
+            "commands": [
+                "what time is it",
+                "what's the time",
+                "what is the time"
+            ]
+        },
+        {
+            "name": "open_apps",
+            "commands": [
+                "open",
+                "run",
+                "launch"
+            ]
+        },
+        {
+            "name": "find_file",
+            "commands": [
+                "find files of",
+                "find file of",
+                "files for",
+                "files",
+                "documents"
+            ]
+        },
+        {
+            "name": "wikipedia",
+            "commands": [
+                "what is the",
+                "who is the",
+                "what's the",
+                "who's the",
+                "what is",
+                "what's",
+                "define",
+                "who is",
+                "who's",
+                "tell me about the",
+                "tell me about"
+            ]
+        },
+        {
+            "name": "youtube",
+            "commands": [
+                "youtube video of",
+                "youtube videos of",
+                "youtube video",
+                "youtube videos",
+                "find youtube",
+                "videos of",
+                "video of",
+                "video about"
+            ]
+        },
+        {
+            "name": "google_maps",
+            "commands": [
+                "where is",
+                "where's",
+                "show me the map of",
+                "show me map of",
+                "show me a map of",
+                "map of",
+                "location of the",
+                "location of",
+                "location"
+            ]
+        },
+        {
+            "name": "google",
+            "commands": [
+                "find",
+                "look for",
+                "search for",
+                "search the web for",
+                "search google for",
+                "google the",
+                "find pictures of",
+                "find images of",
+                "what is the",
+                "who is the",
+                "what's the",
+                "who's the",
+                "what is",
+                "what's",
+                "what",
+                "is it",
+                "define",
+                "who is",
+                "who's",
+                "where is the",
+                "where's the",
+                "where is",
+                "where's",
+                "when is the",
+                "when's the",
+                "when is",
+                "when's",
+                "when does",
+                "when was",
+                "was that",
+                "where there any",
+                "how to",
+                "how is",
+                "how many",
+                "how do you",
+                "how do",
+                "how much",
+                "show me the",
+                "show me"
+            ]
+        }
+    ]
+}
