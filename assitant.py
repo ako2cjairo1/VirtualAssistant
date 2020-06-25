@@ -2,11 +2,16 @@ import os
 import time
 import requests
 import json
+import logging
 from random import randint
 from colorama import init
 from tts import SpeechAssistant
 from helper import clean_voice_data, extract_metadata, is_match
 from controls_library import ControlLibrary
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class VirtualAssistant(SpeechAssistant):
@@ -25,12 +30,12 @@ class VirtualAssistant(SpeechAssistant):
     def activate(self):
         control = ControlLibrary(super(), self.assistant_name)
 
-        def awake_greetings():
+        def _awake_greetings(start_prompt=True):
             wake_responses = _get_commands("wakeup_responses")
             self.speak(wake_responses[randint(
-                0, len(wake_responses) - 1)])
+                0, len(wake_responses) - 1)], start_prompt=start_prompt)
 
-        def wake_assistant(listen_timeout=1):
+        def _wake_assistant(listen_timeout=1):
             voice_data = ""
 
             if listen_timeout == 0:
@@ -39,29 +44,32 @@ class VirtualAssistant(SpeechAssistant):
 
                 # wake command is invoked and the user ask question immediately.
                 if len(voice_data.split(" ")) > 2 and is_match(voice_data, wakeup_command):
-                    formulate_responses(clean_voice_data(
+                    # play end speaking prompt sound effect
+                    self.speak("(begin prompt)", start_prompt=True)
+
+                    _formulate_responses(clean_voice_data(
                         voice_data, self.assistant_name))
                     return True
 
                 # wake commands is invoked and expected to ask for another command
                 elif is_match(voice_data, wakeup_command):
                     # announce greeting from assistant
-                    awake_greetings()
+                    _awake_greetings()
 
                     # listen for commands
                     voice_data = self.listen_to_audio()
 
                     if voice_data:
-                        formulate_responses(voice_data, self.assistant_name)
+                        _formulate_responses(voice_data)
                     return True
 
                 # listen for deactivation commands, and end the program
-                elif deactivate(voice_data):
+                elif _deactivate(voice_data):
                     return False
 
             return False
 
-        def mute_assistant(voice_data):
+        def _mute_assistant(voice_data):
             # commands to interrupt virtual assistant
             if is_match(voice_data, _get_commands("mute")):
 
@@ -71,7 +79,7 @@ class VirtualAssistant(SpeechAssistant):
 
             return False
 
-        def deactivate(voice_data):
+        def _deactivate(voice_data):
             # commands to terminate virtual assistant
             if is_match(voice_data, _get_commands("terminate")):
                 self.speak("\nHappy to help! Goodbye!")
@@ -79,7 +87,7 @@ class VirtualAssistant(SpeechAssistant):
                 # terminate and end the virtual assistant application
                 exit()
 
-        def unknown_responses():
+        def _unknown_responses():
             unknown_responses = _get_commands("unknown_responses")
             return unknown_responses[randint(0, len(unknown_responses) - 1)]
 
@@ -88,19 +96,20 @@ class VirtualAssistant(SpeechAssistant):
             return [com.replace("<assistant_name>", self.assistant_name).replace("<boss_name>", self.master_name) for com in (
                 ([command["commands"] for command in self.command_db if command["name"] == action])[0])]
 
-        def formulate_responses(voice_data):
+        def _formulate_responses(voice_data):
             response_message = ""
             search_google = True
             search_wiki = True
             not_confirmation = True
+            use_calc = True
 
-            # respond to wake commands
-            if wake_assistant():
+            # respond to wake command(s) ("hey <assistant_name>")
+            if _wake_assistant():
                 # then exit immediately
                 return
 
             # respond to deactivation commands
-            if deactivate(voice_data):
+            if _deactivate(voice_data):
                 return
 
             # commands for greeting
@@ -159,6 +168,7 @@ class VirtualAssistant(SpeechAssistant):
 
                 if system_responses:
                     response_message += system_responses
+                    use_calc = False
 
             # commands to ask time
             if is_match(voice_data, _get_commands("time")):
@@ -169,7 +179,7 @@ class VirtualAssistant(SpeechAssistant):
                     search_wiki = False
 
             # commands for simple math calculations
-            if is_match(voice_data, _get_commands("math_calculation")):
+            if use_calc and is_match(voice_data, _get_commands("math_calculation")):
                 calc = control.calculator(voice_data)
                 if calc:
                     response_message += calc
@@ -196,9 +206,9 @@ class VirtualAssistant(SpeechAssistant):
                     search_google = False
                     search_wiki = False
 
-            # commands for wikipedia
+            # commands for wikipedia, exception is "weather" commands
             wiki_commands = _get_commands("wikipedia")
-            if search_wiki and is_match(voice_data, wiki_commands):
+            if search_wiki and is_match(voice_data, wiki_commands) and not ("weather" in voice_data):
                 # extract the keyword
                 wiki_keyword = extract_metadata(voice_data, wiki_commands)
                 # get aswers from wikipedia
@@ -278,12 +288,12 @@ class VirtualAssistant(SpeechAssistant):
             # we did not found any response
             if not response_message:
                 # set the unknown response
-                response_message = unknown_responses()
+                response_message = _unknown_responses()
 
             # anounce all the respons(es)
             self.speak(response_message)
 
-        def check_connection():
+        def _check_connection():
             # check internet connectivity (every 5 seconds)
             # before proceeding to main()
             while True:
@@ -297,7 +307,7 @@ class VirtualAssistant(SpeechAssistant):
                         break
 
                 except Exception as ex:
-                    print(f"**ERROR** : {ex}")
+                    logger.debug(f"General Error: {str(ex)}")
                     print(
                         "**Virtual assistant failed to initiate. No internet connection.\n")
 
@@ -310,13 +320,11 @@ class VirtualAssistant(SpeechAssistant):
         def main():
             # autoreset color coding of texts to normal
             init(autoreset=True)
-
             sleep_counter = 0
             listen_timeout = 0
 
             print(
                 f"\nVirtual assistant \"{self.assistant_name}\" is active...")
-
             start_greetings = _get_commands("start_greeting")
             # generate random start greeting
             announce_greeting = start_greetings[randint(
@@ -324,11 +332,12 @@ class VirtualAssistant(SpeechAssistant):
 
             while True:
                 # handles restarting of listen timeout
-                if listen_timeout >= 6:
+                if listen_timeout >= 4:
                     listen_timeout = 0
 
-                # try to wake the assistant
-                elif wake_assistant(listen_timeout):
+                elif _wake_assistant(listen_timeout):
+                    """ Listening for WAKEUP commands
+                        formulate responses, then restart the loop """
                     listen_timeout += 1
                     sleep_counter = 0
                     # continue the loop without listening to another command
@@ -336,42 +345,65 @@ class VirtualAssistant(SpeechAssistant):
 
                 # handles if assistant is still listening for commands.
                 if announce_greeting or listen_timeout > 0:
-                    print(
-                        f"{self.assistant_name}: ... (listen timeout {listen_timeout} of 5)")
+                    """ Virtual assitant is AWAKE
+                        (1) listen for high level commands, like..
+                        (2) greeting, mute and deactivate commands
+                        (3) formulate responses for lower level commands """
+                    if not announce_greeting:
+                        print(
+                            f"{self.assistant_name}: listening... {listen_timeout} of 3")
+                    else:
+                        # play begin speaking prompt sound effect
+                        self.speak("(begin prompt)", start_prompt=True)
 
                     # listen for commands
                     voice_data = self.listen_to_audio(announce_greeting)
 
-                    # listen for mute commands, and stop listening
-                    if mute_assistant(voice_data):
-                        listen_timeout = 10
-                        # start the loop again and wait for "wake commands"
-                        continue
-
-                    # listen for deactivation commands, and end the program
-                    if deactivate(voice_data):
-                        break
-
+                    # we heard a voice_data, let's start processing
                     if voice_data:
-                        formulate_responses(voice_data)
-                        sleep_counter = 0
-                        # deduct listen timeout
-                        if 1 < listen_timeout <= 5:
-                            listen_timeout -= 1
+                        # listen for mute commands, and stop listening
+                        if _mute_assistant(voice_data):
+                            listen_timeout = 0
+                            # start the loop again and wait for "wake commands"
                             continue
+                        # listen for deactivation commands, and end the program
+                        elif _deactivate(voice_data):
+                            break
+                        # respond to calling assistant's name
+                        elif voice_data.lower() == self.assistant_name.lower():
+                            _awake_greetings(start_prompt=False)
+                            sleep_counter = 0
+                            announce_greeting = None
+                            # restart the listen timeout and wait for new commands
+                            listen_timeout = 1
+                            continue
+
+                        # start gathering answers from sources
+                        _formulate_responses(voice_data)
+                        sleep_counter = 0
+                        announce_greeting = None
+                        # restart the listen timeout and wait for new commands
+                        listen_timeout = 1
+                        continue
 
                     listen_timeout += 1
 
                 else:
+                    """ Virtual assistant is SLEEPING
+                    (1) play end of prompt sound effect and show "ZzzzZzz"
+                    (2) get updates of commands from json """
                     sleep_counter += 1
-                    if (sleep_counter == 1) or ((sleep_counter % 20) == 0):
+                    if sleep_counter == 1:
+                        # play end prompt sound effect
+                        self.speak("(end prompt)", end_prompt=True)
+
+                    if (sleep_counter == 1):  # or ((sleep_counter % 20) == 0):
                         # every 20th cycle, show if assistant is sleeping (muted).
                         print(f"{self.assistant_name}: ZzzzZz")
 
-                    # if assistant is sleeping,
                     # get updates of commands from json file
                     self.get_commands_from_json()
 
                 announce_greeting = None
 
-        check_connection()
+        _check_connection()

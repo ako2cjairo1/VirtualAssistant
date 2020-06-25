@@ -3,6 +3,7 @@ import requests
 import subprocess
 import webbrowser
 import wikipedia
+import logging
 import wmi  # (screen brightness) Windows Management Instrumentation module
 from helper import is_match
 from urllib.parse import quote
@@ -12,6 +13,9 @@ from word2number import w2n
 # from tts import SpeechAssistant
 
 FILE_DIR = "c:\\users\\dave"
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class ControlLibrary:
@@ -61,7 +65,9 @@ class ControlLibrary:
             try:
                 return wikipedia.summary(wiki_keyword.strip(), sentences=2)
 
-            except wikipedia.exceptions.WikipediaException:
+            except wikipedia.exceptions.WikipediaException as wex:
+                logger.debug(f"Wikipedia (handled): {str(wex)}")
+
                 if ("who" or "who's") in voice_data.lower():
                     result = f"I don't know who that is but,"
                 else:
@@ -75,19 +81,21 @@ class ControlLibrary:
         operator = ""
         number1 = 0
         percentage = 0
-        answer = 0
+        answer = None
         equation = ""
 
         # evaluate if there are square root or cube root questions, replace with single word
         evaluated_voice_data = voice_data.replace(
-            "square root", "square#root").replace("cube root", "cube#root").split()
+            "square root", "square#root").replace("cube root", "cube#root").split(" ")
 
         for word in evaluated_voice_data:
             if is_match(word, ["+", "plus", "add"]):
-                operator = " + "
+                operator = " + " if not word.replace("+",
+                                                     "").isdigit() else word
                 equation += operator
             elif is_match(word, ["-", "minus", "subtract"]):
-                operator = " - "
+                operator = " - " if not word.replace("-",
+                                                     "").isdigit() else word
                 equation += operator
             elif is_match(word, ["x", "times", "multiply", "multiplied"]):
                 operator = " * "
@@ -110,7 +118,9 @@ class ControlLibrary:
                 number1 = 0
             elif is_match(word, ["dot", "point", "."]):
                 equation += word
-            elif word.isdigit():
+
+            # try to convert words to numbers
+            elif word.isdigit() or is_match(word, ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "zero"]):
                 # build the equation
                 equation += str(w2n.word_to_num(word)).replace(" ", "")
 
@@ -127,7 +137,7 @@ class ControlLibrary:
 
         # no percentage computation was made,
         # just return equivalent value of percent
-        if not answer and percentage:
+        if (answer is None) and percentage:
             return f"{percentage}% is {percentage * .01}"
 
         if "x2" in equation:
@@ -135,7 +145,7 @@ class ControlLibrary:
         elif "x3" in equation:
             equation = f"{number1}**(1./3.)"
 
-        if not answer and equation:
+        if (answer is None) and equation:
             try:
                 # evaluate the equation made
                 answer = eval(equation.replace(",", ""))
@@ -144,9 +154,10 @@ class ControlLibrary:
                     "The answer is somwhere between infinity, negative infinity, and undefined.", f"The answer is undefined."]
                 return zero_division_responses[randint(0, len(zero_division_responses)-1)]
             except Exception as ex:
+                logger.debug(f"Calculator (handled): {str(ex)}")
                 return ""
 
-        if answer:
+        if not answer is None:
             with_decimal_point = float('{:.02f}'.format(answer))
 
             # check answer for decimal places,
@@ -168,46 +179,85 @@ class ControlLibrary:
 
     def open_application(self, voice_data):
         confirmation = ""
+        app_names = []
+
+        def modified_app_names():
+            clean_app_names = voice_data
+            special_app_names = ["vs code",
+                                 "visual studio code", "command-console", "command-prompt"]
+            for name in special_app_names:
+                if name in voice_data:
+                    # make one word app name by using hyphen
+                    clean_app_names = clean_app_names.replace(
+                        name, name.replace(" ", "-"))
+
+            # return unique list of words/app names
+            return {word for word in clean_app_names.split(" ")}
+
         try:
+            for app in modified_app_names():
+                app_name = ""
+                if is_match(app, ["explorer", "folder"]):
+                    app_name = "explorer"
+                    app_names.append("Windows Explorer")
 
-            if is_match(voice_data, ["explorer", "folder"]):
-                subprocess.Popen("explorer", shell=False, stdin=None,
-                                 stdout=None, stderr=None, close_fds=True)
-                confirmation = "Ok! opening windows explorer."
-            elif is_match(voice_data, ["vs code", "visual studio code"]):
-                vscode = "C:\\Users\\Dave\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe --new-window"
-                subprocess.Popen(vscode, shell=False, stdin=None,
-                                 stdout=None, stderr=None, close_fds=True)
-                confirmation = "Ok! opening Visual Studio Code"
+                elif is_match(app, ["notepad", "textpad", "notes"]):
+                    app_name = "C:\\Windows\\notepad.exe"
+                    app_names.append("Notepad")
 
-            elif is_match(voice_data, ["youtube", "netflix", "github", "facebook", "twitter", "instagram"]):
-                app_names = []
-                for web_app in voice_data.lower().split(" "):
+                elif is_match(app, ["command-console", "command-prompt", "terminal", "command"]):
+                    app_name = "cmd"
+                    app_names.append("Command Console")
+
+                elif is_match(app, ["spotify"]):
+                    app_name = "C:\\Users\Dave\\AppData\\Roaming\\Spotify\\Spotify.exe"
+                    app_names.append("Spotify")
+
+                elif is_match(app, ["vs-code", "visual-studio-code"]):
+                    app_name = "C:\\Users\\Dave\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe --new-window"
+                    app_names.append("Visual Studio Code")
+
+                # launch local applications using Popen
+                if app_name and app_name == "cmd":
+                    os.system("start cmd")
+                elif app_name:
+                    subprocess.Popen(
+                        app_name, shell=False, stdin=None, stdout=None, stderr=None, close_fds=False)
+
+                if is_match(app, ["youtube", "google", "netflix", "github", "facebook", "twitter", "instagram"]):
                     url = ""
 
-                    if web_app == "youtube" and web_app in voice_data:
-                        return youtube()
-                    elif web_app == "netflix" and web_app in voice_data:
+                    if app == "youtube":
+                        app_names.append("Youtube")
+                        url = "https://www.youtube.com/"
+                    elif app == "google":
+                        app_names.append("Google")
+                        url = "https://www.google.com/"
+                    elif app == "netflix":
                         app_names.append("Netflix")
                         url = "https://www.netflix.com/ph/"
-                    elif web_app == "github" and web_app in voice_data:
-                        url = "https://github.com"
+                    elif app == "github":
+                        url = "https://www.github.com"
                         app_names.append("Github")
-                    elif web_app == "facebook" and web_app in voice_data:
+                    elif app == "facebook":
                         url = "https://www.facebook.com"
                         app_names.append("Facebook")
-                    elif web_app == "twitter" and web_app in voice_data:
-                        url = "https://twitter.com"
+                    elif app == "twitter":
+                        url = "https://www.twitter.com"
                         app_names.append("Twitter")
-                    elif web_app == "instagram" and web_app in voice_data:
+                    elif app == "instagram":
                         url = "https://www.instagram.com"
                         app_names.append("Instagram")
 
                     # open the webapp in web browser
                     if url:
                         webbrowser.get().open(url)
-                confirmation = f"Ok! opening {' and '.join(app_names)} in your browser."
-        except Exception:
+
+            if len(app_names) > 0:
+                confirmation = f"Ok! opening {' and '.join(app_names)}..."
+
+        except Exception as ex:
+            logger.debug(f"Open App (handled): {str(ex)}")
             print(
                 f"\n**{self.assistant_name} could not find the specified app**\n")
 
@@ -222,7 +272,7 @@ class ControlLibrary:
                 # open windows explorer and look for files using queries
                 explorer = f'explorer /root,"search-ms:query=*{file_name}*&crumb=location:{FILE_DIR}&"'
                 subprocess.Popen(explorer, shell=False, stdin=None,
-                                 stdout=None, stderr=None, close_fds=True)
+                                 stdout=None, stderr=None, close_fds=False)
                 response_message = f"Here's what I found for files with \"{file_name}\". I'm showing you the folder...\n"
 
             # find files using command console
@@ -264,7 +314,8 @@ class ControlLibrary:
                                         f"{self.assistant_name}: so far, I found {found_file_count} o/f {file_count}")
                                     self.tts.speak("Searching...")
 
-                    except KeyboardInterrupt:
+                    except KeyboardInterrupt as ex:
+                        logger.debug(f"Find File (handled): {str(ex)}")
                         self.tts.speak("Search interrupted...")
 
                     if found_file_count > 0:

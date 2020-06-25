@@ -3,7 +3,10 @@
         {
             "name": "start_greeting",
             "commands": [
-                "Hi, <boss_name> how can i help you?"
+                "Hi, <boss_name> how can I help you?",
+                "Hi, I'm <assistant_name>, how can I help you?",
+                "What can I help you <boss_name>.",
+                "What's up!"
             ]
         },
         {
@@ -16,6 +19,7 @@
             "name": "wakeup_responses",
             "commands": [
                 "I'm listening...",
+                "uh-huh?",
                 "How can I help you <boss_name>?"
             ]
         },
@@ -36,7 +40,7 @@
                 "hmm... I didn't understand.",
                 "Pardon me, what's that again?",
                 "Sorry, I didn't get that. Can you restate the question?",
-                "Hmm.. I don't have an answer for that. Is there something else I can help you with?"
+                "Hmm... I don't have an answer for that. Is there something else I can help you with?"
             ]
         },
         {
@@ -47,7 +51,15 @@
                 "how are you",
                 "hey",
                 "hi",
-                "hello"
+                "hello",
+                "I am fine thank you",
+                "I am fine thanks",
+                "I'm fine thank you",
+                "I'm fine thanks",
+                "I am good thank you",
+                "I am good thanks",
+                "I'm good thank you",
+                "I'm good thanks"
             ]
         },
         {
@@ -79,7 +91,10 @@
             "name": "ask_assistant_name_response",
             "commands": [
                 "My name is <assistant_name>",
-                "I'm <assistant_name>"
+                "My name is <assistant_name>. That's my whole name.",
+                "My name is <assistant_name>, but you knew that already.",
+                "I'm <assistant_name>",
+                "I'm <assistant_name>. Pleased to meet you."
             ]
         },
         {
@@ -134,6 +149,7 @@
                 "-",
                 "minus",
                 "subtract",
+                "x",
                 "times",
                 "multiplied by",
                 "multiply by",
@@ -256,8 +272,11 @@
                 "look for",
                 "search for",
                 "search the web for",
+                "search into google",
                 "search google for",
+                "search google",
                 "google the",
+                "google for",
                 "find pictures of",
                 "find images of",
                 "what is the",
