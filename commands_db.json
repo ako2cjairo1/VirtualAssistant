@@ -26,21 +26,29 @@
         {
             "name": "mute",
             "commands": [
+                "<assistant_name> stop listening",
+                "stop listening <assistant_name>",
                 "<assistant_name> stop",
                 "stop <assistant_name>",
-                "don't listen <assistant_name>",
                 "shut up <assistant_name>",
-                "<assistant_name> shut up"
+                "<assistant_name> quiet please",
+                "quiet please <assistant_name>",
+                "<assistant_name> shut up",
+                "don't listen <assistant_name>",
+                "<assistant_name> don't listen",
+                "goodbye"
             ]
         },
         {
             "name": "unknown_responses",
             "commands": [
                 "I'm not sure I understand.",
-                "hmm... I didn't understand.",
+                "Hmmm... I didn't understand.",
                 "Pardon me, what's that again?",
+                "Can you restate the question?",
+                "Is there something else I can help you with?",
                 "Sorry, I didn't get that. Can you restate the question?",
-                "Hmm... I don't have an answer for that. Is there something else I can help you with?"
+                "Hmmm... I don't have an answer for that. Is there something else I can help you with?"
             ]
         },
         {
@@ -52,6 +60,8 @@
                 "hey",
                 "hi",
                 "hello",
+                "that is good",
+                "that's good",
                 "I am fine thank you",
                 "I am fine thanks",
                 "I'm fine thank you",
@@ -84,13 +94,15 @@
             "name": "ask_assistant_name",
             "commands": [
                 "what is your name",
-                "what's your name"
+                "what's your name",
+                "who are you"
             ]
         },
         {
             "name": "ask_assistant_name_response",
             "commands": [
                 "My name is <assistant_name>",
+                "My name is <assistant_name>. I'm here to help.",
                 "My name is <assistant_name>. That's my whole name.",
                 "My name is <assistant_name>, but you knew that already.",
                 "I'm <assistant_name>",
@@ -121,6 +133,39 @@
             ]
         },
         {
+            "name": "wallpaper",
+            "commands": [
+                "find a new wallpaper",
+                "find a wallpaper",
+                "find new wallpaper",
+                "change my wallpaper",
+                "change the wallpaper",
+                "change to new wallpaper",
+                "change new wallpaper",
+                "change wallpaper"
+            ]
+        },
+        {
+            "name": "create_project",
+            "commands": [
+                "create a new",
+                "create new",
+                "create a new project",
+                "create new project",
+                "create project",
+                "initiate a new",
+                "initiate new",
+                "initiate a new project",
+                "initiate a project",
+                "initiate project",
+                "start new",
+                "start a new",
+                "start a new project",
+                "start a project",
+                "start project"
+            ]
+        },
+        {
             "name": "brightness",
             "commands": [
                 "set the brightness to",
@@ -133,6 +178,8 @@
                 "turn up brightness",
                 "change brightness to",
                 "change brightness",
+                "increase brightness by",
+                "decrease brightness by",
                 "brightness by",
                 "brightness to",
                 "brightness",
@@ -175,12 +222,25 @@
             ]
         },
         {
+            "name": "my_photos",
+            "commands": [
+                "show me my photos",
+                "show me my",
+                "find my photos",
+                "my photos"
+            ]
+        },
+        {
             "name": "wifi",
             "commands": [
                 "turn on the wi-fi",
                 "turn on wi-fi",
                 "turn off the wi-fi",
                 "turn off wi-fi",
+                "turn wi-fi on",
+                "turn wi-fi off",
+                "enable the wi-if",
+                "disable the wi-fi",
                 "enable wi-fi",
                 "disable wi-fi"
             ]
@@ -189,10 +249,15 @@
             "name": "system_shutdown_restart",
             "commands": [
                 "shutdown system",
+                "shutdown laptop",
                 "system shutdown",
                 "shutdown computer",
                 "restart system",
+                "reboot system",
+                "reboot laptop",
                 "system restart",
+                "reboot computer",
+                "restart laptop",
                 "restart computer"
             ]
         },
@@ -231,10 +296,16 @@
                 "who's the",
                 "what is",
                 "what's",
+                "what are the",
+                "what are",
                 "define",
                 "who is",
                 "who's",
+                "do you know",
                 "tell me about the",
+                "tell me facts about",
+                "tell me a fact about",
+                "tell me more about",
                 "tell me about"
             ]
         },
@@ -248,7 +319,9 @@
                 "find youtube",
                 "videos of",
                 "video of",
-                "video about"
+                "videos about",
+                "video about",
+                "play a song on youtube"
             ]
         },
         {
@@ -275,6 +348,7 @@
                 "search into google",
                 "search google for",
                 "search google",
+                "search",
                 "google the",
                 "google for",
                 "find pictures of",
@@ -285,6 +359,8 @@
                 "who's the",
                 "what is",
                 "what's",
+                "what are the",
+                "what are",
                 "what",
                 "is it",
                 "define",
@@ -308,6 +384,8 @@
                 "how do you",
                 "how do",
                 "how much",
+                "how",
+                "does",
                 "show me the",
                 "show me"
             ]

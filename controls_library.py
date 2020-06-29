@@ -3,26 +3,28 @@ import requests
 import subprocess
 import webbrowser
 import wikipedia
-import logging
+import time
 import wmi  # (screen brightness) Windows Management Instrumentation module
-from helper import is_match
+import logging
+from helper import * #is_match, displayException, mapTaskWithException
 from urllib.parse import quote
 from random import randint
 from datetime import datetime as dt
 from word2number import w2n
-# from tts import SpeechAssistant
+# from multiprocessing import Process as task
+import concurrent.futures as task
 
 FILE_DIR = "c:\\users\\dave"
-
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+WALLPAPER_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PythonUtilityProjects"
+INIT_PROJECT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\\ProjectGitInitAutomation"
+DEV_PATH_DIR = os.environ.get("DevPath")
 
 
 class ControlLibrary:
     def __init__(self, tts, assistants_name):
         self.assistant_name = assistants_name
-        self.tts = tts
-
+        self.tts = tts    
+    
     def ask_time(self, voice_data):
         time_responses = ["It's", "The time is"]
         if "in" in voice_data.lower().split(" "):
@@ -31,23 +33,17 @@ class ControlLibrary:
             return f"{time_responses[randint(0, len(time_responses) - 1)]} {dt.now().strftime('%I:%M %p')}\n"
 
     def google(self, search_keyword):
-        result = ""
-        if search_keyword:
-            # open a web browser and show results
-            webbrowser.get().open(
-                f"https://google.com/search?q={quote(search_keyword.strip())}")
-            return f"Here's what i found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
+        # open google iste in web browser and show results
+        if search_keyword and webbrowser.get().open(f"https://google.com/search?q={quote(search_keyword.strip())}"):
+            return f"Here's what I found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
 
-        return result
+        return ""
 
     def youtube(self, search_keyword=None):
-        result = ""
-        browser = webbrowser.get()
-        if search_keyword and browser.open(f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"):
-            result = f"I found something on Youtube for \"{search_keyword}\"."
-        elif browser.open("https://www.youtube.com/"):
-            result = "Ok! opening YouTube website."
-        return result
+        # open youtube site in web browser and show results
+        if search_keyword and webbrowser.get().open(f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"):
+            return f"I found something on Youtube for \"{search_keyword}\"."
+        return ""
 
     def google_maps(self, location):
         result = ""
@@ -66,7 +62,7 @@ class ControlLibrary:
                 return wikipedia.summary(wiki_keyword.strip(), sentences=2)
 
             except wikipedia.exceptions.WikipediaException as wex:
-                logger.debug(f"Wikipedia (handled): {str(wex)}")
+                displayException("from Wikipedia (handled)", logging.INFO)
 
                 if ("who" or "who's") in voice_data.lower():
                     result = f"I don't know who that is but,"
@@ -85,7 +81,7 @@ class ControlLibrary:
         equation = ""
 
         # evaluate if there are square root or cube root questions, replace with single word
-        evaluated_voice_data = voice_data.replace(
+        evaluated_voice_data = voice_data.replace(",", "").replace(
             "square root", "square#root").replace("cube root", "cube#root").split(" ")
 
         for word in evaluated_voice_data:
@@ -128,8 +124,8 @@ class ControlLibrary:
                 if percentage or ("x2" in equation) or ("x3" in equation):
                     number1 = word
 
-        if percentage:
-            equation = f"{percentage}*.01*{number1}".replace(",", "")
+        if percentage and int(number1) > 0:
+            equation = f"{percentage}*.01*{number1}"
             # evaluate percentage equation
             answer = float(eval(equation))
             # create a readable equation
@@ -153,8 +149,8 @@ class ControlLibrary:
                 zero_division_responses = [
                     "The answer is somwhere between infinity, negative infinity, and undefined.", f"The answer is undefined."]
                 return zero_division_responses[randint(0, len(zero_division_responses)-1)]
-            except Exception as ex:
-                logger.debug(f"Calculator (handled): {str(ex)}")
+            except Exception:
+                displayException("Calculator control_library (handled)", logging.INFO)
                 return ""
 
         if not answer is None:
@@ -173,7 +169,7 @@ class ControlLibrary:
 
             equation = [equation, "The answer"]
 
-            return f"{equation[randint(0, len(equation) - 1)]} is {'approximately' if positive_float else ''} {format_answer}"
+            return f"{equation[randint(0, len(equation) - 1)]} is {'approximately ' if positive_float else ''}{format_answer}"
         else:
             return ""
 
@@ -183,8 +179,8 @@ class ControlLibrary:
 
         def modified_app_names():
             clean_app_names = voice_data
-            special_app_names = ["vs code",
-                                 "visual studio code", "command-console", "command-prompt"]
+            special_app_names = ["vs code", "ms code", "ms vc", "microsoft excel", "spread sheet", "ms excel", "microsoft word", "ms word", "microsoft powerpoint", "ms powerpoint", "task scheduler",
+                                 "visual studio code", "command console", "command prompt", "control panel", "task manager", "resource monitor", "resource manager", "device manager", "windows services", "remove programs", "add remove"]
             for name in special_app_names:
                 if name in voice_data:
                     # make one word app name by using hyphen
@@ -195,71 +191,115 @@ class ControlLibrary:
             return {word for word in clean_app_names.split(" ")}
 
         try:
+            app_commands = []
+            urls = []
+
             for app in modified_app_names():
-                app_name = ""
                 if is_match(app, ["explorer", "folder"]):
-                    app_name = "explorer"
+                    app_commands.append("start explorer C:\\Users\\Dave\\DEVENV\\Python")
                     app_names.append("Windows Explorer")
 
+                elif is_match(app, ["control-panel"]):
+                    app_commands.append("start control")
+                    app_names.append("Control Panel")
+
+                elif is_match(app, ["device-manager", "device"]):
+                    app_commands.append("start devmgmt.msc")
+                    app_names.append("Device Manager")
+
+                elif is_match(app, ["windows-services", "services"]):
+                    app_commands.append("start services.msc")
+                    app_names.append("Windows Services")
+
+                elif is_match(app, ["add-remove-program", "remove-programs", "add-remove", "unistall"]):
+                    app_commands.append("start control appwiz.cpl")
+                    app_names.append("Programs and Features")
+
+                elif is_match(app, ["resource-manager", "resource-monitor"]):
+                    app_commands.append("start resmon")
+                    app_names.append("Resource Manager")
+
+                elif is_match(app, ["task-manager"]):
+                    app_commands.append("start Taskmgr")
+                    app_names.append("Task Manager")
+
+                elif is_match(app, ["task-scheduler", "scheduler"]):
+                    app_commands.append("start taskschd.msc")
+                    app_names.append("Task Scheduler")
+
                 elif is_match(app, ["notepad", "textpad", "notes"]):
-                    app_name = "C:\\Windows\\notepad.exe"
+                    app_commands.append("start notepad")
                     app_names.append("Notepad")
 
+                elif is_match(app, ["calculator"]):
+                    app_commands.append("start calc")
+                    app_names.append("Calculator")
+
                 elif is_match(app, ["command-console", "command-prompt", "terminal", "command"]):
-                    app_name = "cmd"
+                    app_commands.append("start cmd")
                     app_names.append("Command Console")
 
+                elif is_match(app, ["microsoft-excel", "ms-excel", "excel", "spread-sheet"]):
+                    app_commands.append("start excel")
+                    app_names.append("Microsoft Excel")
+
+                elif is_match(app, ["microsoft-word", "ms-word", "word"]):
+                    app_commands.append("start winword")
+                    app_names.append("Microsoft Word")
+
+                elif is_match(app, ["microsoft-powerpoint", "ms-powerpoint", "powerpoint"]):
+                    app_commands.append("start winword")
+                    app_names.append("Microsoft Powerpoint")
+
                 elif is_match(app, ["spotify"]):
-                    app_name = "C:\\Users\Dave\\AppData\\Roaming\\Spotify\\Spotify.exe"
+                    app_commands.append(
+                        "C:\\Users\\Dave\\AppData\\Roaming\\Spotify\\Spotify.exe")
                     app_names.append("Spotify")
 
-                elif is_match(app, ["vs-code", "visual-studio-code"]):
-                    app_name = "C:\\Users\\Dave\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe --new-window"
+                elif is_match(app, ["vscode", "vs-code", "ms-code", "ms-vc", "visual-studio-code"]):
+                    app_commands.append("start code -n")
                     app_names.append("Visual Studio Code")
 
-                # launch local applications using Popen
-                if app_name and app_name == "cmd":
-                    os.system("start cmd")
-                elif app_name:
-                    subprocess.Popen(
-                        app_name, shell=False, stdin=None, stdout=None, stderr=None, close_fds=False)
-
-                if is_match(app, ["youtube", "google", "netflix", "github", "facebook", "twitter", "instagram"]):
-                    url = ""
-
+                elif is_match(app, ["youtube", "google", "netflix", "github", "facebook", "twitter", "instagram", "wikipedia"]):
                     if app == "youtube":
                         app_names.append("Youtube")
-                        url = "https://www.youtube.com/"
+                        urls.append("https://www.youtube.com/")
                     elif app == "google":
                         app_names.append("Google")
-                        url = "https://www.google.com/"
+                        urls.append("https://www.google.com/")
                     elif app == "netflix":
                         app_names.append("Netflix")
-                        url = "https://www.netflix.com/ph/"
+                        urls.append("https://www.netflix.com/ph/")
                     elif app == "github":
-                        url = "https://www.github.com"
+                        urls.append("https://www.github.com")
                         app_names.append("Github")
                     elif app == "facebook":
-                        url = "https://www.facebook.com"
+                        urls.append("https://www.facebook.com")
                         app_names.append("Facebook")
                     elif app == "twitter":
-                        url = "https://www.twitter.com"
+                        urls.append("https://www.twitter.com")
                         app_names.append("Twitter")
                     elif app == "instagram":
-                        url = "https://www.instagram.com"
+                        urls.append("https://www.instagram.com")
                         app_names.append("Instagram")
+                    elif app == "wikipedia":
+                        urls.append("https://www.wikipedia.org")
+                        app_names.append("Wikipedia")
 
-                    # open the webapp in web browser
-                    if url:
-                        webbrowser.get().open(url)
+            # launch local applications using python's os.system class
+            if len(app_commands) > 0:
+                mapTaskWithException("open system", app_commands)
+
+            # open the webapp in web browser
+            if len(urls) > 0:
+                mapTaskWithException("open browser", urls)
 
             if len(app_names) > 0:
                 confirmation = f"Ok! opening {' and '.join(app_names)}..."
 
-        except Exception as ex:
-            logger.debug(f"Open App (handled): {str(ex)}")
-            print(
-                f"\n**{self.assistant_name} could not find the specified app**\n")
+        except Exception:
+            displayException(
+                f"**{self.assistant_name} could not find the specified app**", logging.DEBUG)
 
         return confirmation
 
@@ -315,7 +355,7 @@ class ControlLibrary:
                                     self.tts.speak("Searching...")
 
                     except KeyboardInterrupt as ex:
-                        logger.debug(f"Find File (handled): {str(ex)}")
+                        displayException(f"Find File (handled)", logging.INFO)
                         self.tts.speak("Search interrupted...")
 
                     if found_file_count > 0:
@@ -338,7 +378,7 @@ class ControlLibrary:
         wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
             0].WmiSetBrightness(percentage, 0)
 
-        return percentage
+        return f"Ok! I set the brightness by {percentage}%"
 
     def control_wifi(self, voice_data):
         command = ""
@@ -348,8 +388,11 @@ class ControlLibrary:
             command = "disabled"
 
         if command:
+            # announce before going off-line
+            self.tts.speak(f"Done! I {command} the wi-fi.\n")
             os.system(f"netsh interface set interface \"Wi-Fi\" {command}")
-
+            print(f"\033[1;33;41m{self.assistant_name} is offline...")
+            # although this will not be annouced anymore (offline), let's rather return something.
             return f"Done! I {command} the wi-fi."
         return ""
 
@@ -357,19 +400,37 @@ class ControlLibrary:
         command = ""
         confirmation = "no"
         if "shutdown" in voice_data:
-            # shudown command sequence
-            command = "shutdown /s /t 1"
+            # shudown command sequence for 15 seconds
+            command = "shutdown /s /t 15"
 
-        elif "restart" in voice_data:
-            # restart command sequence
-            command = "shutdown /r /t 1"
+        elif is_match(voice_data, ["restart", "reboot"]):
+            # restart command sequence for 15 seconds
+            command = "shutdown /r /t 15"
 
         if command:
             confirmation = self.tts.listen_to_audio(
-                f"\033[1;33;41m Want to \"{'Restart' if '/r' in command else 'Shutdown'}\" your computer? (yes/no): ")
+                f"\033[1;33;41m Are you sure to \"{'Restart' if '/r' in command else 'Shutdown'}\" your computer? (yes/no): ")
 
             # execute the shutdown/restart command if confirmed by user
-            if confirmation.lower().strip() == "yes":
+            if "yes" in confirmation.lower().strip():
                 os.system(command)
-                return f"Ok! {'restarting...' if '/r' in command else 'shuting down...'}"
+                return f"Ok! {'Reboot' if '/r' in command else 'Shutdown'} sequence will commence in approximately 10 seconds..."
+            return f"{'Reboot' if '/r' in command else 'Shutdown'} is canceled."
+
         return ""
+
+    def wallpaper(self):
+        import sys
+        sys.path.append(WALLPAPER_MODULE_DIR)
+        from wallpaper import Wallpaper
+
+        wp = Wallpaper()
+        wp.change_wallpaper()
+        return "Ok! I changed your wallpaper..."
+
+    def initiate_new_project(self, lang="Python", proj_name="NewPythonProject", mode="g"):
+        # navigate to the ProjectGitInitAutomation directory - contains the libraries
+        # to automate creation of project, it pushes the initial commit files to Github if possible
+        os.system(f'cd "{INIT_PROJECT_MODULE_DIR}"')
+        os.system(f"create.bat {lang} {proj_name} {mode}")
+        return f"A new {lang} project was created. Opening in Visual Studio Code..." 

@@ -1,2 +1,7 @@
-"C:\Users\Dave\python\python.exe" "C:\Users\Dave\DEVENV\Python\YuriVirtualAssistant\main.py"
-pause
+@ECHO OFF
+CMDOW @ /ren "Virtual Assistant - Brenda" /mov 1174 533 /siz 217 203 /top
+CD C:\Users\Dave\DEVENV\Python\VirtualAssistant
+CLS
+python main.py
+@ECHO Virtual Assistant is closing...
+EXIT
