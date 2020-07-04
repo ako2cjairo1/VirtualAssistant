@@ -1,0 +1,10 @@
+2020-07-04 22:35:53,220: helper | ERROR | gtts Request error
+File:    tts.py
+Line:    47
+Target:  voice_text = recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request
+2020-07-04 22:40:03,952: helper | ERROR | gtts Request error
+File:    tts.py
+Line:    47
+Target:  voice_text = recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request

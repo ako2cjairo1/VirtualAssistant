@@ -15,8 +15,9 @@ from word2number import w2n
 import concurrent.futures as task
 
 FILE_DIR = "c:\\users\\dave"
-WALLPAPER_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PythonUtilityProjects"
-INIT_PROJECT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\\ProjectGitInitAutomation"
+VIRTUAL_ASSISTANT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant"
+UTILITIES_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PythonUtilityProjects"
+INIT_PROJECT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\ProjectGitInitAutomation"
 DEV_PATH_DIR = os.environ.get("DevPath")
 
 
@@ -421,7 +422,7 @@ class ControlLibrary:
 
     def wallpaper(self):
         import sys
-        sys.path.append(WALLPAPER_MODULE_DIR)
+        sys.path.append(UTILITIES_MODULE_DIR)
         from wallpaper import Wallpaper
 
         wp = Wallpaper()
@@ -431,6 +432,19 @@ class ControlLibrary:
     def initiate_new_project(self, lang="Python", proj_name="NewPythonProject", mode="g"):
         # navigate to the ProjectGitInitAutomation directory - contains the libraries
         # to automate creation of project, it pushes the initial commit files to Github if possible
-        os.system(f'cd "{INIT_PROJECT_MODULE_DIR}"')
-        os.system(f"create.bat {lang} {proj_name} {mode}")
-        return f"A new {lang} project was created. Opening in Visual Studio Code..." 
+        os.chdir(INIT_PROJECT_MODULE_DIR)
+        # batch file to execute project initiation in new window
+        os.system(f'start cmd /k \"create.bat\" {lang} {proj_name} {mode}')
+        # get back to virtual assistant directory after command execution
+        os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+        return f"The new {lang} project should open in Visual Studio Code when done..." 
+
+    def play_music(self):
+        # change the directory to location of batch file to execute
+        os.chdir(UTILITIES_MODULE_DIR)
+        # batch file to play some music in new window
+        os.system('start cmd /k "play_some_music.bat"')
+        # get back to virtual assistant directory
+        os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+
+        return f"Ok! Playing some music in shuffle..."

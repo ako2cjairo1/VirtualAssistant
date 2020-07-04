@@ -46,10 +46,7 @@ class VirtualAssistant(SpeechAssistant):
                 # wake command is invoked and the user ask question immediately.
                 if len(voice_data.split(" ")) > 2 and is_match(voice_data, wakeup_command):
                     # play end speaking prompt sound effect
-                    self.speak("(begin prompt)", start_prompt=True)
-
-                    # _formulate_responses(clean_voice_data(
-                    #     voice_data, self.assistant_name))
+                    self.speak("(start prompt)", start_prompt=True)
                     submitTaskWithException(_formulate_responses, clean_voice_data(voice_data, self.assistant_name))
                     return True
 
@@ -62,6 +59,8 @@ class VirtualAssistant(SpeechAssistant):
                     voice_data = self.listen_to_audio()
 
                     if voice_data:
+                        # play end prompt sound effect before
+                        self.speak("(end prompt)", end_prompt=True)
                         submitTaskWithException(_formulate_responses, voice_data)
                     return True
 
@@ -133,7 +132,7 @@ class VirtualAssistant(SpeechAssistant):
                     self.speak(greeting_responses[randint(
                         0, len(greeting_responses) - 1)])
                     # return immediately, we don't need contextual answers
-                    return
+                    # return
 
             # commands to ask for assistant's name
             if is_match(voice_data, _get_commands("ask_assistant_name")):
@@ -160,6 +159,17 @@ class VirtualAssistant(SpeechAssistant):
                 to avoid misleading data.
             """
             voice_data = clean_voice_data(voice_data, self.assistant_name)
+
+            # commands for playing music
+            music_comands = _get_commands("play_music")
+            if is_match(voice_data, music_comands):
+                music_response = submitTaskWithException(control.play_music)
+                if music_response:
+                    response_message += music_response
+                    search_google = False
+                    search_wiki = False
+                    not_confirmation = False
+                    use_calc = False
 
             # commands for controlling screen brightness
             brightness_commands = _get_commands("brightness")
@@ -202,8 +212,9 @@ class VirtualAssistant(SpeechAssistant):
                     if lang_idx >= 0 and len(new_proj_metadata.split()) > 1:
                         lang = new_proj_metadata[(lang_idx + 2):]
 
-                    self.speak(f"Ok! initiating new {lang} project...")
+                    self.speak("Ok! Just a momement.")
                     create_proj_response = submitTaskwargsWithException(control.initiate_new_project, lang=lang, proj_name=proj_name)
+                    self.speak(f"Initiating new {lang} project.")
                     self.speak(create_proj_response)
                     return
 
@@ -414,13 +425,15 @@ class VirtualAssistant(SpeechAssistant):
                             print(f"{self.assistant_name}: listening...")
                     else:
                         # play begin speaking prompt sound effect
-                        self.speak("(begin prompt)", start_prompt=True)
+                        self.speak("(start prompt)", start_prompt=True)
 
                     # listen for commands
                     voice_data = self.listen_to_audio(announce_greeting)
 
                     # we heard a voice_data, let's start processing
                     if voice_data:
+                        # play end prompt sound effect
+                        self.speak("(end prompt)", end_prompt=True)
                         # listen for mute commands, and stop listening
                         if _mute_assistant(voice_data):
                             listen_time = 0
@@ -455,7 +468,7 @@ class VirtualAssistant(SpeechAssistant):
                     sleep_counter += 1
                     if sleep_counter == 1:
                         # play end prompt sound effect
-                        self.speak("(end prompt)", end_prompt=True)
+                        self.speak("(mute/sleep prompt)", mute_prompt=True)
 
                     if (sleep_counter == 1):  # or ((sleep_counter % 20) == 0):
                         # every 20th cycle, show if assistant is sleeping (muted).

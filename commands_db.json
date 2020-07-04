@@ -166,6 +166,13 @@
             ]
         },
         {
+            "name": "play_music",
+            "commands": [
+                "play some music",
+                "play music"
+            ]
+        },
+        {
             "name": "brightness",
             "commands": [
                 "set the brightness to",
