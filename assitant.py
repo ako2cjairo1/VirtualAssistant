@@ -17,6 +17,7 @@ class VirtualAssistant(SpeechAssistant):
         self.master_name = masters_name
         self.assistant_name = assistants_name
         self.listen_timeout = listen_timeout
+        self.sleep_assistant = False
         self.command_db = []
         self.get_commands_from_json()
 
@@ -132,7 +133,7 @@ class VirtualAssistant(SpeechAssistant):
                     self.speak(greeting_responses[randint(
                         0, len(greeting_responses) - 1)])
                     # return immediately, we don't need contextual answers
-                    # return
+                    return
 
             # commands to ask for assistant's name
             if is_match(voice_data, _get_commands("ask_assistant_name")):
@@ -161,15 +162,18 @@ class VirtualAssistant(SpeechAssistant):
             voice_data = clean_voice_data(voice_data, self.assistant_name)
 
             # commands for playing music
-            music_comands = _get_commands("play_music")
-            if is_match(voice_data, music_comands):
-                music_response = submitTaskWithException(control.play_music)
+            music_commands = _get_commands("play_music")
+            if is_match(voice_data, music_commands):
+                music_keyword = extract_metadata(voice_data, music_commands)
+                music_response = submitTaskWithException(control.play_music, music_keyword)
                 if music_response:
                     response_message += music_response
                     search_google = False
                     search_wiki = False
                     not_confirmation = False
                     use_calc = False
+                    # mute assistant when playing music
+                    self.sleep_assistant = True
 
             # commands for controlling screen brightness
             brightness_commands = _get_commands("brightness")
@@ -405,6 +409,13 @@ class VirtualAssistant(SpeechAssistant):
                 if listen_time >= (self.listen_timeout + 1):
                     listen_time = 0
 
+                if self.sleep_assistant:
+                    self.sleep_assistant = False
+                    # listen for mute commands, and stop listening
+                    _mute_assistant(f"stop {self.assistant_name}")
+                    listen_time = 0
+                    sleep_counter = 0
+
                 elif _wake_assistant(listen_time):
                     """ Listening for WAKEUP commands
                         formulate responses, then restart the loop """
@@ -462,7 +473,7 @@ class VirtualAssistant(SpeechAssistant):
                     listen_time += 1
 
                 else:
-                    """ Virtual assistant is SLEEPING
+                    """ Virtual assistant will sleep/mute
                     (1) play end of prompt sound effect and show "ZzzzZzz"
                     (2) get updates of commands from json """
                     sleep_counter += 1

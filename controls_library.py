@@ -11,6 +11,7 @@ from urllib.parse import quote
 from random import randint
 from datetime import datetime as dt
 from word2number import w2n
+
 # from multiprocessing import Process as task
 import concurrent.futures as task
 
@@ -18,6 +19,7 @@ FILE_DIR = "c:\\users\\dave"
 VIRTUAL_ASSISTANT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant"
 UTILITIES_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PythonUtilityProjects"
 INIT_PROJECT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\ProjectGitInitAutomation"
+PSE_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\PSE"
 DEV_PATH_DIR = os.environ.get("DevPath")
 
 
@@ -181,7 +183,7 @@ class ControlLibrary:
         def modified_app_names():
             clean_app_names = voice_data
             special_app_names = ["vs code", "ms code", "ms vc", "microsoft excel", "spread sheet", "ms excel", "microsoft word", "ms word", "microsoft powerpoint", "ms powerpoint", "task scheduler",
-                                 "visual studio code", "command console", "command prompt", "control panel", "task manager", "resource monitor", "resource manager", "device manager", "windows services", "remove programs", "add remove"]
+                                 "visual studio code", "pse ticker", "command console", "command prompt", "control panel", "task manager", "resource monitor", "resource manager", "device manager", "windows services", "remove programs", "add remove"]
             for name in special_app_names:
                 if name in voice_data:
                     # make one word app name by using hyphen
@@ -260,6 +262,16 @@ class ControlLibrary:
                 elif is_match(app, ["vscode", "vs-code", "ms-code", "ms-vc", "visual-studio-code"]):
                     app_commands.append("start code -n")
                     app_names.append("Visual Studio Code")
+
+                elif is_match(app, ["pse-ticker", "pse"]):
+                    app_names.append("Philippine Stock Exchange Ticker")
+                    # change directory to PSE library resides
+                    os.chdir(PSE_MODULE_DIR)
+                    # open PSE ticker in new window
+                    os.system(f'start cmd /k \"start_PSE.bat\"')
+                    # get back to virtual assistant directory after command execution
+                    os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+                    
 
                 elif is_match(app, ["youtube", "google", "netflix", "github", "facebook", "twitter", "instagram", "wikipedia"]):
                     if app == "youtube":
@@ -439,12 +451,66 @@ class ControlLibrary:
         os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
         return f"The new {lang} project should open in Visual Studio Code when done..." 
 
-    def play_music(self):
+    def play_music(self, voice_data):
+        option = '"play all"'
+        shuffle = "True"
+        mode = "compact"
+        title = "none"
+        artist = "none"
+        genre = "none"
+        response = ""
+        
+        meta_data = voice_data.strip().lower()
+        if meta_data == "":
+            # mode = "compact"
+            response = f"Ok! Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
+        
+        elif meta_data and "by" in meta_data.split(" ") and meta_data.find("by") > 0 and len(meta_data.split()) >= 3:
+            option = '"play by"'
+
+            by_idx = meta_data.find("by")
+            title = f'"{meta_data[:(by_idx - 1)].strip()}"'
+            artist = f'"{meta_data[(by_idx + 3):].strip()}"'
+            genre = title
+            response = f"Ok! Playing {title} by {artist}..."
+        
+        elif meta_data:
+            option = '"play by"'
+            title = f'"{meta_data}"'
+            artist = f'"{meta_data}"'
+            genre = f'"{meta_data}"'
+            response = f"Ok! Now playing {meta_data}{', shuffled...' if shuffle == 'True' else '...'}"
+
         # change the directory to location of batch file to execute
         os.chdir(UTILITIES_MODULE_DIR)
         # batch file to play some music in new window
-        os.system('start cmd /k "play_some_music.bat"')
+        os.system(f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
         # get back to virtual assistant directory
         os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
-        return f"Ok! Playing some music in shuffle..."
+        return response
+
+    def control_music(self, command):
+        response = ""
+        wsh = comctl.Dispatch("WScript.Shell")
+
+        command = command.strip().lower()
+        if command == "stop":
+            wsh.SendKeys("{F4}")
+            response = "Stop music..."
+        elif command == "shuffle":
+            wsh.SendKeys("{F5}")
+            response = "Shuffle music..."
+        elif command == "shuffle":
+            wsh.SendKeys("{F5}")
+            response = "Unshuffled music..."
+        elif command == "play":
+            wsh.SendKeys("{F9}")
+            response = "Playing music..."
+        elif command == "pause":
+            wsh.SendKeys("{F9}")
+            response = "Pause music..."
+        elif command == "next":
+            wsh.SendKeys("{F10}")
+            response = "Playing next song..."
+        return response

@@ -168,8 +168,13 @@
         {
             "name": "play_music",
             "commands": [
+                "play something",
                 "play some music",
-                "play music"
+                "play some songs",
+                "play songs",
+                "play some",
+                "play music",
+                "play"
             ]
         },
         {

@@ -3,6 +3,7 @@ import sys
 import webbrowser
 import linecache
 import logging
+import time
 import concurrent.futures as executor
 
 logging.basicConfig(filename="VirtualAssistant.log", filemode="w",
@@ -82,7 +83,7 @@ def convert_to_one_word_commands(voice_data, commands):
             meta_keyword = voice_data.replace(command, command.replace(" ", "-"))
 
     # do the same with the commands list (put hyphen in between)
-    commands = [com.replace(" ", "-") for com in commands if len(com.split(" ")) > 1]
+    commands = [com.replace(" ", "-") for com in commands]
 
     return (voice_data if not meta_keyword else meta_keyword), commands
 
