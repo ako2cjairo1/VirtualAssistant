@@ -12,7 +12,8 @@
         {
             "name": "wakeup",
             "commands": [
-                "hey <assistant_name>"
+                "hey <assistant_name>",
+                "ok <assistant_name>"
             ]
         },
         {
@@ -35,8 +36,7 @@
                 "quiet please <assistant_name>",
                 "<assistant_name> shut up",
                 "don't listen <assistant_name>",
-                "<assistant_name> don't listen",
-                "goodbye"
+                "<assistant_name> don't listen"
             ]
         },
         {
@@ -46,6 +46,7 @@
                 "Hmmm... I didn't understand.",
                 "Pardon me, what's that again?",
                 "Can you restate the question?",
+                "I don't understand, what can I help you?",
                 "Is there something else I can help you with?",
                 "Sorry, I didn't get that. Can you restate the question?",
                 "Hmmm... I don't have an answer for that. Is there something else I can help you with?"
@@ -87,7 +88,18 @@
             "commands": [
                 "turn off <assistant_name>",
                 "deactivate <assistant_name>",
-                "<assistant_name> deactivate"
+                "<assistant_name> deactivate",
+                "goodbye <assistant_name>"
+            ]
+        },
+        {
+            "name": "terminate_response",
+            "commands": [
+                "Happy to help. Goodbye...",
+                "Talk to you soon, goodbye...",
+                "Nice talking with you, goodbye!",
+                "It's been a pleasure. Goodbye!",
+                "Goodbye..."
             ]
         },
         {
@@ -168,11 +180,16 @@
         {
             "name": "play_music",
             "commands": [
+                "play something by",
                 "play something",
+                "play some music by",
                 "play some music",
+                "play some songs by",
                 "play some songs",
+                "play songs by",
                 "play songs",
                 "play some",
+                "play music by",
                 "play music",
                 "play"
             ]
@@ -254,7 +271,9 @@
                 "enable the wi-if",
                 "disable the wi-fi",
                 "enable wi-fi",
-                "disable wi-fi"
+                "disable wi-fi",
+                "close wi-fi",
+                "open wi-fi"
             ]
         },
         {

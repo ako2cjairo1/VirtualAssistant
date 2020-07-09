@@ -6,14 +6,12 @@ import wikipedia
 import time
 import wmi  # (screen brightness) Windows Management Instrumentation module
 import logging
-from helper import * #is_match, displayException, mapTaskWithException
+import concurrent.futures as task
+from helper import *
 from urllib.parse import quote
-from random import randint
+from random import choice
 from datetime import datetime as dt
 from word2number import w2n
-
-# from multiprocessing import Process as task
-import concurrent.futures as task
 
 FILE_DIR = "c:\\users\\dave"
 VIRTUAL_ASSISTANT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant"
@@ -29,11 +27,10 @@ class ControlLibrary:
         self.tts = tts    
     
     def ask_time(self, voice_data):
-        time_responses = ["It's", "The time is"]
         if "in" in voice_data.lower().split(" "):
             return self.google(voice_data)
         else:
-            return f"{time_responses[randint(0, len(time_responses) - 1)]} {dt.now().strftime('%I:%M %p')}\n"
+            return f"{choice(['Its', 'The time is'])} {dt.now().strftime('%I:%M %p')}"
 
     def google(self, search_keyword):
         # open google iste in web browser and show results
@@ -149,9 +146,7 @@ class ControlLibrary:
                 # evaluate the equation made
                 answer = eval(equation.replace(",", ""))
             except ZeroDivisionError:
-                zero_division_responses = [
-                    "The answer is somwhere between infinity, negative infinity, and undefined.", f"The answer is undefined."]
-                return zero_division_responses[randint(0, len(zero_division_responses)-1)]
+                return choice(["The answer is somwhere between infinity, negative infinity, and undefined.", f"The answer is undefined."])
             except Exception:
                 displayException("Calculator control_library (handled)", logging.INFO)
                 return ""
@@ -172,7 +167,7 @@ class ControlLibrary:
 
             equation = [equation, "The answer"]
 
-            return f"{equation[randint(0, len(equation) - 1)]} is {'approximately ' if positive_float else ''}{format_answer}"
+            return f"{choice(equation)} is {'approximately ' if positive_float else ''}{format_answer}"
         else:
             return ""
 
@@ -384,20 +379,17 @@ class ControlLibrary:
         return response_message
 
     def screen_brightness(self, voice_data):
-        percentage = int([val for val in voice_data.replace(
-            '%', '').split(' ') if val.isdigit()][0]) if True else 50
-
+        percentage = int([val for val in voice_data.replace('%', '').split(' ') if val.isdigit()][0]) if True else 50
         # set the screen brightness (in percentage)
-        wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
-            0].WmiSetBrightness(percentage, 0)
+        wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[0].WmiSetBrightness(percentage, 0)
 
         return f"Ok! I set the brightness by {percentage}%"
 
     def control_wifi(self, voice_data):
         command = ""
-        if "on" in voice_data:
+        if "on" in voice_data or "open" in voice_data:
             command = "enabled"
-        elif "off" in voice_data:
+        elif "off" in voice_data or "close" in voice_data:
             command = "disabled"
 
         if command:
@@ -452,6 +444,7 @@ class ControlLibrary:
         return f"The new {lang} project should open in Visual Studio Code when done..." 
 
     def play_music(self, voice_data):
+        songWasFound = False
         option = '"play all"'
         shuffle = "True"
         mode = "compact"
@@ -459,11 +452,20 @@ class ControlLibrary:
         artist = "none"
         genre = "none"
         response = ""
+
+        import sys
+        sys.path.append(UTILITIES_MODULE_DIR)
+        from musicplayer import MusicPlayer
+        mp = MusicPlayer()
+
+        # change the directory to location of batch file to execute
+        os.chdir(UTILITIES_MODULE_DIR)
         
-        meta_data = voice_data.strip().lower()
+        meta_data = voice_data.strip().lower().replace("&", "and")
         if meta_data == "":
             # mode = "compact"
             response = f"Ok! Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
+            songWasFound = True
         
         elif meta_data and "by" in meta_data.split(" ") and meta_data.find("by") > 0 and len(meta_data.split()) >= 3:
             option = '"play by"'
@@ -472,19 +474,36 @@ class ControlLibrary:
             title = f'"{meta_data[:(by_idx - 1)].strip()}"'
             artist = f'"{meta_data[(by_idx + 3):].strip()}"'
             genre = title
-            response = f"Ok! Playing {title} by {artist}..."
+
+            temp = mp.search_song_by(meta_data[:(by_idx - 1)].strip(), meta_data[(by_idx + 3):].strip(), meta_data[:(by_idx - 1)].strip())
+            if temp:
+                songWasFound = True
+                response = f"Ok! Playing {title} by {artist}..."
+            else:
+                response = f"I couldn't find {title} in your music."
+
         
         elif meta_data:
             option = '"play by"'
             title = f'"{meta_data}"'
             artist = f'"{meta_data}"'
             genre = f'"{meta_data}"'
-            response = f"Ok! Now playing {meta_data}{', shuffled...' if shuffle == 'True' else '...'}"
 
-        # change the directory to location of batch file to execute
-        os.chdir(UTILITIES_MODULE_DIR)
-        # batch file to play some music in new window
-        os.system(f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
+            mp.title = meta_data
+            mp.artist = meta_data
+            mp.genre = meta_data
+
+            temp = mp.search_song_by(meta_data, meta_data, meta_data)
+            if temp:
+                songWasFound = True
+                response = f"Ok! Now playing {meta_data}..."
+            else:
+                response = f"I couldn't find '{meta_data}' in your music."
+		
+        if songWasFound:
+            # batch file to play some music in new window
+            os.system(f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
+
         # get back to virtual assistant directory
         os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 

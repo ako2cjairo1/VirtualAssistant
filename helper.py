@@ -12,6 +12,7 @@ logging.basicConfig(filename="VirtualAssistant.log", filemode="w",
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 def displayException(exception_title="", ex_type=logging.CRITICAL):
     (execution_type, execution_obj, tb) = sys.exc_info()
 
@@ -20,8 +21,8 @@ def displayException(exception_title="", ex_type=logging.CRITICAL):
     fname = f.f_code.co_filename
     linecache.checkcache(fname)
     line = linecache.getline(fname, ln, f.f_globals)
-    log_data = "{}\nFile:    {}\nLine:    {}\nTarget:  {}\nMessage: {}".format(exception_title, fname.split('\\')[-1], ln, line.strip(), execution_obj)
-
+    log_data = "{}\nFile:    {}\nLine:    {}\nTarget:  {}\nMessage: {}".format(
+        exception_title, fname.split('\\')[-1], ln, line.strip(), execution_obj)
 
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
         line_len = len(str(execution_obj)) + 10
@@ -31,7 +32,7 @@ def displayException(exception_title="", ex_type=logging.CRITICAL):
 
     if ex_type == logging.DEBUG:
         logger.debug(log_data)
-    
+
     elif ex_type == logging.INFO:
         logger.info(log_data)
 
@@ -71,19 +72,19 @@ def clean_voice_data(voice_data, assistants_name):
 
 
 def convert_to_one_word_commands(voice_data, commands):
-    meta_keyword = ""
-    # sort the commands in descending mode,
-    # so the longer commands will be evaluated first.
-    commands = sorted(commands, reverse=True)
+    meta_keyword = voice_data.lower()
+    commands = sorted(commands, key=len, reverse=True)
 
     for command in (com.lower() for com in commands):
         # command contains 2 or more words
-        if len(command.split(" ")) > 1 and command in voice_data.lower():
+        if len(command.split(" ")) > 1 and command in meta_keyword:
             # put a hyphen in between to make it a 1 word command
             meta_keyword = voice_data.replace(command, command.replace(" ", "-"))
 
     # do the same with the commands list (put hyphen in between)
-    commands = [com.replace(" ", "-") for com in commands]
+    # then, sort the commands based on their length,
+    # so the longer commands will be evaluated first.
+    commands = sorted([com.replace(" ", "-") for com in commands], key=len, reverse=True)
 
     return (voice_data if not meta_keyword else meta_keyword), commands
 
@@ -92,7 +93,7 @@ def extract_metadata(voice_data, commands):
     meta_keyword, commands = convert_to_one_word_commands(voice_data, commands)
     voice_data_list = meta_keyword.lower().split(" ")
     extracted = True
-    
+
     for command in (com.lower() for com in commands):
         # remove the first occurance of command from voice data
         if command in voice_data_list:
@@ -121,6 +122,7 @@ def execute_map(func, *argv):
 
     return task
 
+
 def execute_map_kwargs(func, **kwargs):
     task = "Done"
     with executor.ThreadPoolExecutor() as exec:
@@ -135,7 +137,6 @@ def execute_map_kwargs(func, **kwargs):
     return task
 
 
-
 def execute_submit(func, *argv):
     task = ""
     with executor.ThreadPoolExecutor() as exec:
@@ -147,11 +148,10 @@ def execute_submit(func, *argv):
 def execute_submit_kwargs(func, **kwargs):
     task = ""
     with executor.ThreadPoolExecutor() as exec:
-        task = exec.submit(func, **kwargs) if len(kwargs) > 0 else exec.submit(func)
+        task = exec.submit(
+            func, **kwargs) if len(kwargs) > 0 else exec.submit(func)
 
     return task.result()
-
-
 
 
 def mapTaskWithException(func, *argv):
@@ -160,13 +160,12 @@ def mapTaskWithException(func, *argv):
     except Exception:
         displayException(str(func), logging.CRITICAL)
 
+
 def mapTaskwargsWithException(func, **kwargs):
     try:
         return execute_map_kwargs(func, **kwargs)
     except Exception:
         displayException(str(func), logging.CRITICAL)
-
-
 
 
 def submitTaskWithException(func, *argv):

@@ -51,7 +51,7 @@ class SpeechAssistant:
                 displayException("Could not understand audio.", logging.WARNING)
                 return voice_text
             except sr.RequestError:
-                displayException("gtts Request error", logging.ERROR)
+                displayException("gtts Request error", logging.WARNING)
                 if voice_text:
                     self.speak(
                         "Sorry! My speech service is not available at the moment.")

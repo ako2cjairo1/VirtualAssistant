@@ -4,4 +4,5 @@ CD C:\Users\Dave\DEVENV\Python\VirtualAssistant
 CLS
 python main.py
 @ECHO Virtual Assistant is closing...
+timeout 1
 EXIT
