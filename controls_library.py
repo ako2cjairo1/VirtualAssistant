@@ -3,6 +3,7 @@ import requests
 import subprocess
 import webbrowser
 import wikipedia
+import wolframalpha
 import time
 import wmi  # (screen brightness) Windows Management Instrumentation module
 import logging
@@ -19,18 +20,21 @@ UTILITIES_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PythonUtilityProjects"
 INIT_PROJECT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\ProjectGitInitAutomation"
 PSE_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\PSE"
 DEV_PATH_DIR = os.environ.get("DevPath")
+WOLFRAM_APP_ID = os.environ.get("WOLFRAM_APP_ID")
 
 
 class ControlLibrary:
-    def __init__(self, tts, assistants_name):
+    def __init__(self, tts, masters_name, assistants_name):
+        self.master_name = masters_name
         self.assistant_name = assistants_name
         self.tts = tts    
     
     def ask_time(self, voice_data):
         if "in" in voice_data.lower().split(" "):
-            return self.google(voice_data)
+            return ""
         else:
-            return f"{choice(['Its', 'The time is'])} {dt.now().strftime('%I:%M %p')}"
+            time_prefix = ["It's", "The time is"]
+            return f'{choice(time_prefix)} {dt.now().strftime("%I:%M %p")}'
 
     def google(self, search_keyword):
         # open google iste in web browser and show results
@@ -54,6 +58,65 @@ class ControlLibrary:
             return f"Here\'s the map location of \"{location.strip()}\". Opening your browser..."
 
         return result
+
+    def wolfram_search(self, voice_data):
+        client = wolframalpha.Client(WOLFRAM_APP_ID)
+        res = client.query(voice_data)
+        response = ""
+
+        try:
+            # get answers from Wolfram Alpha
+            wolfram_response = next(res.results).text
+
+            # if no answers found return a blank response
+            no_data_responses = ["(data not available)", "(no data available)"]
+            if is_match(wolfram_response, no_data_responses):
+                return response
+
+            # remove "according to" phrase in wolfram response
+            if "(according to" in wolfram_response.lower():
+                wolfram_response = wolfram_response.split("(according to")[0]
+
+            # replace "Q:" and "A:" prefixes and replace new space instead
+            if is_match(wolfram_response, ["Q: ", "A: "]):
+                wolfram_response = wolfram_response.replace("Q: ", "").replace("A: ", "\n\n") 
+
+            wolfram_meta = wolfram_response.split("|")
+            parts_of_speech = ["noun", "pronoun", "verb", "adjective", "adverb", "preposition", "conjunction", "interjection"]
+            
+            if wolfram_response.count("|") > 2:
+                if is_match(wolfram_response, parts_of_speech):
+                    response = f"({wolfram_meta[1]}) \nIt means, {wolfram_meta[2][:(len(wolfram_meta[2]) - 2)]}."
+                else:
+                    response = "Here's some information."
+                    print(f"\n{wolfram_response}\n")
+                
+
+            elif "|" in wolfram_response:
+                if "time" in voice_data.lower():
+                    if len(wolfram_response.split(":")[0]) == 2:
+                        response = f"{wolfram_response[:5]} {wolfram_response[9:11]}"
+                    else:
+                        response = f"{wolfram_response[:4]} {wolfram_response[8:10]}"
+                elif "my name is" in wolfram_response.lower():
+                    response = wolfram_response[:(wolfram_response.lower().find("my name is") + 11)] + self.assistant_name + ". Are you " + self.master_name + "?"
+                else:
+                    
+                    if is_match(wolfram_response, parts_of_speech):
+                        response = f"[{wolfram_meta[0]}] \nIt means, {wolfram_meta[-1]}."
+                    else:
+                        response = wolfram_response
+
+            else:
+                if "how do you spell" or "spell" in voice_data:
+                    response = f'{wolfram_response}. \n\n{" . ".join(list(wolfram_response.upper()))}'
+                else:
+                    response = wolfram_response
+
+            return response
+            
+        except:
+            return response
 
     def wikipedia_search(self, wiki_keyword, voice_data):
         result = ""
@@ -318,7 +381,7 @@ class ControlLibrary:
             # find files using windows explorer
             if using_explorer:
                 # open windows explorer and look for files using queries
-                explorer = f'explorer /root,"search-ms:query=*{file_name}*&crumb=location:{FILE_DIR}&"'
+                explorer = f'explorer /root,"search-ms:query=name:{file_name}&crumb=location:{FILE_DIR}&"'
                 subprocess.Popen(explorer, shell=False, stdin=None,
                                  stdout=None, stderr=None, close_fds=False)
                 response_message = f"Here's what I found for files with \"{file_name}\". I'm showing you the folder...\n"
@@ -413,8 +476,7 @@ class ControlLibrary:
             command = "shutdown /r /t 15"
 
         if command:
-            confirmation = self.tts.listen_to_audio(
-                f"\033[1;33;41m Are you sure to \"{'Restart' if '/r' in command else 'Shutdown'}\" your computer? (yes/no): ")
+            confirmation = self.tts.listen_to_audio(f"\033[1;33;41m Are you sure to \"{'Restart' if '/r' in command else 'Shutdown'}\" your computer? (yes/no): ")
 
             # execute the shutdown/restart command if confirmed by user
             if "yes" in confirmation.lower().strip():
@@ -461,7 +523,9 @@ class ControlLibrary:
         # change the directory to location of batch file to execute
         os.chdir(UTILITIES_MODULE_DIR)
         
-        meta_data = voice_data.strip().lower().replace("&", "and")
+        meta_data = voice_data.strip().lower().replace("&", "and").replace("music", "").replace("songs", "")
+
+
         if meta_data == "":
             # mode = "compact"
             response = f"Ok! Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
@@ -480,7 +544,7 @@ class ControlLibrary:
                 songWasFound = True
                 response = f"Ok! Playing {title} by {artist}..."
             else:
-                response = f"I couldn't find {title} in your music."
+                response = f"I couldn't find '{title}' in your music."
 
         
         elif meta_data:
@@ -496,7 +560,7 @@ class ControlLibrary:
             temp = mp.search_song_by(meta_data, meta_data, meta_data)
             if temp:
                 songWasFound = True
-                response = f"Ok! Now playing {meta_data}..."
+                response = f"Ok! Now playing '{meta_data}' music..."
             else:
                 response = f"I couldn't find '{meta_data}' in your music."
 		

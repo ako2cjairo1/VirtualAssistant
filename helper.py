@@ -54,19 +54,7 @@ def is_match(voice_data, keywords):
 
 
 def clean_voice_data(voice_data, assistants_name):
-    clean_data = voice_data
-
-    # if not greeting_commands(voice_data):
-    if voice_data.lower().find(assistants_name.lower()) > 0:
-        # remove all words starting from assistant's name
-        clean_data = voice_data[(voice_data.lower().find(
-            assistants_name.lower()) + len(assistants_name)):].strip()
-
-        # if assitant name's the last word in sentence
-        if len(clean_data.split(" ")) <= 1:
-            # remove only the portion of assistant's name in voice_data
-            clean_data = voice_data.replace(
-                assistants_name.lower(), "").strip()
+    clean_data = voice_data.replace(assistants_name.strip().lower(), "").strip()
 
     return clean_data
 

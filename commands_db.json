@@ -20,7 +20,7 @@
             "name": "wakeup_responses",
             "commands": [
                 "I'm listening...",
-                "uh-huh?",
+                "I'm here...",
                 "How can I help you <boss_name>?"
             ]
         },

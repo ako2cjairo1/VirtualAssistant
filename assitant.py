@@ -9,6 +9,7 @@ from colorama import init
 from tts import SpeechAssistant
 from helper import *
 from controls_library import ControlLibrary
+from threading import Thread
 
 
 class VirtualAssistant(SpeechAssistant):
@@ -27,28 +28,26 @@ class VirtualAssistant(SpeechAssistant):
                 self.command_db = json.load(fl)["command_db"]
 
     def activate(self):
-        control = ControlLibrary(super(), self.assistant_name)
+        control = ControlLibrary(super(), self.master_name, self.assistant_name)
 
         def _awake_greetings(start_prompt=True):
-            self.speak(choice(_get_commands("wakeup_responses")),
-                       start_prompt=start_prompt)
+            self.speak(choice(_get_commands("wakeup_responses")), start_prompt=start_prompt)
 
-        def _wake_assistant(listen_timeout=1):
-            voice_data = ""
+        def _wake_assistant(listen_timeout=1, voice_data=""):
 
             if listen_timeout == 0:
-                voice_data = self.listen_to_audio()
+                if not voice_data:
+                    voice_data = self.listen_to_audio()
                 wakeup_command = _get_commands("wakeup")
 
                 if _deactivate(voice_data):
-                    return
+                    return False
 
                 # wake command is invoked and the user ask question immediately.
                 if len(voice_data.split(" ")) > 2 and is_match(voice_data, wakeup_command):
                     # play end speaking prompt sound effect
-                    self.speak("(start prompt)", start_prompt=True)
-                    submitTaskWithException(_formulate_responses, clean_voice_data(
-                        voice_data, self.assistant_name))
+                    self.speak("<start prompt>", start_prompt=True)
+                    _formulate_responses(clean_voice_data(voice_data, self.assistant_name))
                     return True
 
                 # wake commands is invoked and expected to ask for another command
@@ -61,23 +60,24 @@ class VirtualAssistant(SpeechAssistant):
 
                     if voice_data:
                         # play end prompt sound effect before
-                        self.speak("(end prompt)", end_prompt=True)
-                        submitTaskWithException(
-                            _formulate_responses, voice_data)
+                        self.speak("<end prompt>", end_prompt=True)
+                        _formulate_responses(voice_data)
                     return True
 
-                # listen for deactivation commands, and end the program
-                elif _deactivate(voice_data):
-                    return False
+                # # listen for deactivation commands, and end the program
+                # elif _deactivate(voice_data):
+                #     return False
 
             return False
 
         def _mute_assistant(voice_data):
             # commands to interrupt virtual assistant
             if is_match(voice_data, _get_commands("mute")):
-
                 # don't listen for commands temporarily
                 print(f"{self.assistant_name}: (muted)")
+                # play end prompt sound effect
+                self.speak("(mute/sleep prompt)", mute_prompt=True)
+
                 return True
 
             return False
@@ -86,6 +86,7 @@ class VirtualAssistant(SpeechAssistant):
             # commands to terminate virtual assistant
             if is_match(voice_data, _get_commands("terminate")):
                 self.speak(choice(_get_commands("terminate_response")))
+                _mute_assistant(f"stop {self.assistant_name}")
                 print(f"\n{self.assistant_name} assistant DEACTIVATED.\n")
                 # terminate and end the virtual assistant application
                 exit()
@@ -102,13 +103,14 @@ class VirtualAssistant(SpeechAssistant):
 
         def _formulate_responses(voice_data):
             response_message = ""
-            search_google = True
-            search_wiki = True
+            ask_google = True
+            ask_wikipedia = True
+            ask_wolfram = True
             not_confirmation = True
             use_calc = True
 
             # respond to wake command(s) ("hey <assistant_name>")
-            if _wake_assistant():
+            if _wake_assistant(voice_data=voice_data):
                 # then exit immediately
                 return
 
@@ -131,14 +133,12 @@ class VirtualAssistant(SpeechAssistant):
 
             # commands to ask for assistant's name
             if is_match(voice_data, _get_commands("ask_assistant_name")):
-                self.speak(
-                    f"{choice(_get_commands('ask_assistant_name_response'))}.")
+                self.speak(f"{choice(_get_commands('ask_assistant_name_response'))}.")
                 # return immediately we don't need any answers below
                 return
 
             # commands to change wallpaper
-            wallpaper_commands = _get_commands("wallpaper")
-            if is_match(voice_data, wallpaper_commands):
+            if is_match(voice_data, _get_commands("wallpaper")):
                 wallpaper_response = submitTaskWithException(control.wallpaper)
 
                 if wallpaper_response:
@@ -152,40 +152,39 @@ class VirtualAssistant(SpeechAssistant):
             """
             voice_data = clean_voice_data(voice_data, self.assistant_name)
 
+            # respond to calling assistant's name
+            if voice_data == "":
+                self.speak("<end prompt>", end_prompt=True)
+                _awake_greetings(start_prompt=False)
+                return
+
             # commands for playing music
             music_commands = _get_commands("play_music")
             if is_match(voice_data, music_commands):
                 music_keyword = extract_metadata(voice_data, music_commands)
-                music_response = submitTaskWithException(
-                    control.play_music, music_keyword)
+                music_response = submitTaskWithException(control.play_music, music_keyword)
+
                 if music_response:
                     response_message += music_response
-                    search_google = False
-                    search_wiki = False
+                    ask_google = False
+                    ask_wikipedia = False
+                    ask_wolfram = False
                     not_confirmation = False
                     use_calc = False
                     if "Ok!" in music_response:
                         # mute assistant when playing music
                         self.sleep_assistant = True
 
-            # commands for controlling screen brightness
-            brightness_commands = _get_commands("brightness")
-            # commands to control wi-fi
-            wifi_commands = _get_commands("wifi")
-            # commands to control system
-            system_shutdown_commands = _get_commands("system_shutdown_restart")
-            if is_match(voice_data, (brightness_commands + wifi_commands + system_shutdown_commands)):
+            # commands for controlling screen brightness, wi-fi and to shutdown/restart system
+            if is_match(voice_data, (_get_commands("brightness") + _get_commands("wifi") + _get_commands("system_shutdown_restart"))):
                 system_responses = ""
                 if "brightness" in voice_data:
-                    system_responses = submitTaskWithException(
-                        control.screen_brightness, voice_data)
+                    system_responses = submitTaskWithException(control.screen_brightness, voice_data)
                 elif "wi-fi" in voice_data:
-                    system_responses = submitTaskWithException(
-                        control.control_wifi, voice_data)
+                    system_responses = submitTaskWithException(control.control_wifi, voice_data)
                 elif ("shutdown" in voice_data) or ("restart" in voice_data) or ("reboot" in voice_data):
                     # if we got response from shutdown command, initiate deactivation
-                    restart_msg = submitTaskWithException(
-                        control.control_system, voice_data)
+                    restart_msg = submitTaskWithException(control.control_system, voice_data)
 
                     if restart_msg:
                         self.speak(restart_msg)
@@ -202,8 +201,8 @@ class VirtualAssistant(SpeechAssistant):
             # commands for creating a new project automation
             create_project_commands = _get_commands("create_project")
             if is_match(voice_data, create_project_commands):
-                new_proj_metadata = extract_metadata(
-                    voice_data, create_project_commands)
+                new_proj_metadata = extract_metadata(voice_data, create_project_commands)
+
                 if new_proj_metadata:
                     lang = "python"
                     proj_name = "NewProjectFolder"
@@ -213,41 +212,44 @@ class VirtualAssistant(SpeechAssistant):
                         lang = new_proj_metadata[(lang_idx + 2):]
 
                     self.speak("Ok! Just a momement.")
-                    create_proj_response = submitTaskwargsWithException(
-                        control.initiate_new_project, lang=lang, proj_name=proj_name)
+                    create_proj_response = submitTaskwargsWithException(control.initiate_new_project, lang=lang, proj_name=proj_name)
                     self.speak(f"Initiating new {lang} project.")
                     self.speak(create_proj_response)
                     return
 
             # commands to ask time
             if is_match(voice_data, _get_commands("time")):
-                response_time = submitTaskWithException(
-                    control.ask_time, voice_data)
+                response_time = submitTaskWithException(control.ask_time, voice_data)
+
                 if response_time:
                     response_message += response_time
-                    search_google = False
-                    search_wiki = False
+                    ask_google = False
+                    ask_wikipedia = False
+                    ask_wolfram = False
                     not_confirmation = False
                     use_calc = False
 
             # commands for simple math calculations
             if use_calc and is_match(voice_data, _get_commands("math_calculation")):
-                calc = submitTaskWithException(control.calculator, voice_data)
-                if calc:
-                    response_message += calc
-                    search_google = False
-                    search_wiki = False
+                calc_response = submitTaskWithException(control.calculator, voice_data)
+
+                if calc_response:
+                    response_message += calc_response
+                    ask_google = False
+                    ask_wikipedia = False
+                    ask_wolfram = False
                     not_confirmation = False
                     use_calc = False
 
             # commands to open apps
             if is_match(voice_data, _get_commands("open_apps")):
-                open_app_response = submitTaskWithException(
-                    control.open_application, voice_data)
+                open_app_response = submitTaskWithException(control.open_application, voice_data)
+
                 if open_app_response:
                     response_message += open_app_response
-                    search_google = False
-                    search_wiki = False
+                    ask_google = False
+                    ask_wikipedia = False
+                    ask_wolfram = False
                     not_confirmation = False
                     use_calc = False
 
@@ -255,20 +257,68 @@ class VirtualAssistant(SpeechAssistant):
             find_file_commands = _get_commands("find_file")
             if is_match(voice_data, find_file_commands):
                 file_keyword = extract_metadata(voice_data, find_file_commands)
-                find_file_response = submitTaskWithException(
-                    control.find_file, file_keyword)
+                find_file_response = submitTaskWithException(control.find_file, file_keyword)
 
                 if find_file_response:
                     response_message += find_file_response
-                    # we found response from find_fil, don't search on google or wiki
-                    search_google = False
-                    search_wiki = False
+                    # we found response from find_file, don't search on google or wiki
+                    ask_google = False
+                    ask_wikipedia = False
+                    ask_wolfram = False
                     not_confirmation = False
                     use_calc = False
 
+            # commands for youtube
+            youtube_commands = _get_commands("youtube")
+            if is_match(voice_data, youtube_commands):
+                # extract youtube keyword to search
+                youtube_keyword = extract_metadata(
+                    voice_data, youtube_commands)
+                # search the keyword in youtube website
+                youtube_response = submitTaskWithException(
+                    control.youtube, youtube_keyword)
+
+                # we got response from youtube, now append it to list of response_message
+                if youtube_response:
+                    response_message += youtube_response
+                    # don't search into google we found answer from youtube
+                    ask_wolfram = False
+                    ask_wikipedia = False
+                    ask_google = False
+                    not_confirmation = False
+        
+            # commands to use google maps
+            google_maps_commands = _get_commands("google_maps")
+            if ask_google and is_match(voice_data, google_maps_commands):
+                # extract the location name
+                location = extract_metadata(voice_data, google_maps_commands)
+
+                if location:
+                    response_message += submitTaskWithException(
+                        control.google_maps, location)
+                    # don't search on google we found answers from maps
+                    ask_wolfram = False
+                    ask_wikipedia = False
+                    ask_google = False
+                    not_confirmation = False
+
+            # commands for confirmation
+            confirmation_commands = _get_commands("confirmation")
+
+            # try wolfram for answers
+            if ask_wolfram and not any(word for word in voice_data.split() if word in confirmation_commands):
+                # using commands from google to extract useful meta data for wolfram search
+                # wolfram_keywords = extract_metadata(voice_data, _get_commands("google"))
+                wolfram_response = submitTaskWithException(control.wolfram_search, voice_data)
+                if wolfram_response:
+                    response_message += wolfram_response
+                    ask_wikipedia = False
+                    ask_google = False
+                    not_confirmation = False
+
             # commands for wikipedia, exception is "weather" commands
             wiki_commands = _get_commands("wikipedia")
-            if search_wiki and is_match(voice_data, wiki_commands) and not ("weather" in voice_data):
+            if ask_wikipedia and is_match(voice_data, wiki_commands) and not ("weather" in voice_data):
                 # extract the keyword
                 wiki_keyword = extract_metadata(voice_data, wiki_commands)
                 # get aswers from wikipedia
@@ -291,58 +341,20 @@ class VirtualAssistant(SpeechAssistant):
                 if wiki_result:
                     response_message += wiki_result
                     # don't search into google we found answer from wikipedia
-                    search_google = False
-                    search_wiki = False
+                    ask_google = False
                     not_confirmation = False
-                    use_calc = False
-
-            # commands for youtube
-            youtube_commands = _get_commands("youtube")
-            if is_match(voice_data, youtube_commands):
-                # extract youtube keyword to search
-                youtube_keyword = extract_metadata(
-                    voice_data, youtube_commands)
-                # search the keyword in youtube website
-                youtube_response = submitTaskWithException(
-                    control.youtube, youtube_keyword)
-
-                # we got response from youtube, now append it to list of response_message
-                if youtube_response:
-                    response_message += youtube_response
-                    # don't search into google we found answer from youtube
-                    search_google = False
-                    search_wiki = False
-                    not_confirmation = False
-                    use_calc = False
-
-            # commands to use google maps
-            google_maps_commands = _get_commands("google_maps")
-            if search_google and is_match(voice_data, google_maps_commands):
-                # extract the location name
-                location = extract_metadata(voice_data, google_maps_commands)
-
-                if location:
-                    response_message += submitTaskWithException(
-                        control.google_maps, location)
-                    # don't search on google we found answers from maps
-                    search_google = False
-                    search_wiki = False
-                    not_confirmation = False
-                    use_calc = False
 
             # commands to search on google
             google_commands = _get_commands("google")
-            if search_google and is_match(voice_data, google_commands):
+            if ask_google and is_match(voice_data, google_commands):
                 # remove these commands on keyword to search on google
                 google_keyword = extract_metadata(voice_data, google_commands)
 
                 # search on google if we have a keyword
                 if google_keyword:
-                    response_message += submitTaskWithException(
-                        control.google, google_keyword)
+                    response_message += submitTaskWithException(control.google, google_keyword)
+                    not_confirmation = False
 
-            # commands for confirmation
-            confirmation_commands = _get_commands("confirmation")
             if not_confirmation and is_match(voice_data, confirmation_commands):
                 confimation_keyword = extract_metadata(
                     voice_data, confirmation_commands).strip()
@@ -363,6 +375,7 @@ class VirtualAssistant(SpeechAssistant):
 
             # anounce all the respons(es)
             self.speak(response_message)
+            return True
 
         def _check_connection():
             while True:
@@ -378,16 +391,20 @@ class VirtualAssistant(SpeechAssistant):
                         "**Virtual assistant failed to initiate. No internet connection.", logging.WARNING)
                 time.sleep(1)
 
-        def _announce_time(announce_time=False):
-            t = dt.now()
-            mn = t.minute
-            sec = t.second
+        def _announce_time():
+            time_ticker = 0
+            while True:
+                t = dt.now()
+                mn = t.minute
+                sec = t.second
 
-            if announce_time or (mn == 0 and sec <= 4):
-                self.speak(f"The time now is {t.strftime('%I:%M %p')}")
-                return True
-            else:
-                return False
+                if time_ticker == 0 and (mn == 0 and sec == 0):
+                    self.speak(f"The time now is {t.strftime('%I:%M %p')}")
+                    time_ticker += 1
+                if time_ticker >= 1:
+                    time_ticker = 0
+
+                time.sleep(1)
 
         """
         Main handler of virtual assistant
@@ -397,21 +414,24 @@ class VirtualAssistant(SpeechAssistant):
             # autoreset color coding of texts to normal
             init(autoreset=True)
             sleep_counter = 0
-            listen_time = 0
+            listen_time = 1
             announce_time = True
 
-            print(
-                f"\n\nVirtual assistant \"{self.assistant_name}\" is active...")
+            print(f"\n\n\"{self.assistant_name}\" is active...")
 
-            # generate random start greeting
-            announce_greeting = choice(_get_commands("start_greeting"))
+            announcetime_thread = Thread(target=_announce_time)
+            announcetime_thread.setDaemon(True)
+            announcetime_thread.start()
 
+            # play speaking prompt sound effect and say greetings
+            self.speak(choice(_get_commands("start_greeting")), start_prompt=True)
+            
             while True:
                 # handles restarting of listen timeout
-                if listen_time >= (self.listen_timeout + 1):
+                if listen_time >= self.listen_timeout:
                     listen_time = 0
 
-                if self.sleep_assistant:
+                elif self.sleep_assistant:
                     self.sleep_assistant = False
                     # listen for mute commands, and stop listening
                     _mute_assistant(f"stop {self.assistant_name}")
@@ -427,49 +447,44 @@ class VirtualAssistant(SpeechAssistant):
                     continue
 
                 # handles if assistant is still listening for commands.
-                if announce_greeting or listen_time > 0:
+                elif listen_time > 0:
                     """ Virtual assitant is AWAKE
                         (1) listen for high level commands, like..
                         (2) greeting, mute and deactivate commands
                         (3) formulate responses for lower level commands """
-                    if not announce_greeting:
-                        # print(f"{self.assistant_name}: listening... {listen_time} of {self.listen_timeout}")
-                        if listen_time == 1:
-                            print(f"{self.assistant_name}: listening...")
-                    else:
-                        # play begin speaking prompt sound effect
-                        self.speak("(start prompt)", start_prompt=True)
+                        
+                    if listen_time == 1:
+                        print(f"{self.assistant_name}: listening...")
 
                     # listen for commands
-                    voice_data = self.listen_to_audio(announce_greeting)
+                    voice_data = self.listen_to_audio()
 
                     # we heard a voice_data, let's start processing
                     if voice_data:
                         # listen for mute commands, and stop listening
                         if _mute_assistant(voice_data):
                             listen_time = 0
+                            self.sleep_assistant = False
                             # start the loop again and wait for "wake commands"
                             continue
                         # listen for deactivation commands, and end the program
                         elif _deactivate(voice_data):
                             break
                         # respond to calling assistant's name
-                        elif voice_data.lower() == self.assistant_name.lower():
+                        elif self.assistant_name.lower() in voice_data.lower() and not clean_voice_data(voice_data, self.assistant_name):
+                            self.speak("<end prompt>", end_prompt=True)
                             _awake_greetings(start_prompt=False)
                             sleep_counter = 0
-                            announce_greeting = None
                             # restart the listen timeout and wait for new commands
                             listen_time = 1
                             continue
 
                         # play end prompt sound effect
-                        self.speak("(end prompt)", end_prompt=True)
+                        self.speak("<end prompt>", end_prompt=True)
 
                         # start gathering answers from sources
-                        submitTaskWithException(
-                            _formulate_responses, voice_data)
+                        _formulate_responses(voice_data)
                         sleep_counter = 0
-                        announce_greeting = None
 
                         # restart the listen timeout and wait for new commands
                         listen_time = 1
@@ -481,20 +496,22 @@ class VirtualAssistant(SpeechAssistant):
                     """ Virtual assistant will sleep/mute
                     (1) play end of prompt sound effect and show "ZzzzZzz"
                     (2) get updates of commands from json """
+
                     sleep_counter += 1
                     if sleep_counter == 1:
-                        # play end prompt sound effect
-                        self.speak("(mute/sleep prompt)", mute_prompt=True)
+                        if self.sleep_assistant:
+                            # play end prompt sound effect
+                            _mute_assistant(f"stop {self.assistant_name}")
+                        else:
+                            # play end prompt sound effect
+                            self.speak("(mute/sleep prompt)", mute_prompt=True)
 
-                    if (sleep_counter == 1):  # or ((sleep_counter % 20) == 0):
-                        # every 20th cycle, show if assistant is sleeping (muted).
+                        # show if assistant is sleeping (muted).
                         print(f"{self.assistant_name}: ZzzzZz")
 
                     # get updates of commands from json file
-                    self.get_commands_from_json()
-
-                _announce_time()
-                announce_greeting = None
+                    get_commands_thread = Thread(target=self.get_commands_from_json)
+                    get_commands_thread.start()
 
         # check internet connectivity every second
         # before proceeding to main()
