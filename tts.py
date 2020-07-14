@@ -22,20 +22,20 @@ class SpeechAssistant:
     def __init__(self, masters_name, assistants_name):
         self.master_name = masters_name
         self.assistant_name = assistants_name
+        
+        self.recognizer = sr.Recognizer()
+        # let's override the dynamic threshold to 4000,
+        # so the timeout we set in listen() will be used
+        self.recognizer.dynamic_energy_threshold = False
+        self.recognizer.energy_threshold = 4000
 
     def listen_to_audio(self, ask=None):
         voice_text = ""
-        recognizer = sr.Recognizer()
-
-        # let's override the dynamic threshold to 400,
-        # so the timeout we set in listen() will be used
-        recognizer.dynamic_energy_threshold = True
-        recognizer.energy_threshold = 4000
-
+        
         # adjust the recognizer sensitivity to ambient noise 
         # and record audio from microphone
         with sr.Microphone() as source:
-            recognizer.adjust_for_ambient_noise(source, duration=1)
+            self.recognizer.adjust_for_ambient_noise(source, duration=1)
 
             try:
                 # announce/play something before listening from microphone
@@ -43,9 +43,9 @@ class SpeechAssistant:
                     self.speak(ask)
 
                 # listening
-                audio = recognizer.listen(source, timeout=2)
+                audio = self.recognizer.listen(source, timeout=2)
                 # try convert audio to text/string data
-                voice_text = recognizer.recognize_google(audio)
+                voice_text = self.recognizer.recognize_google(audio)
 
             except sr.UnknownValueError:
                 # displayException("Could not understand audio.")
@@ -84,15 +84,19 @@ class SpeechAssistant:
 
                 if start_prompt and "<start prompt>" in audio_string:
                     audio_file = f"{AUDIO_FOLDER}/start prompt.mp3"
+
                 elif start_prompt and audio_string:
                     tts.save(audio_file)
                     playsound.playsound(f"{AUDIO_FOLDER}/start prompt.mp3")
                     print(f"{MASTER_BLACK_NAME}{self.assistant_name}:{MASTER_CYAN_MESSAGE} {audio_string}")
                     force_delete = True
+
                 elif end_prompt:
                     audio_file = f"{AUDIO_FOLDER}/end prompt.mp3"
+
                 elif mute_prompt:
                     audio_file = f"{AUDIO_FOLDER}/mute prompt.mp3"
+
                 else:
                     tts.save(audio_file)
                     print(f"{MASTER_BLACK_NAME}{self.assistant_name}:{MASTER_CYAN_MESSAGE} {audio_string}")
@@ -107,8 +111,5 @@ class SpeechAssistant:
             except Exception as ex:
                 if not ("Cannot find the specified file." or "Permission denied:") in str(ex):
                     displayException("gtts Speak")
-                    while not submitTaskWithException(self.speak, audio_string, start_prompt, end_prompt):
-                        print("\n**re-connecting to gtts API...")
-                        time.sleep(2)
         
         

@@ -7,7 +7,7 @@ import time
 import concurrent.futures as executor
 
 logging.basicConfig(filename="VirtualAssistant.log", filemode="w",
-                    level=logging.ERROR, format="%(asctime)s: %(name)s | %(levelname)s | %(message)s")
+                    level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s")
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -100,71 +100,12 @@ def extract_metadata(voice_data, commands):
 
 def execute_map(func, *argv):
     task = ""
-    with executor.ThreadPoolExecutor() as exec:
-        if "open browser" in str(func):
+    if "open browser" in str(func):
             func = webbrowser.get().open_new
-        elif "open system" in str(func):
-            func = os.system
+    elif "open system" in str(func):
+        func = os.system
 
+    with executor.ThreadPoolExecutor() as exec:
         task = [result for result in zip(*argv, exec.map(func, *argv))]
 
     return task
-
-
-def execute_map_kwargs(func, **kwargs):
-    task = "Done"
-    with executor.ThreadPoolExecutor() as exec:
-        if "open browser" in str(func):
-            func = webbrowser.get().open_new
-        elif "open system" in str(func):
-            func = os.system
-
-        # task = [result for result in zip(**kwargs, exec.map(func, **kwargs))]
-        exec.map(func, **kwargs)
-
-    return task
-
-
-def execute_submit(func, *argv):
-    task = ""
-    with executor.ThreadPoolExecutor() as exec:
-        task = exec.submit(func, *argv) if len(argv) > 0 else exec.submit(func)
-
-    return task.result()
-
-
-def execute_submit_kwargs(func, **kwargs):
-    task = ""
-    with executor.ThreadPoolExecutor() as exec:
-        task = exec.submit(
-            func, **kwargs) if len(kwargs) > 0 else exec.submit(func)
-
-    return task.result()
-
-
-def mapTaskWithException(func, *argv):
-    try:
-        return execute_map(func, *argv)
-    except Exception:
-        displayException(str(func), logging.CRITICAL)
-
-
-def mapTaskwargsWithException(func, **kwargs):
-    try:
-        return execute_map_kwargs(func, **kwargs)
-    except Exception:
-        displayException(str(func), logging.CRITICAL)
-
-
-def submitTaskWithException(func, *argv):
-    try:
-        return execute_submit(func, *argv)
-    except Exception:
-        displayException(str(func), logging.CRITICAL)
-
-
-def submitTaskwargsWithException(func, **kwargs):
-    try:
-        return execute_submit_kwargs(func, **kwargs)
-    except Exception:
-        displayException(str(func), logging.CRITICAL)
