@@ -319,6 +319,16 @@
             ]
         },
         {
+            "name": "weather",
+            "commands": [
+                "weather forecast", 
+                "weather today", 
+                "weather like", 
+                "forecast weather", 
+                "weather"
+            ]
+        },
+        {
             "name": "wikipedia",
             "commands": [
                 "what is the",

@@ -22,6 +22,9 @@ PSE_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\PSE"
 DEV_PATH_DIR = os.environ.get("DevPath")
 WOLFRAM_APP_ID = os.environ.get("WOLFRAM_APP_ID")
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 class ControlLibrary:
     def __init__(self, tts, masters_name, assistants_name):
@@ -61,62 +64,165 @@ class ControlLibrary:
 
     def wolfram_search(self, voice_data):
         client = wolframalpha.Client(WOLFRAM_APP_ID)
-        res = client.query(voice_data)
+        is_weather_report = False
         response = ""
 
-        try:
-            # get answers from Wolfram Alpha
-            wolfram_response = next(res.results).text
+        def _resolveListOrDict(value):
+            if isinstance(value, list):
+                return value[0]["plaintext"]
+            else:
+                return value["plaintext"]
 
-            # if no answers found return a blank response
-            no_data_responses = ["(data not available)", "(no data available)"]
-            if is_match(wolfram_response, no_data_responses):
-                return response
+        def _removeBrackets(value):
+            return value.split("(")[0]
 
-            # remove "according to" phrase in wolfram response
-            if "(according to" in wolfram_response.lower():
-                wolfram_response = wolfram_response.split("(according to")[0]
+        def _weatherReport(data):
+            report = ""
+            max_temp = ""
+            min_temp = ""
+            ave_temp = ""
+            conditions = []
+            current_hour = int(dt.now().strftime("%I"))
+            current_meridian_indicator = dt.now().strftime("%p")
+            time_frame = "morning" if ("AM" == current_meridian_indicator and current_hour <= 10) else ("afternoon" if (("AM" == current_meridian_indicator and current_hour > 10) or ("PM" == current_meridian_indicator and current_hour == 12) or ("PM" == current_meridian_indicator and current_hour <= 2)) else "night")
 
-            # replace "Q:" and "A:" prefixes and replace new space instead
-            if is_match(wolfram_response, ["Q: ", "A: "]):
-                wolfram_response = wolfram_response.replace("Q: ", "").replace("A: ", "\n\n") 
-
-            wolfram_meta = wolfram_response.split("|")
-            parts_of_speech = ["noun", "pronoun", "verb", "adjective", "adverb", "preposition", "conjunction", "interjection"]
+            data = data.replace('rain', 'raining').replace('few clouds', 'cloudy').replace("clear", "clear skies")
             
-            if wolfram_response.count("|") > 2:
-                if is_match(wolfram_response, parts_of_speech):
-                    response = f"({wolfram_meta[1]}) \nIt means, {wolfram_meta[2][:(len(wolfram_meta[2]) - 2)]}."
-                else:
-                    response = "Here's some information."
-                    print(f"\n{wolfram_response}\n")
-                
+            for item in data.split("\n"):
+                if "°C" in item:
+                    temps = item.replace("between", "").split("and")
 
-            elif "|" in wolfram_response:
-                if "time" in voice_data.lower():
-                    if len(wolfram_response.split(":")[0]) == 2:
-                        response = f"{wolfram_response[:5]} {wolfram_response[9:11]}"
+                    if len(temps) > 1:
+                        min_temp = temps[0].strip()
+                        max_temp = temps[1].strip()
+                        ave_temp = str((int(max_temp.replace('°C', '')) + int(min_temp.replace('°C', ''))) // 2)
                     else:
-                        response = f"{wolfram_response[:4]} {wolfram_response[8:10]}"
-                elif "my name is" in wolfram_response.lower():
-                    response = wolfram_response[:(wolfram_response.lower().find("my name is") + 11)] + self.assistant_name + ". Are you " + self.master_name + "?"
-                else:
+                        ave_temp = item.strip()
+
+                elif is_match(item, ["|"]):
+                    for cond in item.split("|"):
+                        if time_frame == "morning" and "early morning" in cond:
+                            conditions.append(cond[:cond.index("(")].strip())
+                        elif time_frame == "afternoon" and "afternoon" in cond:
+                            conditions.append(cond[:cond.index("(")].strip())
+                        elif "(" in cond:
+                            conditions.append(cond[:cond.index("(")].strip())
                     
-                    if is_match(wolfram_response, parts_of_speech):
-                        response = f"[{wolfram_meta[0]}] \nIt means, {wolfram_meta[-1]}."
+                    if max_temp and min_temp:
+                        return f"It's currently  {conditions[0]} and {ave_temp}°C. Expect {' and '.join(conditions)} starting {time_frame} with mixed conditions for the rest of the day. Temperatures are heading down from {max_temp} to {min_temp}."
+                else:
+                    conditions = item[:item.index("(")].strip()
+
+            return f"It's currently {conditions} and {ave_temp}°C."
+
+
+        if is_match(voice_data, ["weather forecast", "weather today", "weather like", "forecast weather", "weather"]):
+            if is_match(voice_data, ["in", "for"]):
+                meta_data = extract_metadata(voice_data, ["in", "for"])
+                voice_data = f"weather forecast for {meta_data}"
+            else:
+                voice_data = "weather forecast for Malolos, Bulacan"
+            is_weather_report = True
+
+        # send query to Wolfram Alpha        
+        wolframAlpha = client.query(voice_data)
+
+        # check if we have a successful result
+        if wolframAlpha["@success"] == "true":
+            # may contain extracted question or query meta data
+            pod0 = wolframAlpha["pod"][0]
+
+            # may contain the answer
+            pod1 = wolframAlpha["pod"][1]
+
+            # extracting wolfram question interpretation from pod0
+            question = _resolveListOrDict(pod0["subpod"])
+
+            # removing unnecessary parenthesis
+            question = _removeBrackets(question)
+
+            # checking if pod1 has primary=true or title=result|definition
+            if (("definition" in pod1["@title"].lower()) or ("result" in pod1["@title"].lower()) or (pod1.get("@primary", "false") == "true")):
+
+                # extract result from pod1
+                wolfram_response = _resolveListOrDict(pod1["subpod"])
+
+                try:
+                    # create a weather report
+                    if is_weather_report:
+                        return f"Here's the {pod1['@title']}\n\n{_weatherReport(wolfram_response)}"
+
+                    # if no answers found return a blank response
+                    no_data_responses = ["(data not available)", "(no data available)"]
+                    if is_match(wolfram_response, no_data_responses):
+                        return response
+
+                    # remove "according to" phrase in wolfram response
+                    if is_match(wolfram_response, ["(according to"]):
+                        wolfram_response = wolfram_response.split("(according to")[0]
+
+                    # replace "Q:" and "A:" prefixes and replace new space instead
+                    if is_match(wolfram_response, ["Q: ", "A: "]):
+                        wolfram_response = wolfram_response.replace("Q: ", "").replace("A: ", "\n\n") 
+
+                    wolfram_meta = wolfram_response.split("|")
+                    parts_of_speech = ["noun", "pronoun", "verb", "adjective", "adverb", "preposition", "conjunction", "interjection"]
+                    
+                    # we found an array of information, let's disect if necessary
+                    if wolfram_response.count("|") > 2:
+                        if is_match(wolfram_response, parts_of_speech):
+                            # responding to definition of terms, and using the first answer in the list as definition
+                            response = f"({wolfram_meta[1]}) \nIt means, {wolfram_meta[2][:(len(wolfram_meta[2]) - 2)]}."
+                        else:
+                            # respond by showing list of information
+                            response = "Here's some information."
+                            print(f"\n{wolfram_response}\n")
+                        
+                    # we found at least 1 set of defition, disect further if necessary
+                    elif is_match(wolfram_response, ["|"]):
+                        # extract the 12 hour time value
+                        if is_match(voice_data, ["time"]):
+
+                            # check for 12 hour time value
+                            if len(wolfram_response.split(":")[0]) == 2:
+                                hour = wolfram_response[:5]
+                                ampm = wolfram_response[9:11]
+                                response = f"{hour} {ampm}"
+                            else:
+                                hour = wolfram_response[:4]
+                                ampm = wolfram_response[8:10]
+                                response = f"{hour} {ampm}"
+
+                        # responding to "do you know my name?"
+                        elif is_match(wolfram_response, ["my name is"]):
+                            # replace "Wolfram|Aplha" to assistant's name.
+                            response = wolfram_response[:(wolfram_response.lower().find("my name is") + 11)] + self.assistant_name + ". Are you " + self.master_name + "?"
+                        
+                        else:
+                            # responding to definition of terms    
+                            if is_match(wolfram_response, parts_of_speech):
+                                response = f"[{wolfram_meta[0]}] \nIt means, {wolfram_meta[-1]}."
+                            else:
+                                response = wolfram_response
+
+                    # single string response
                     else:
-                        response = wolfram_response
+                        if is_match(voice_data, ["how do you spell", "spell"]):
+                            # let's split the letters of response to simulate spelling the word(s).
+                            response = f'{wolfram_response}\n\n . {" . ".join(list(wolfram_response.upper()))}'
+                        else:
+                            response = wolfram_response
+
+                    return response
+                except Exception:
+                    displayException(__name__, logging.CRITICAL)
 
             else:
-                if "how do you spell" or "spell" in voice_data:
-                    response = f'{wolfram_response}. \n\n{" . ".join(list(wolfram_response.upper()))}'
-                else:
-                    response = wolfram_response
+                # wolfram did not found or not confident on answers, let's try in wikipedia search.
+                return self.wikipedia_search(question, question)
 
-            return response
-            
-        except:
-            return response
+        # if no answers found return a blank response
+        return response
 
     def wikipedia_search(self, wiki_keyword, voice_data):
         result = ""
@@ -523,7 +629,8 @@ class ControlLibrary:
         # change the directory to location of batch file to execute
         os.chdir(UTILITIES_MODULE_DIR)
         
-        meta_data = voice_data.strip().lower().replace("&", "and").replace("music", "").replace("songs", "")
+        music_word_found = True if is_match(voice_data, ["music", "songs"]) else False
+        meta_data = voice_data.lower().replace("&", "and").replace("music", "").replace("songs", "").strip()
 
 
         if meta_data == "":
@@ -535,16 +642,17 @@ class ControlLibrary:
             option = '"play by"'
 
             by_idx = meta_data.find("by")
-            title = f'"{meta_data[:(by_idx - 1)].strip()}"'
-            artist = f'"{meta_data[(by_idx + 3):].strip()}"'
-            genre = title
+            title = meta_data[:(by_idx - 1)].strip()
+            artist = meta_data[(by_idx + 3):].strip()
 
-            temp = mp.search_song_by(meta_data[:(by_idx - 1)].strip(), meta_data[(by_idx + 3):].strip(), meta_data[:(by_idx - 1)].strip())
-            if temp:
+            if mp.search_song_by(title, artist, title):
                 songWasFound = True
-                response = f"Ok! Playing {title} by {artist}..."
+                title = f'"{title}"'
+                artist = f'"{artist}"'
+                genre = title
+                response = f"Ok! Playing \"{title}\" by \"{artist}\"..."
             else:
-                response = f"I couldn't find '{title}' in your music."
+                response = f"I couldn't find \"{title}\" in your music."
 
         
         elif meta_data:
@@ -557,12 +665,11 @@ class ControlLibrary:
             mp.artist = meta_data
             mp.genre = meta_data
 
-            temp = mp.search_song_by(meta_data, meta_data, meta_data)
-            if temp:
+            if mp.search_song_by(meta_data, meta_data, meta_data):
                 songWasFound = True
-                response = f"Ok! Now playing '{meta_data}' music..."
+                response = f"Ok! Now playing \"{meta_data}\" {'music...' if music_word_found else '...'}"
             else:
-                response = f"I couldn't find '{meta_data}' in your music."
+                response = f"I couldn't find \"{meta_data}\" in your music."
 		
         if songWasFound:
             # batch file to play some music in new window

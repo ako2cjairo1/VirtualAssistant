@@ -74,7 +74,7 @@ class VirtualAssistant(SpeechAssistant):
             # commands to interrupt virtual assistant
             if is_match(voice_data, _get_commands("mute")):
                 # don't listen for commands temporarily
-                print(f"{self.assistant_name}: (muted)")
+                print(f"{self.assistant_name}: (in mute)")
                 # play end prompt sound effect
                 self.speak("(mute/sleep prompt)", mute_prompt=True)
 
@@ -154,7 +154,6 @@ class VirtualAssistant(SpeechAssistant):
 
             # respond to calling assistant's name
             if voice_data == "":
-                self.speak("<end prompt>", end_prompt=True)
                 _awake_greetings(start_prompt=False)
                 return
 
@@ -309,7 +308,8 @@ class VirtualAssistant(SpeechAssistant):
             if ask_wolfram and not any(word for word in voice_data.split() if word in confirmation_commands):
                 # using commands from google to extract useful meta data for wolfram search
                 # wolfram_keywords = extract_metadata(voice_data, _get_commands("google"))
-                wolfram_response = submitTaskWithException(control.wolfram_search, voice_data)
+                # wolfram_response = submitTaskWithException(control.wolfram_search, voice_data)
+                wolfram_response = control.wolfram_search(voice_data)
                 if wolfram_response:
                     response_message += wolfram_response
                     ask_wikipedia = False
@@ -430,6 +430,8 @@ class VirtualAssistant(SpeechAssistant):
                 # handles restarting of listen timeout
                 if listen_time >= self.listen_timeout:
                     listen_time = 0
+                    # play end prompt sound effect
+                    _mute_assistant(f"stop {self.assistant_name}")
 
                 elif self.sleep_assistant:
                     self.sleep_assistant = False
@@ -461,23 +463,18 @@ class VirtualAssistant(SpeechAssistant):
 
                     # we heard a voice_data, let's start processing
                     if voice_data:
+
                         # listen for mute commands, and stop listening
                         if _mute_assistant(voice_data):
-                            listen_time = 0
                             self.sleep_assistant = False
+                            listen_time = 0
+                            sleep_counter = 0
                             # start the loop again and wait for "wake commands"
                             continue
+
                         # listen for deactivation commands, and end the program
                         elif _deactivate(voice_data):
                             break
-                        # respond to calling assistant's name
-                        elif self.assistant_name.lower() in voice_data.lower() and not clean_voice_data(voice_data, self.assistant_name):
-                            self.speak("<end prompt>", end_prompt=True)
-                            _awake_greetings(start_prompt=False)
-                            sleep_counter = 0
-                            # restart the listen timeout and wait for new commands
-                            listen_time = 1
-                            continue
 
                         # play end prompt sound effect
                         self.speak("<end prompt>", end_prompt=True)
@@ -499,19 +496,12 @@ class VirtualAssistant(SpeechAssistant):
 
                     sleep_counter += 1
                     if sleep_counter == 1:
-                        if self.sleep_assistant:
-                            # play end prompt sound effect
-                            _mute_assistant(f"stop {self.assistant_name}")
-                        else:
-                            # play end prompt sound effect
-                            self.speak("(mute/sleep prompt)", mute_prompt=True)
-
                         # show if assistant is sleeping (muted).
                         print(f"{self.assistant_name}: ZzzzZz")
 
-                    # get updates of commands from json file
-                    get_commands_thread = Thread(target=self.get_commands_from_json)
-                    get_commands_thread.start()
+                        # get updates of commands from json file
+                        get_commands_thread = Thread(target=self.get_commands_from_json)
+                        get_commands_thread.start()
 
         # check internet connectivity every second
         # before proceeding to main()
