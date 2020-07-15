@@ -394,7 +394,7 @@ class VirtualAssistant(SpeechAssistant):
                 sec = t.second
 
                 if time_ticker == 0 and (mn == 0 and sec == 0):
-                    self.speak(f"The time now is {t.strftime('%I:%M %p')}")
+                    self.speak(f"The time now is {t.strftime('%I:%M %p')}.")
                     time_ticker += 1
                 if time_ticker >= 1:
                     time_ticker = 0

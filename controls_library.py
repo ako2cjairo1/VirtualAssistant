@@ -37,29 +37,39 @@ class ControlLibrary:
             return f'{choice(time_prefix)} {dt.now().strftime("%I:%M %p")}'
 
     def google(self, search_keyword):
+        result = ""
         # open google iste in web browser and show results
-        if search_keyword and execute_map(f"https://google.com/search?q={quote(search_keyword.strip())}"):
-            return f"Here's what I found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
+        if search_keyword:
+            open_browser_thread = Thread(target=execute_map, args=("open browser", [f"https://google.com/search?q={quote(search_keyword.strip())}"],))
+            open_browser_thread.start()
+            result = f"Here's what I found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
 
-        return ""
+        return result
 
     def youtube(self, search_keyword=None):
+        result = ""
         # open youtube site in web browser and show results
-        if search_keyword and execute_map(f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"):
-            return f"I found something on Youtube for \"{search_keyword}\"."
-        return ""
+        if search_keyword:
+            open_browser_thread = Thread(target=execute_map, args=("open browser", [f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"],))
+            open_browser_thread.start()
+            result = f"I found something on Youtube for \"{search_keyword}\"."
+        
+        return result
 
     def google_maps(self, location):
         result = ""
         if location:
             # open a web browser and map
-            execute_map(f"https://google.nl/maps/place/{quote(location.strip())}/&amp;")
-            return f"Here\'s the map location of \"{location.strip()}\". Opening your browser..."
+            open_browser_thread = Thread(target=execute_map, args=("open browser", [f"https://google.nl/maps/place/{quote(location.strip())}/&amp;"],))
+            open_browser_thread.start()
+            result = f"Here\'s the map location of \"{location.strip()}\". Opening your browser..."
 
         return result
 
     def wolfram_search(self, voice_data):
         response = ""
+        meta_data = ""
+
         try:
             client = wolframalpha.Client(WOLFRAM_APP_ID)
             is_weather_report = False
@@ -71,7 +81,7 @@ class ControlLibrary:
                     return value["plaintext"]
 
             def _removeBrackets(value):
-                return value.split("(")[0]
+                return value.replace("|", "").strip().split("(")[0]
 
             def _weatherReport(data):
                 report = ""
@@ -87,14 +97,14 @@ class ControlLibrary:
                 
                 for item in data.split("\n"):
                     if "°C" in item:
-                        temps = item.replace("between", "").split("and")
+                        temps = item.replace("between", "").replace("°C","").split("and")
 
                         if len(temps) > 1:
                             min_temp = temps[0].strip()
                             max_temp = temps[1].strip()
-                            ave_temp = str((int(max_temp.replace('°C', '')) + int(min_temp.replace('°C', ''))) // 2)
+                            ave_temp = str((int(max_temp) + int(min_temp)) // 2)
                         else:
-                            ave_temp = item.strip()
+                            ave_temp = item.replace("°C","").strip()
 
                     elif is_match(item, ["|"]):
                         for cond in item.split("|"):
@@ -104,21 +114,30 @@ class ControlLibrary:
                                 conditions.append(cond[:cond.index("(")].strip())
                             elif "(" in cond:
                                 conditions.append(cond[:cond.index("(")].strip())
-                        
+                            # conditions.append(cond.strip())
+
                         if max_temp and min_temp:
-                            return f"It's currently  {conditions[0]} and {ave_temp}°C. Expect {' and '.join(conditions)} starting {time_frame} with mixed conditions for the rest of the day. Temperatures are heading down from {max_temp} to {min_temp}."
+                            if len(conditions) > 2:
+                                report = f"{conditions[0]} and {ave_temp}°C. Expect mixed conditions starting {time_frame} and the rest of the day. Temperatures are heading down from {max_temp}°C to {min_temp}°C."
+                            else:
+                                report = f"{conditions[0]} and {ave_temp}°C. Expect {' and '.join(conditions)} starting {time_frame} with mixed conditions for the rest of the day. Temperatures are heading down from {max_temp}°C to {min_temp}°C."
+                        else:
+                            conditions = ' and '.join(conditions)
+                            report = f"{ave_temp}°C with mixed condition like {conditions}."
                     else:
-                        conditions = item[:item.index("(")].strip()
+                        conditions = item.strip()
+                        report = f"{conditions} and {ave_temp}°C."
 
-                return f"It's currently {conditions} and {ave_temp}°C."
+                return report
 
-
-            if is_match(voice_data, ["weather forecast", "weather today", "weather like", "forecast weather", "weather"]):
+            weather_keywords = ["weather forecast", "weather today", "weather like", "forecast weather", "weather"]
+            if is_match(voice_data, weather_keywords):
                 if is_match(voice_data, ["in", "for"]):
-                    meta_data = extract_metadata(voice_data, ["in", "for"])
+                    meta_data = extract_metadata(voice_data, (["in", "for"] + weather_keywords))
                     voice_data = f"weather forecast for {meta_data}"
                 else:
-                    voice_data = "weather forecast for Malolos, Bulacan"
+                    meta_data = extract_metadata(voice_data, weather_keywords)
+                    voice_data = f"weather forecast for Malolos, Bulacan {meta_data}"
                 is_weather_report = True
 
             # send query to Wolfram Alpha        
@@ -136,87 +155,91 @@ class ControlLibrary:
                 question = _resolveListOrDict(pod0["subpod"])
 
                 # removing unnecessary parenthesis
-                question = _removeBrackets(question)
+                question = _removeBrackets(question).strip()
 
                 # checking if pod1 has primary=true or title=result|definition
                 if (("definition" in pod1["@title"].lower()) or ("result" in pod1["@title"].lower()) or (pod1.get("@primary", "false") == "true")):
-
+                    
                     # extract result from pod1
                     wolfram_response = _resolveListOrDict(pod1["subpod"])
 
-                    try:
-                        # create a weather report
-                        if is_weather_report:
-                            return f"Here's the {pod1['@title']}\n\n{_weatherReport(wolfram_response)}"
-
-                        # if no answers found return a blank response
-                        no_data_responses = ["(data not available)", "(no data available)"]
-                        if is_match(wolfram_response, no_data_responses):
-                            return response
-
-                        # remove "according to" phrase in wolfram response
-                        if is_match(wolfram_response, ["(according to"]):
-                            wolfram_response = wolfram_response.split("(according to")[0]
-
-                        # replace "Q:" and "A:" prefixes and replace new space instead
-                        if is_match(wolfram_response, ["Q: ", "A: "]):
-                            wolfram_response = wolfram_response.replace("Q: ", "").replace("A: ", "\n\n") 
-
-                        wolfram_meta = wolfram_response.split("|")
-                        parts_of_speech = ["noun", "pronoun", "verb", "adjective", "adverb", "preposition", "conjunction", "interjection"]
+                    # create a weather report
+                    if is_weather_report:
+                        report_prefix = "It's currently"
+                        if is_match(meta_data, ["tomorrow", "morning", "afternoon", "evening", "night", "noon", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]):
+                            report_prefix = f"{meta_data.capitalize()} will be"
                         
-                        # we found an array of information, let's disect if necessary
-                        if wolfram_response.count("|") > 2:
-                            if is_match(wolfram_response, parts_of_speech):
-                                # responding to definition of terms, and using the first answer in the list as definition
-                                response = f"({wolfram_meta[1]}) \nIt means, {wolfram_meta[2][:(len(wolfram_meta[2]) - 2)]}."
-                            else:
-                                # respond by showing list of information
-                                response = "Here's some information."
-                                print(f"\n{wolfram_response}\n")
-                            
-                        # we found at least 1 set of defition, disect further if necessary
-                        elif is_match(wolfram_response, ["|"]):
-                            # extract the 12 hour time value
-                            if is_match(voice_data, ["time"]):
+                        return f"Here's the {pod1['@title']}.\n\n{report_prefix} {_weatherReport(wolfram_response)}"
 
-                                # check for 12 hour time value
-                                if len(wolfram_response.split(":")[0]) == 2:
-                                    hour = wolfram_response[:5]
-                                    ampm = wolfram_response[9:11]
-                                    response = f"{hour} {ampm}"
-                                else:
-                                    hour = wolfram_response[:4]
-                                    ampm = wolfram_response[8:10]
-                                    response = f"{hour} {ampm}"
+                    # if no answers found return a blank response
+                    no_data_responses = ["(data not available)", "(no data available)"]
+                    if is_match(wolfram_response, no_data_responses):
+                        return response
 
-                            # responding to "do you know my name?"
-                            elif is_match(wolfram_response, ["my name is"]):
-                                # replace "Wolfram|Aplha" to assistant's name.
-                                response = wolfram_response[:(wolfram_response.lower().find("my name is") + 11)] + self.assistant_name + ". Are you " + self.master_name + "?"
-                            
-                            else:
-                                # responding to definition of terms    
-                                if is_match(wolfram_response, parts_of_speech):
-                                    response = f"[{wolfram_meta[0]}] \nIt means, {wolfram_meta[-1]}."
-                                else:
-                                    response = wolfram_response
+                    # remove "according to" phrase in wolfram response
+                    if is_match(wolfram_response, ["(according to"]):
+                        wolfram_response = wolfram_response.split("(according to")[0]
 
-                        # single string response
+                    if is_match(wolfram_response, ["I was created by"]):
+                        wolfram_response = f"I was created by {self.master_name}."
+
+                    # replace "Q:" and "A:" prefixes and replace new space instead
+                    if is_match(wolfram_response, ["Q: ", "A: "]):
+                        wolfram_response = wolfram_response.replace("Q: ", "").replace("A: ", "\n\n") 
+
+                    wolfram_meta = wolfram_response.split("|")
+                    parts_of_speech = ["noun", "pronoun", "verb", "adjective", "adverb", "preposition", "conjunction", "interjection"]
+                    
+                    # we found an array of information, let's disect if necessary
+                    if wolfram_response.count("|") > 2:
+                        if is_match(wolfram_response, parts_of_speech):
+                            # responding to definition of terms, and using the first answer in the list as definition
+                            response = f"({wolfram_meta[1]}) \nIt means, {wolfram_meta[2][:(len(wolfram_meta[2]) - 2)]}."
                         else:
-                            if is_match(voice_data, ["how do you spell", "spell"]):
-                                # let's split the letters of response to simulate spelling the word(s).
-                                response = f'{wolfram_response}\n\n . {" . ".join(list(wolfram_response.upper()))}'
+                            # respond by showing list of information
+                            response = "Here's some information."
+                            print(f"\n{wolfram_response}\n")
+                        
+                    # we found at least 1 set of defition, disect further if necessary
+                    elif is_match(wolfram_response, ["|"]):
+                        # extract the 12 hour time value
+                        if is_match(voice_data, ["time"]):
+
+                            # check for 12 hour time value
+                            if len(wolfram_response.split(":")[0]) == 2:
+                                hour = wolfram_response[:5]
+                                ampm = wolfram_response[9:11]
+                                response = f"{hour} {ampm}"
+                            else:
+                                hour = wolfram_response[:4]
+                                ampm = wolfram_response[8:10]
+                                response = f"{hour} {ampm}"
+
+                        # responding to "do you know my name?"
+                        elif is_match(wolfram_response, ["my name is"]):
+                            # replace "Wolfram|Aplha" to assistant's name.
+                            response = wolfram_response[:(wolfram_response.lower().find("my name is") + 11)] + self.assistant_name + ". Are you " + self.master_name + "?"
+                        
+                        else:
+                            # responding to definition of terms    
+                            if is_match(wolfram_response, parts_of_speech):
+                                response = f"[{wolfram_meta[0]}] \nIt means, {wolfram_meta[-1]}."
                             else:
                                 response = wolfram_response
 
-                        return response
-                    except Exception:
-                        displayException(__name__, logging.CRITICAL)
+                    # single string response
+                    else:
+                        if is_match(voice_data, ["how do you spell", "spell"]):
+                            # let's split the letters of response to simulate spelling the word(s).
+                            response = f'\n\n . {" . ".join(list(wolfram_response.capitalize()))}'
+                        else:
+                            response = wolfram_response
 
-                else:
-                    # wolfram did not found or not confident on answers, let's try in wikipedia search.
-                    return self.wikipedia_search(question, question)
+                    # don't include the evaluated question in result if it has "?", "here's some information" or more than 5 words in it
+                    if is_match(question, ["?"]) or "Here's some information." in response or len(voice_data.split(" ")) > 5:
+                        return response
+                    else:
+                        return f"{question.capitalize()} is {response}."
 
         except Exception:
             displayException(__name__, logging.ERROR)
@@ -228,7 +251,11 @@ class ControlLibrary:
         result = ""
         if wiki_keyword:
             try:
-                return wikipedia.summary(wiki_keyword.strip(), sentences=2)
+                summary = wikipedia.summary(wiki_keyword.strip(), sentences=2)
+                if len(summary.split(" ")) > 15:
+                    summary = summary.split(".")[0]
+
+                return summary
 
             except wikipedia.exceptions.WikipediaException:
                 displayException("from Wikipedia (handled)", logging.INFO)
