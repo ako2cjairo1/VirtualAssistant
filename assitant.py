@@ -78,6 +78,9 @@ class VirtualAssistant(SpeechAssistant):
                 
                 # play end prompt sound effect
                 self.speak("(mute/sleep prompt)", mute_prompt=True)
+
+                # volume up the music player, if applicable
+                control.music_volume(70)
                 return True
 
             return False
@@ -91,6 +94,9 @@ class VirtualAssistant(SpeechAssistant):
 
                 print(f"\n{self.assistant_name} assistant DEACTIVATED.\n")
                 # terminate and end the virtual assistant application
+
+                # volume up the music player, if applicable
+                control.music_volume(70)
                 exit()
                 
             else:
@@ -395,7 +401,10 @@ class VirtualAssistant(SpeechAssistant):
 
                 if time_ticker == 0 and (mn == 0 and sec == 0):
                     self.speak(f"The time now is {t.strftime('%I:%M %p')}.")
+                    # volume up the music player, if applicable
+                    control.music_volume(40)
                     time_ticker += 1
+                    
                 if time_ticker >= 1:
                     time_ticker = 0
 
@@ -411,6 +420,8 @@ class VirtualAssistant(SpeechAssistant):
             sleep_counter = 0
             listen_time = 1
             announce_time = True
+            # volume up the music player, if applicable
+            control.music_volume(40)
 
             print(f"\n\n\"{self.assistant_name}\" is active...")
 
@@ -494,6 +505,8 @@ class VirtualAssistant(SpeechAssistant):
                         if sleep_counter == 1:
                             # show if assistant is sleeping (muted).
                             print(f"{self.assistant_name}: ZzzzZz")
+                            # volume up the music player, if applicable
+                            control.music_volume(70)
 
                             # get updates of commands from json file
                             get_commands_thread = Thread(target=self.get_commands_from_json)

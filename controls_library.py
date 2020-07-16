@@ -236,7 +236,7 @@ class ControlLibrary:
                             response = wolfram_response
 
                     # don't include the evaluated question in result if it has "?", "here's some information" or more than 5 words in it
-                    if is_match(question, ["?"]) or "Here's some information." in response or len(voice_data.split(" ")) > 5:
+                    if len(voice_data.split(" ")) > 5 or is_match(question, ["?", "tell me a joke.", "thank you."]) or "Here's some information." in response:
                         return response
                     else:
                         return f"{question.capitalize()} is {response}."
@@ -689,7 +689,6 @@ class ControlLibrary:
             music_word_found = True if is_match(voice_data, ["music", "songs"]) else False
             meta_data = voice_data.lower().replace("&", "and").replace("music", "").replace("songs", "").strip()
 
-
             if meta_data == "":
                 # mode = "compact"
                 response = f"Ok! Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
@@ -729,6 +728,7 @@ class ControlLibrary:
                     response = f"I couldn't find \"{meta_data}\" in your music."
             
             if songWasFound:
+                mp.terminate_player()
                 # batch file to play some music in new window
                 os.system(f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
 
@@ -740,32 +740,20 @@ class ControlLibrary:
         except Exception:
             displayException(__name__, logging.ERROR)
 
-    def control_music(self, command):
-        response = ""
+    def music_volume(self, volume):
 
         try:
-            wsh = comctl.Dispatch("WScript.Shell")
+            import sys
+            sys.path.append(UTILITIES_MODULE_DIR)
+            from musicplayer import MusicPlayer
+            mp = MusicPlayer()
+            # change the directory to location of batch file to execute
+            os.chdir(UTILITIES_MODULE_DIR)
 
-            command = command.strip().lower()
-            if command == "stop":
-                wsh.SendKeys("{F4}")
-                response = "Stop music..."
-            elif command == "shuffle":
-                wsh.SendKeys("{F5}")
-                response = "Shuffle music..."
-            elif command == "shuffle":
-                wsh.SendKeys("{F5}")
-                response = "Unshuffled music..."
-            elif command == "play":
-                wsh.SendKeys("{F9}")
-                response = "Playing music..."
-            elif command == "pause":
-                wsh.SendKeys("{F9}")
-                response = "Pause music..."
-            elif command == "next":
-                wsh.SendKeys("{F10}")
-                response = "Playing next song..."
-            return response
+            mp.music_player_volume(volume)
+
+            # get back to virtual assistant directory
+            os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
         
         except Exception:
             displayException(__name__, logging.ERROR)    

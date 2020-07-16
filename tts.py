@@ -8,6 +8,7 @@ import time
 from helper import *
 from gtts import gTTS
 from gtts.tts import gTTSError
+from controls_library import ControlLibrary
 
 AUDIO_FOLDER = "./text-to-speech-audio"
 
@@ -16,7 +17,6 @@ ASSISTANT_BLACK_NAME = "\033[22;30;42m"
 
 MASTER_CYAN_MESSAGE = "\033[1;37;46m"
 MASTER_BLACK_NAME = "\033[22;30;46m"
-
 
 class SpeechAssistant:
     def __init__(self, masters_name, assistants_name):
@@ -28,6 +28,8 @@ class SpeechAssistant:
         # so the timeout we set in listen() will be used
         self.recognizer.dynamic_energy_threshold = False
         self.recognizer.energy_threshold = 4000
+
+        self.control = ControlLibrary(self, self.master_name, self.assistant_name)
 
     def listen_to_audio(self, ask=None):
         voice_text = ""
@@ -72,6 +74,9 @@ class SpeechAssistant:
     def speak(self, audio_string, start_prompt=False, end_prompt=False, mute_prompt=False):
         if audio_string.strip():
             try:
+                # volume up the music player, if applicable
+                self.control.music_volume(40)
+
                 force_delete = False
                 # init google's text-to-speech module
                 tts = gTTS(text=audio_string, lang="en-us", slow=False)

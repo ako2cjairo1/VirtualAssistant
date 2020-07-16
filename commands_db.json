@@ -36,7 +36,9 @@
                 "quiet please <assistant_name>",
                 "<assistant_name> shut up",
                 "don't listen <assistant_name>",
-                "<assistant_name> don't listen"
+                "<assistant_name> don't listen",
+                "go to sleep <assistant_name>",
+                "<assistant_name> go to sleep"
             ]
         },
         {
@@ -321,10 +323,10 @@
         {
             "name": "weather",
             "commands": [
-                "weather forecast", 
-                "weather today", 
-                "weather like", 
-                "forecast weather", 
+                "weather forecast",
+                "weather today",
+                "weather like",
+                "forecast weather",
                 "weather"
             ]
         },
