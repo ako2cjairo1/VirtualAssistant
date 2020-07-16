@@ -37,7 +37,7 @@ class SpeechAssistant:
         # adjust the recognizer sensitivity to ambient noise 
         # and record audio from microphone
         with sr.Microphone() as source:
-            self.recognizer.adjust_for_ambient_noise(source, duration=1)
+            self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
 
             try:
                 # announce/play something before listening from microphone
@@ -50,14 +50,11 @@ class SpeechAssistant:
                 voice_text = self.recognizer.recognize_google(audio)
 
             except sr.UnknownValueError:
-                # displayException("Could not understand audio.")
                 displayException("Could not understand audio.", logging.WARNING)
                 return voice_text
             except sr.RequestError:
                 displayException("gtts Request error", logging.WARNING)
-                if voice_text:
-                    self.speak(
-                        "Sorry! My speech service is not available at the moment.")
+                print(f"{self.assistant_name} Not Available. You are not connected to the internet.")
             except gTTSError:
                 displayException("gTTSError", logging.ERROR)
             except Exception as ex:
@@ -116,5 +113,6 @@ class SpeechAssistant:
             except Exception as ex:
                 if not ("Cannot find the specified file." or "Permission denied:") in str(ex):
                     displayException("gtts Speak")
+                    print(f"{self.assistant_name} Not Available. You are not connected to the internet.")
         
         

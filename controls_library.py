@@ -194,11 +194,13 @@ class ControlLibrary:
                     if wolfram_response.count("|") > 2:
                         if is_match(wolfram_response, parts_of_speech):
                             # responding to definition of terms, and using the first answer in the list as definition
-                            response = f"({wolfram_meta[1]}) \nIt means, {wolfram_meta[2][:(len(wolfram_meta[2]) - 2)]}."
+                            response = f"\"{question.capitalize()}\". \n ({wolfram_meta[1]}) \nIt means... {wolfram_meta[2][:(len(wolfram_meta[2]) - 2)].strip().capitalize()}."
                         else:
                             # respond by showing list of information
                             response = "Here's some information."
-                            print(f"\n{wolfram_response}\n")
+
+                            for idx, deet in enumerate(wolfram_response.split(" | ")):
+                                print(f"{(idx + 1)}. {deet}.")
                         
                     # we found at least 1 set of defition, disect further if necessary
                     elif is_match(wolfram_response, ["|"]):
@@ -223,7 +225,7 @@ class ControlLibrary:
                         else:
                             # responding to definition of terms    
                             if is_match(wolfram_response, parts_of_speech):
-                                response = f"[{wolfram_meta[0]}] \nIt means, {wolfram_meta[-1]}."
+                                response = f"\"{question.capitalize()}\". \n ({wolfram_meta[0]}) \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                             else:
                                 response = wolfram_response
 
@@ -235,8 +237,9 @@ class ControlLibrary:
                         else:
                             response = wolfram_response
 
+                    parts_of_speech.append("Here's some information.")
                     # don't include the evaluated question in result if it has "?", "here's some information" or more than 5 words in it
-                    if len(voice_data.split(" ")) > 5 or is_match(question, ["?", "tell me a joke.", "thank you."]) or "Here's some information." in response:
+                    if len(voice_data.split(" ")) > 5 or is_match(question, ["?", "tell me a joke.", "thank you."]) or is_match(response, parts_of_speech):
                         return response
                     else:
                         return f"{question.capitalize()} is {response}."

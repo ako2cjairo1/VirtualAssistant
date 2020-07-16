@@ -401,10 +401,12 @@ class VirtualAssistant(SpeechAssistant):
 
                 if time_ticker == 0 and (mn == 0 and sec == 0):
                     self.speak(f"The time now is {t.strftime('%I:%M %p')}.")
-                    # volume up the music player, if applicable
-                    control.music_volume(40)
                     time_ticker += 1
-                    
+
+                    time.sleep(5)
+                    # put back to normal volume level
+                    control.music_volume(70)
+
                 if time_ticker >= 1:
                     time_ticker = 0
 
