@@ -4,13 +4,15 @@ import requests
 import json
 import concurrent.futures as task
 from datetime import datetime as dt
-from random import choice
+from random import choice, randint
 from colorama import init
 from tts import SpeechAssistant
 from helper import *
 from controls_library import ControlLibrary
 from threading import Thread
 
+MASTER_GREEN_MESSAGE = "\033[1;37;42m"
+MASTER_BLACK_NAME = "\033[22;30;42m"
 
 class VirtualAssistant(SpeechAssistant):
     def __init__(self, masters_name, assistants_name, listen_timeout=3):
@@ -18,7 +20,6 @@ class VirtualAssistant(SpeechAssistant):
         self.master_name = masters_name
         self.assistant_name = assistants_name
         self.listen_timeout = listen_timeout
-        self.sleep_assistant = False
         self.command_db = []
         self.get_commands_from_json()
 
@@ -48,13 +49,19 @@ class VirtualAssistant(SpeechAssistant):
                 wakeup_command = _get_commands("wakeup")
                 # wake command is invoked and the user ask question immediately.
                 if len(voice_data.split(" ")) > 2 and is_match(voice_data, wakeup_command):
+                    print(f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
+                    self.sleep(False)
                     # play end speaking prompt sound effect
                     self.speak("<start prompt>", start_prompt=True)
+                    print(f"{self.assistant_name}: (awaken)")
                     _formulate_responses(clean_voice_data(voice_data, self.assistant_name))
                     return True
 
                 # wake commands is invoked and expected to ask for another command
                 elif is_match(voice_data, wakeup_command):
+                    print(f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
+                    print(f"{self.assistant_name}: (awaken)")
+                    self.sleep(False)
                     # announce greeting from assistant
                     _awake_greetings()
 
@@ -79,6 +86,7 @@ class VirtualAssistant(SpeechAssistant):
                 # play end prompt sound effect
                 self.speak("(mute/sleep prompt)", mute_prompt=True)
 
+                self.sleep(True)
                 # volume up the music player, if applicable
                 control.music_volume(70)
                 return True
@@ -88,7 +96,12 @@ class VirtualAssistant(SpeechAssistant):
         def _deactivate(voice_data):
             # commands to terminate virtual assistant
             if is_match(voice_data, _get_commands("terminate")):
+                if self.isSleeping:
+                    print(f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
 
+                # play end prompt sound effect
+                self.speak("<end prompt>", end_prompt=True)
+                self.sleep(False)
                 self.speak(choice(_get_commands("terminate_response")))
                 _mute_assistant(f"stop {self.assistant_name}")
 
@@ -178,7 +191,7 @@ class VirtualAssistant(SpeechAssistant):
                     use_calc = False
                     if "Ok!" in music_response:
                         # mute assistant when playing music
-                        self.sleep_assistant = True
+                        self.sleep(True)
 
             # commands for controlling screen brightness, wi-fi and to shutdown/restart system
             if is_match(voice_data, (_get_commands("brightness") + _get_commands("wifi") + _get_commands("system_shutdown_restart"))):
@@ -379,17 +392,24 @@ class VirtualAssistant(SpeechAssistant):
             return True
 
         def _check_connection():
+            retry_count = 0
             while True:
                 try:
                     response = requests.get("http://google.com", timeout=300)
+                    retry_count += 1
+
                     # 200 means we got connection to web
                     if response.status_code == 200:
                         # we got a connection, end the check process and proceed to remaining function
                         return True
+                    elif retry_count == 1:
+                        print(f"{self.assistant_name} Not Available.\nYou are not connected to the Internet")
+                    elif retry_count >= 10:
+                        retry_count = 0
 
                 except Exception:
-                    displayException(
-                        "**Virtual assistant failed to initiate. No internet connection.", logging.WARNING)
+                    displayException("**Virtual assistant failed to initiate. No internet connection.", logging.WARNING)
+                
                 time.sleep(1)
 
         def _announce_time():
@@ -403,9 +423,10 @@ class VirtualAssistant(SpeechAssistant):
                     self.speak(f"The time now is {t.strftime('%I:%M %p')}.")
                     time_ticker += 1
 
-                    time.sleep(5)
-                    # put back to normal volume level
-                    control.music_volume(70)
+                    if self.isSleeping():
+                        time.sleep(3)
+                        # put back to normal volume level
+                        control.music_volume(70)
 
                 if time_ticker >= 1:
                     time_ticker = 0
@@ -416,7 +437,7 @@ class VirtualAssistant(SpeechAssistant):
         Main handler of virtual assistant
         """
 
-        def start_virtual_assistant():
+        def _start_virtual_assistant():
             # autoreset color coding of texts to normal
             init(autoreset=True)
             sleep_counter = 0
@@ -442,8 +463,7 @@ class VirtualAssistant(SpeechAssistant):
                         # play end prompt sound effect
                         _mute_assistant(f"stop {self.assistant_name}")
 
-                    elif self.sleep_assistant:
-                        self.sleep_assistant = False
+                    elif self.isSleeping() and listen_time > 0:
                         # listen for mute commands, and stop listening
                         _mute_assistant(f"stop {self.assistant_name}")
                         listen_time = 0
@@ -466,6 +486,8 @@ class VirtualAssistant(SpeechAssistant):
                             
                         if listen_time == 1:
                             print(f"{self.assistant_name}: listening...")
+                        elif listen_time == randint(2, (self.listen_timeout - 1)):
+                            self.speak(choice(["I'm here...", "I'm listening..."]), start_prompt=False)
 
                         # listen for commands
                         voice_data = self.listen_to_audio()
@@ -475,7 +497,6 @@ class VirtualAssistant(SpeechAssistant):
 
                             # listen for mute commands, and stop listening
                             if _mute_assistant(voice_data):
-                                self.sleep_assistant = False
                                 listen_time = 0
                                 sleep_counter = 0
                                 # start the loop again and wait for "wake commands"
@@ -505,6 +526,7 @@ class VirtualAssistant(SpeechAssistant):
 
                         sleep_counter += 1
                         if sleep_counter == 1:
+                            self.sleep(True)
                             # show if assistant is sleeping (muted).
                             print(f"{self.assistant_name}: ZzzzZz")
                             # volume up the music player, if applicable
@@ -520,6 +542,6 @@ class VirtualAssistant(SpeechAssistant):
         # check internet connectivity every second
         # before proceeding to main()
         if _check_connection():
-            while not start_virtual_assistant():
+            while not _start_virtual_assistant():
                 print("\n**Trying to recover from internal error...")
                 time.sleep(5)

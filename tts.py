@@ -12,16 +12,17 @@ from controls_library import ControlLibrary
 
 AUDIO_FOLDER = "./text-to-speech-audio"
 
-ASSISTANT_GREEN_MESSAGE = "\033[1;37;42m"
-ASSISTANT_BLACK_NAME = "\033[22;30;42m"
+ASSISTANT_CYAN_MESSAGE = "\033[1;37;46m"
+ASSISTANT_BLACK_NAME = "\033[22;30;46m"
 
-MASTER_CYAN_MESSAGE = "\033[1;37;46m"
-MASTER_BLACK_NAME = "\033[22;30;46m"
+MASTER_GREEN_MESSAGE = "\033[1;37;42m"
+MASTER_BLACK_NAME = "\033[22;30;42m"
 
 class SpeechAssistant:
     def __init__(self, masters_name, assistants_name):
         self.master_name = masters_name
         self.assistant_name = assistants_name
+        self.sleep_assistant = False
         
         self.recognizer = sr.Recognizer()
         # let's override the dynamic threshold to 4000,
@@ -33,11 +34,16 @@ class SpeechAssistant:
 
     def listen_to_audio(self, ask=None):
         voice_text = ""
-        
+        listen_timeout = 3
+
+        if self.isSleeping():
+            listen_timeout = 1
+
         # adjust the recognizer sensitivity to ambient noise 
         # and record audio from microphone
         with sr.Microphone() as source:
-            self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
+            if not self.isSleeping():
+                self.recognizer.adjust_for_ambient_noise(source, duration=1)
 
             try:
                 # announce/play something before listening from microphone
@@ -45,7 +51,7 @@ class SpeechAssistant:
                     self.speak(ask)
 
                 # listening
-                audio = self.recognizer.listen(source, timeout=2)
+                audio = self.recognizer.listen(source, timeout=listen_timeout)
                 # try convert audio to text/string data
                 voice_text = self.recognizer.recognize_google(audio)
 
@@ -53,21 +59,25 @@ class SpeechAssistant:
                 displayException("Could not understand audio.", logging.WARNING)
                 return voice_text
             except sr.RequestError:
-                displayException("gtts Request error", logging.WARNING)
-                print(f"{self.assistant_name} Not Available. You are not connected to the internet.")
+                displayException(f"{self.assistant_name} Not Available. You are not connected to the internet.", logging.WARNING)
             except gTTSError:
                 displayException("gTTSError", logging.ERROR)
             except Exception as ex:
                 if not "listening timed out" in str(ex):
-                    # bypass the timed out exception, (timedout=5, if total silence for 5 secs.)
+                    # bypass the timed out exception, (timeout=3, if total silence for 3 secs.)
                     displayException("Exception error")
 
-        if voice_text.strip():
+        if not self.isSleeping() and voice_text.strip():
             print(
-                f"{ASSISTANT_BLACK_NAME}{self.master_name}:{ASSISTANT_GREEN_MESSAGE} {voice_text}")
+                f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_text}")
         return voice_text.strip()
 
-        
+    def sleep(self, value):
+        self.sleep_assistant = value
+
+    def isSleeping(self):
+        return self.sleep_assistant
+
     def speak(self, audio_string, start_prompt=False, end_prompt=False, mute_prompt=False):
         if audio_string.strip():
             try:
@@ -90,7 +100,7 @@ class SpeechAssistant:
                 elif start_prompt and audio_string:
                     tts.save(audio_file)
                     playsound.playsound(f"{AUDIO_FOLDER}/start prompt.mp3")
-                    print(f"{MASTER_BLACK_NAME}{self.assistant_name}:{MASTER_CYAN_MESSAGE} {audio_string}")
+                    print(f"{ASSISTANT_BLACK_NAME}{self.assistant_name}:{ASSISTANT_CYAN_MESSAGE} {audio_string}")
                     force_delete = True
 
                 elif end_prompt:
@@ -101,7 +111,7 @@ class SpeechAssistant:
 
                 else:
                     tts.save(audio_file)
-                    print(f"{MASTER_BLACK_NAME}{self.assistant_name}:{MASTER_CYAN_MESSAGE} {audio_string}")
+                    print(f"{ASSISTANT_BLACK_NAME}{self.assistant_name}:{ASSISTANT_CYAN_MESSAGE} {audio_string}")
 
                 # announce/play the generated audio
                 playsound.playsound(audio_file)

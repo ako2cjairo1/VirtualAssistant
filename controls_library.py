@@ -163,19 +163,18 @@ class ControlLibrary:
                     # extract result from pod1
                     wolfram_response = _resolveListOrDict(pod1["subpod"])
 
+                    # if no answers found return a blank response
+                    if (wolfram_response is None) or is_match(wolfram_response, ["(data not available)", "(no data available)"]):
+                        return response
+
                     # create a weather report
                     if is_weather_report:
                         report_prefix = "It's currently"
                         if is_match(meta_data, ["tomorrow", "morning", "afternoon", "evening", "night", "noon", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]):
                             report_prefix = f"{meta_data.capitalize()} will be"
-                        
-                        return f"Here's the {pod1['@title']}.\n\n{report_prefix} {_weatherReport(wolfram_response)}"
 
-                    # if no answers found return a blank response
-                    no_data_responses = ["(data not available)", "(no data available)"]
-                    if is_match(wolfram_response, no_data_responses):
-                        return response
-
+                        return f"Here's the {question.capitalize()}.\n\n{report_prefix} {_weatherReport(wolfram_response)}"
+                    
                     # remove "according to" phrase in wolfram response
                     if is_match(wolfram_response, ["(according to"]):
                         wolfram_response = wolfram_response.split("(according to")[0]
@@ -189,18 +188,26 @@ class ControlLibrary:
 
                     wolfram_meta = wolfram_response.split("|")
                     parts_of_speech = ["noun", "pronoun", "verb", "adjective", "adverb", "preposition", "conjunction", "interjection"]
-                    
+                
                     # we found an array of information, let's disect if necessary
                     if wolfram_response.count("|") > 2:
                         if is_match(wolfram_response, parts_of_speech):
                             # responding to definition of terms, and using the first answer in the list as definition
-                            response = f"\"{question.capitalize()}\". \n ({wolfram_meta[1]}) \nIt means... {wolfram_meta[2][:(len(wolfram_meta[2]) - 2)].strip().capitalize()}."
+                            response = f"\"{question.capitalize()}\" \n. ({wolfram_meta[1]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                         else:
                             # respond by showing list of information
                             response = "Here's some information."
 
-                            for idx, deet in enumerate(wolfram_response.split(" | ")):
-                                print(f"{(idx + 1)}. {deet}.")
+                            for deet in wolfram_response.split(" | "):
+                                print(f">> {deet}.")
+
+                    # we found an array of information, let's disect if necessary
+                    elif wolfram_response.count("\n") > 3:
+                        # respond by showing list of information
+                        response = "Here's some information."
+
+                        for deet in wolfram_response.split("\n"):
+                            print(f">> {deet}.")
                         
                     # we found at least 1 set of defition, disect further if necessary
                     elif is_match(wolfram_response, ["|"]):
@@ -225,21 +232,21 @@ class ControlLibrary:
                         else:
                             # responding to definition of terms    
                             if is_match(wolfram_response, parts_of_speech):
-                                response = f"\"{question.capitalize()}\". \n ({wolfram_meta[0]}) \nIt means... {wolfram_meta[-1].strip().capitalize()}."
+                                response = f"\"{question.capitalize()}\" \n. ({wolfram_meta[0]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                             else:
                                 response = wolfram_response
 
                     # single string response
                     else:
-                        if is_match(voice_data, ["how do you spell", "spell"]):
+                        if is_match(voice_data, ["how do you spell", "spell", "spelling", "spells"]):
                             # let's split the letters of response to simulate spelling the word(s).
-                            response = f'\n\n . {" . ".join(list(wolfram_response.capitalize()))}'
+                            response = f'{question.capitalize()}\n\n . {" . ".join(list(wolfram_response.capitalize()))}'
                         else:
                             response = wolfram_response
 
                     parts_of_speech.append("Here's some information.")
                     # don't include the evaluated question in result if it has "?", "here's some information" or more than 5 words in it
-                    if len(voice_data.split(" ")) > 5 or is_match(question, ["?", "tell me a joke.", "thank you."]) or is_match(response, parts_of_speech):
+                    if len(voice_data.split(" ")) > 5 or is_match(voice_data, ["how do you spell", "spell", "spelling", "spells"]) or is_match(question, ["?", "tell me a joke.", "thank you."]) or is_match(response, parts_of_speech):
                         return response
                     else:
                         return f"{question.capitalize()} is {response}."
@@ -255,7 +262,7 @@ class ControlLibrary:
         if wiki_keyword:
             try:
                 summary = wikipedia.summary(wiki_keyword.strip(), sentences=2)
-                if len(summary.split(" ")) > 15:
+                if len(summary.split(" ")) > 15 and len(summary.split(".")[0]) > 15:
                     summary = summary.split(".")[0]
 
                 return summary
@@ -701,15 +708,14 @@ class ControlLibrary:
                 option = '"play by"'
 
                 by_idx = meta_data.find("by")
-                title = meta_data[:(by_idx - 1)].strip()
-                artist = meta_data[(by_idx + 3):].strip()
+                title = meta_data[:(by_idx - 1)].strip().capitalize()
+                artist = meta_data[(by_idx + 3):].strip().capitalize()
 
                 if mp.search_song_by(title, artist, title):
                     songWasFound = True
-                    title = f'"{title}"'
                     artist = f'"{artist}"'
                     genre = title
-                    response = f"Ok! Playing {title} by {artist}..."
+                    response = f"Ok! Playing \"{title}\" by {artist}..."
                 else:
                     response = f"I couldn't find \"{title}\" in your music."
 
@@ -726,9 +732,9 @@ class ControlLibrary:
 
                 if mp.search_song_by(meta_data, meta_data, meta_data):
                     songWasFound = True
-                    response = f"Ok! Now playing \"{meta_data}\" {'music...' if music_word_found else '...'}"
+                    response = f"Ok! Now playing \"{meta_data.capitalize()}\" {'music...' if music_word_found else '...'}"
                 else:
-                    response = f"I couldn't find \"{meta_data}\" in your music."
+                    response = f"I couldn't find \"{meta_data.capitalize()}\" in your music."
             
             if songWasFound:
                 mp.terminate_player()

@@ -25,10 +25,10 @@ def displayException(exception_title="", ex_type=logging.CRITICAL):
         exception_title, fname.split('\\')[-1], ln, line.strip(), execution_obj)
 
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-        line_len = len(str(execution_obj)) + 10
-        print("-" * line_len)
+        # line_len = len(str(execution_obj)) + 10
+        print("-" * 23)
         print(log_data)
-        print("-" * line_len)
+        print("-" * 23)
 
     if ex_type == logging.DEBUG:
         logger.debug(log_data)
