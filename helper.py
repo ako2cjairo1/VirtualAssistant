@@ -27,7 +27,7 @@ def displayException(exception_title="", ex_type=logging.CRITICAL):
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
         # line_len = len(str(execution_obj)) + 10
         print("-" * 23)
-        print(log_data)
+        print(exception_title)
         print("-" * 23)
 
     if ex_type == logging.DEBUG:

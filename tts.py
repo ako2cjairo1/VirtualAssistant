@@ -8,7 +8,7 @@ import time
 from helper import *
 from gtts import gTTS
 from gtts.tts import gTTSError
-from controls_library import ControlLibrary
+from skills_library import SkillsLibrary
 
 AUDIO_FOLDER = "./text-to-speech-audio"
 
@@ -30,14 +30,14 @@ class SpeechAssistant:
         self.recognizer.dynamic_energy_threshold = False
         self.recognizer.energy_threshold = 4000
 
-        self.control = ControlLibrary(self, self.master_name, self.assistant_name)
+        self.skill = SkillsLibrary(self, self.master_name, self.assistant_name)
 
     def listen_to_audio(self, ask=None):
         voice_text = ""
         listen_timeout = 3
 
         if self.isSleeping():
-            listen_timeout = 1
+            listen_timeout = 2
 
         # adjust the recognizer sensitivity to ambient noise 
         # and record audio from microphone
@@ -59,7 +59,7 @@ class SpeechAssistant:
                 displayException("Could not understand audio.", logging.WARNING)
                 return voice_text
             except sr.RequestError:
-                displayException(f"{self.assistant_name} Not Available. You are not connected to the internet.", logging.WARNING)
+                displayException(f"{self.assistant_name} Not Available. You are not connected to the internet.", logging.ERROR)
             except gTTSError:
                 displayException("gTTSError", logging.ERROR)
             except Exception as ex:
@@ -82,7 +82,7 @@ class SpeechAssistant:
         if audio_string.strip():
             try:
                 # volume up the music player, if applicable
-                self.control.music_volume(40)
+                self.skill.music_volume(30)
 
                 force_delete = False
                 # init google's text-to-speech module

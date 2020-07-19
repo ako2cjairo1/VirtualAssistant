@@ -20,10 +20,11 @@ VIRTUAL_ASSISTANT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistan
 UTILITIES_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PythonUtilityProjects"
 INIT_PROJECT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\ProjectGitInitAutomation"
 PSE_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\PSE"
+NEWS_SCRAPER_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\NewsScraper"
 DEV_PATH_DIR = os.environ.get("DevPath")
 WOLFRAM_APP_ID = os.environ.get("WOLFRAM_APP_ID")
 
-class ControlLibrary:
+class SkillsLibrary:
     def __init__(self, tts, masters_name, assistants_name):
         self.master_name = masters_name
         self.assistant_name = assistants_name
@@ -765,4 +766,27 @@ class ControlLibrary:
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
         
         except Exception:
-            displayException(__name__, logging.ERROR)    
+            displayException(__name__, logging.ERROR)
+
+    def news_scraper(self):
+
+        try:
+            import sys
+            sys.path.append(NEWS_SCRAPER_MODULE_DIR)
+            from NewsScraper import NewsTicker
+
+            # change the directory to location of batch file to execute
+            os.chdir(NEWS_SCRAPER_MODULE_DIR)
+            news = NewsTicker()
+
+            # execute daemon to fetch breaking news in background
+            news.run_breaking_news_daemon()
+
+            # get back to virtual assistant directory
+            os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+
+            return news
+        
+        except Exception:
+            displayException(__name__, logging.ERROR)
+            return None

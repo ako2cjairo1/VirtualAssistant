@@ -321,6 +321,19 @@
             ]
         },
         {
+            "name": "news",
+            "commands": [
+                "recent news",
+                "breaking news",
+                "the news",
+                "latest news",
+                "flash news",
+                "news flash",
+                "flash briefing",
+                "news briefing"
+            ]
+        },
+        {
             "name": "weather",
             "commands": [
                 "weather forecast",
