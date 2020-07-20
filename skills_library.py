@@ -240,6 +240,22 @@ class SkillsLibrary:
                     # single string response
                     else:
                         if is_match(voice_data, ["how do you spell", "spell", "spelling", "spells"]):
+
+                            question = question.replace("spellings", "").strip()
+                            if len(wolfram_response) > len(question):
+                                # there are one or more word spelling, we need to figure out which one is in question.
+                                word_found = False
+                                for word in wolfram_response.split(" "):
+                                    if word.lower() in voice_data.lower().split(" "):
+                                        question = word
+                                        wolfram_response = word
+                                        word_found = True
+                                        break
+
+                                # if we don't find the word to spell in wolfram response, then it must be the "question"
+                                if not word_found:
+                                    wolfram_response = question
+
                             # let's split the letters of response to simulate spelling the word(s).
                             response = f'{question.capitalize()}\n\n . {" . ".join(list(wolfram_response.capitalize()))}'
                         else:
@@ -250,7 +266,10 @@ class SkillsLibrary:
                     if len(voice_data.split(" ")) > 5 or is_match(voice_data, ["how do you spell", "spell", "spelling", "spells"]) or is_match(question, ["?", "tell me a joke.", "thank you."]) or is_match(response, parts_of_speech):
                         return response
                     else:
-                        return f"{question.capitalize()} is {response}."
+                        if question:
+                            return f"{question.capitalize()} is {response}."
+                        else:
+                            return f"{question.capitalize()} {response}."
 
         except Exception:
             displayException(__name__, logging.ERROR)

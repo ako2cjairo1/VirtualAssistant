@@ -1,0 +1,40 @@
+2020-07-20 21:00:04,298 | ERROR | Brenda Not Available. You are not connected to the internet.
+File:    tts.py
+Line:    56
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request
+2020-07-20 21:07:14,676 | ERROR | Brenda Not Available. You are not connected to the internet.
+File:    tts.py
+Line:    56
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request
+2020-07-20 21:14:25,410 | ERROR | Brenda Not Available. You are not connected to the internet.
+File:    tts.py
+Line:    56
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request
+2020-07-20 21:19:01,589 | ERROR | Brenda Not Available. You are not connected to the internet.
+File:    tts.py
+Line:    56
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request
+2020-07-20 21:33:40,619 | ERROR | Brenda Not Available. You are not connected to the internet.
+File:    tts.py
+Line:    56
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request
+2020-07-20 21:37:58,589 | ERROR | Brenda Not Available. You are not connected to the internet.
+File:    tts.py
+Line:    56
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request
+2020-07-20 21:45:54,636 | ERROR | Brenda Not Available. You are not connected to the internet.
+File:    tts.py
+Line:    56
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request
+2020-07-20 21:50:37,930 | ERROR | Brenda Not Available. You are not connected to the internet.
+File:    tts.py
+Line:    56
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: recognition request failed: Bad Request

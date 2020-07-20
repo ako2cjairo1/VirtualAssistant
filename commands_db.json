@@ -323,12 +323,19 @@
         {
             "name": "news",
             "commands": [
+                "any news",
+                "on news",
+                "in news",
                 "recent news",
                 "breaking news",
+                "top stories",
+                "top news",
                 "the news",
                 "latest news",
                 "flash news",
+                "newsflash",
                 "news flash",
+                "news report",
                 "flash briefing",
                 "news briefing"
             ]

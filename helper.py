@@ -6,8 +6,8 @@ import logging
 import time
 import concurrent.futures as executor
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="w",
-                    level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s")
+logging.basicConfig(filename="NewsScraper.log", filemode="w", level=logging.ERROR)
+logging.Formatter("%(asctime)s | %(levelname)s | %(message)s", "%m-%d-Y %I:%M:%S")
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -21,8 +21,7 @@ def displayException(exception_title="", ex_type=logging.CRITICAL):
     fname = f.f_code.co_filename
     linecache.checkcache(fname)
     line = linecache.getline(fname, ln, f.f_globals)
-    log_data = "{}\nFile:    {}\nLine:    {}\nTarget:  {}\nMessage: {}".format(
-        exception_title, fname.split('\\')[-1], ln, line.strip(), execution_obj)
+    log_data = "{}\nTarget:  {}\nMessage: {}\nLine:    {}".format(exception_title, line.strip(), execution_obj, ln)
 
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
         # line_len = len(str(execution_obj)) + 10

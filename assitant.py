@@ -20,6 +20,7 @@ class VirtualAssistant(SpeechAssistant):
         self.master_name = masters_name
         self.assistant_name = assistants_name
         self.listen_timeout = listen_timeout
+        self.can_listen = True
         self.breaking_news_reported = []
         self.command_db = []
         self.get_commands_from_json()
@@ -82,7 +83,7 @@ class VirtualAssistant(SpeechAssistant):
 
         def _mute_assistant(voice_data):
             # commands to interrupt virtual assistant
-            if is_match(voice_data, _get_commands("mute")) or voice_data.strip().lower() == "stop":
+            if is_match(voice_data, _get_commands("mute")) or voice_data.replace("stop","").strip() == "":
                 
                 # don't listen for commands temporarily
                 print(f"{self.assistant_name}: (in mute)")
@@ -137,6 +138,9 @@ class VirtualAssistant(SpeechAssistant):
 
             # respond to wake command(s) ("hey <assistant_name>")
             if _wake_assistant(voice_data=voice_data):
+                return
+
+            if _mute_assistant(voice_data):
                 return
 
             # respond to deactivation commands
@@ -316,7 +320,7 @@ class VirtualAssistant(SpeechAssistant):
                 elif news.check_latest_news():
                     if is_match(voice_data, ["latest", "most", "recent", "flash news", "news flash"]):
                         news_response = f"Here's the latest news...\n {news.cast_latest_news()[0]}"
-                    elif is_match(voice_data, ["news briefing", "flash briefing"]):
+                    elif is_match(voice_data, ["news briefing", "flash briefing", "news report", "top news", "top stories"]):
                         news_response = "Here's your news briefing...\n\n"
                         news_briefing = news.cast_latest_news()
                         for i in range(0,3):
@@ -484,24 +488,30 @@ class VirtualAssistant(SpeechAssistant):
                 time.sleep(1)
 
         def _breaking_news_report():
-            newBreakingNews = False
+            time.sleep(60)
 
             if news.check_breaking_news():
+                self.can_listen = False
                 newBreakingNews = False
                 news_update = news.breaking_news_update
 
+                news_briefing = []
                 for bn in news_update:
                     if not is_match(bn["headline"], self.breaking_news_reported):
-                        self.breaking_news_reported.append(bn["headline"])
+                        news_briefing.append(bn["headline"])
                         newBreakingNews = True
 
                 if newBreakingNews:
+                    self.breaking_news_reported = []
+                    self.breaking_news_reported.extend(news_briefing)
+
                     # announce breaking news alert
                     self.speak("Breaking News Alert!")
                                         
                     source_urls = [source["source url"] for source in news_update]
                     if len(source_urls) > 0:
                         open_browser_thread = Thread(target=execute_map, args=("open browser", source_urls,))
+                        open_browser_thread.setDaemon(True)
                         open_browser_thread.start()
 
                     # cast the breaking news
@@ -511,7 +521,7 @@ class VirtualAssistant(SpeechAssistant):
                     if len(source_urls) > 0:
                         self.speak("More details of this breaking news in the source article. It should open on your web browser now...")
                 
-            return newBreakingNews
+                self.can_listen = True
 
         """
         Main handler of virtual assistant
@@ -532,13 +542,16 @@ class VirtualAssistant(SpeechAssistant):
             announcetime_thread.setDaemon(True)
             announcetime_thread.start()
 
+            check_breaking_news_thread = Thread(target=_breaking_news_report)
+            check_breaking_news_thread.setDaemon(True)
+            check_breaking_news_thread.start()
+
             # play speaking prompt sound effect and say greetings
             self.speak(choice(_get_commands("start_greeting")), start_prompt=True)
             
             try:
                 while True:
-                    # report any breaking news
-                    _breaking_news_report()
+                    voice_data = ""
 
                     # handles restarting of listen timeout
                     if listen_time >= self.listen_timeout:
@@ -569,11 +582,12 @@ class VirtualAssistant(SpeechAssistant):
                             
                         if listen_time == 1:
                             print(f"{self.assistant_name}: listening...")
-                        elif listen_time == randint(2, (self.listen_timeout - 1)):
+                        elif listen_time == randint(2, (self.listen_timeout - 2)):
                             self.speak(choice(["I'm here...", "I'm listening..."]), start_prompt=False)
 
                         # listen for commands
-                        voice_data = self.listen_to_audio()
+                        if self.can_listen:
+                            voice_data = self.listen_to_audio()
 
                         # we heard a voice_data, let's start processing
                         if voice_data:
@@ -602,7 +616,7 @@ class VirtualAssistant(SpeechAssistant):
 
                         listen_time += 1
 
-                    else:
+                    elif self.can_listen:
                         """ Virtual assistant will sleep/mute
                         (1) play end of prompt sound effect and show "ZzzzZzz"
                         (2) get updates of commands from json """
@@ -617,10 +631,11 @@ class VirtualAssistant(SpeechAssistant):
 
                             # get updates of commands from json file
                             get_commands_thread = Thread(target=self.get_commands_from_json)
+                            get_commands_thread.setDaemon(True)
                             get_commands_thread.start()
             
-            except Exception:
-                displayException(__name__, logging.ERROR)
+            except:
+                displayException("Error while starting virtual assistant.", logging.ERROR)
 
         # check internet connectivity every second
         # before proceeding to main()
