@@ -24,12 +24,14 @@ NEWS_SCRAPER_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\NewsScraper"
 DEV_PATH_DIR = os.environ.get("DevPath")
 WOLFRAM_APP_ID = os.environ.get("WOLFRAM_APP_ID")
 
+
 class SkillsLibrary:
+
     def __init__(self, tts, masters_name, assistants_name):
         self.master_name = masters_name
         self.assistant_name = assistants_name
-        self.tts = tts    
-    
+        self.tts = tts
+
     def ask_time(self, voice_data):
         if "in" in voice_data.lower().split(" "):
             return ""
@@ -54,7 +56,7 @@ class SkillsLibrary:
             open_browser_thread = Thread(target=execute_map, args=("open browser", [f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"],))
             open_browser_thread.start()
             result = f"I found something on Youtube for \"{search_keyword}\"."
-        
+
         return result
 
     def google_maps(self, location):
@@ -82,7 +84,10 @@ class SkillsLibrary:
                     return value["plaintext"]
 
             def _removeBrackets(value):
-                return value.replace("|", "").strip().split("(")[0]
+                if value:
+                    return value.replace("|", "").strip().split("(")[0]
+                else:
+                    return ""
 
             def _weatherReport(data):
                 report = ""
@@ -95,17 +100,17 @@ class SkillsLibrary:
                 time_frame = "morning" if ("AM" == current_meridian_indicator and current_hour <= 10) else ("afternoon" if (("AM" == current_meridian_indicator and current_hour > 10) or ("PM" == current_meridian_indicator and current_hour == 12) or ("PM" == current_meridian_indicator and current_hour <= 2)) else "night")
 
                 data = data.replace('rain', 'raining').replace('few clouds', 'cloudy').replace("clear", "clear skies")
-                
+
                 for item in data.split("\n"):
                     if "°C" in item:
-                        temps = item.replace("between", "").replace("°C","").split("and")
+                        temps = item.replace("between", "").replace("°C", "").split("and")
 
                         if len(temps) > 1:
                             min_temp = temps[0].strip()
                             max_temp = temps[1].strip()
                             ave_temp = str((int(max_temp) + int(min_temp)) // 2)
                         else:
-                            ave_temp = item.replace("°C","").strip()
+                            ave_temp = item.replace("°C", "").strip()
 
                     elif is_match(item, ["|"]):
                         for cond in item.split("|"):
@@ -131,7 +136,7 @@ class SkillsLibrary:
 
                 return report
 
-            weather_keywords = ["weather forecast", "weather today", "weather like", "forecast weather", "weather"]
+            weather_keywords = ["weather forecast", "weather today", "weather like", "forecast weather", "the weather", "weather in", "weather on", "weather for"]
             if is_match(voice_data, weather_keywords):
                 if is_match(voice_data, ["in", "for"]):
                     meta_data = extract_metadata(voice_data, (["in", "for"] + weather_keywords))
@@ -141,7 +146,7 @@ class SkillsLibrary:
                     voice_data = f"weather forecast for Malolos, Bulacan {meta_data}"
                 is_weather_report = True
 
-            # send query to Wolfram Alpha        
+            # send query to Wolfram Alpha
             wolframAlpha = client.query(voice_data)
 
             # check if we have a successful result
@@ -160,7 +165,7 @@ class SkillsLibrary:
 
                 # checking if pod1 has primary=true or title=result|definition
                 if (("definition" in pod1["@title"].lower()) or ("result" in pod1["@title"].lower()) or (pod1.get("@primary", "false") == "true")):
-                    
+
                     # extract result from pod1
                     wolfram_response = _resolveListOrDict(pod1["subpod"])
 
@@ -175,7 +180,7 @@ class SkillsLibrary:
                             report_prefix = f"{meta_data.capitalize()} will be"
 
                         return f"Here's the {question.capitalize()}.\n\n{report_prefix} {_weatherReport(wolfram_response)}"
-                    
+
                     # remove "according to" phrase in wolfram response
                     if is_match(wolfram_response, ["(according to"]):
                         wolfram_response = wolfram_response.split("(according to")[0]
@@ -185,11 +190,11 @@ class SkillsLibrary:
 
                     # replace "Q:" and "A:" prefixes and replace new space instead
                     if is_match(wolfram_response, ["Q: ", "A: "]):
-                        wolfram_response = wolfram_response.replace("Q: ", "").replace("A: ", "\n\n") 
+                        wolfram_response = wolfram_response.replace("Q: ", "").replace("A: ", "\n\n")
 
                     wolfram_meta = wolfram_response.split("|")
                     parts_of_speech = ["noun", "pronoun", "verb", "adjective", "adverb", "preposition", "conjunction", "interjection"]
-                
+
                     # we found an array of information, let's disect if necessary
                     if wolfram_response.count("|") > 2:
                         if is_match(wolfram_response, parts_of_speech):
@@ -209,7 +214,7 @@ class SkillsLibrary:
 
                         for deet in wolfram_response.split("\n"):
                             print(f">> {deet}.")
-                        
+
                     # we found at least 1 set of defition, disect further if necessary
                     elif is_match(wolfram_response, ["|"]):
                         # extract the 12 hour time value
@@ -229,9 +234,9 @@ class SkillsLibrary:
                         elif is_match(wolfram_response, ["my name is"]):
                             # replace "Wolfram|Aplha" to assistant's name.
                             response = wolfram_response[:(wolfram_response.lower().find("my name is") + 11)] + self.assistant_name + ". Are you " + self.master_name + "?"
-                        
+
                         else:
-                            # responding to definition of terms    
+                            # responding to definition of terms
                             if is_match(wolfram_response, parts_of_speech):
                                 response = f"\"{question.capitalize()}\" \n. ({wolfram_meta[0]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                             else:
@@ -259,11 +264,14 @@ class SkillsLibrary:
                             # let's split the letters of response to simulate spelling the word(s).
                             response = f'{question.capitalize()}\n\n . {" . ".join(list(wolfram_response.capitalize()))}'
                         else:
-                            response = wolfram_response
+                            if "happy birthday to you." in question.lower():
+                                response = wolfram_response.replace("<fill in name of birthday person>", self.master_name)
+                            else:
+                                response = wolfram_response
 
                     parts_of_speech.append("Here's some information.")
                     # don't include the evaluated question in result if it has "?", "here's some information" or more than 5 words in it
-                    if len(voice_data.split(" ")) > 5 or is_match(voice_data, ["how do you spell", "spell", "spelling", "spells"]) or is_match(question, ["?", "tell me a joke.", "thank you."]) or is_match(response, parts_of_speech):
+                    if len(voice_data.split(" ")) > 5 or is_match(voice_data, ["how do you spell", "spell", "spelling", "spells"]) or is_match(question, ["?", "tell me a joke.", "thank you.", "happy birthday to you."]) or is_match(response, parts_of_speech):
                         return response
                     else:
                         if question:
@@ -272,7 +280,7 @@ class SkillsLibrary:
                             return f"{question.capitalize()} {response}."
 
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("Wolfram|Alpha Search Control Error.", logging.ERROR)
 
         # if no answers found return a blank response
         return response
@@ -288,7 +296,7 @@ class SkillsLibrary:
                 return summary
 
             except wikipedia.exceptions.WikipediaException:
-                displayException("from Wikipedia (handled)", logging.INFO)
+                displayException("Wikipedia Search Control (handled)", logging.INFO)
 
                 if ("who" or "who's") in voice_data.lower():
                     result = f"I don't know who that is but,"
@@ -298,7 +306,7 @@ class SkillsLibrary:
                 return f"{result} {self.google(wiki_keyword.strip())}"
 
             except Exception:
-                displayException(__name__, logging.ERROR)
+                displayException("Wikipedia Search Control Error.", logging.ERROR)
 
         return result
 
@@ -310,23 +318,26 @@ class SkillsLibrary:
         equation = ""
 
         # evaluate if there are square root or cube root questions, replace with single word
-        evaluated_voice_data = voice_data.replace(",", "").replace("square root", "square#root").replace("cube root", "cube#root").split(" ")
+        evaluated_voice_data = voice_data.replace(",", "").replace("power of", "power#of").replace("square root", "square#root").replace("cube root", "cube#root").split(" ")
 
         try:
             for word in evaluated_voice_data:
                 if is_match(word, ["+", "plus", "add"]):
                     operator = " + " if not word.replace("+",
-                                                        "").isdigit() else word
+                                                         "").isdigit() else word
                     equation += operator
                 elif is_match(word, ["-", "minus", "subtract"]):
                     operator = " - " if not word.replace("-",
-                                                        "").isdigit() else word
+                                                         "").isdigit() else word
                     equation += operator
                 elif is_match(word, ["x", "times", "multiply", "multiplied"]):
                     operator = " * "
                     equation += operator
                 elif is_match(word, ["/", "divide", "divided"]):
                     operator = " / "
+                    equation += operator
+                elif is_match(word, ["^", "power#of"]):
+                    operator = " ^ "
                     equation += operator
                 elif is_match(word, ["square#root"]):
                     equation += "x2"
@@ -369,6 +380,8 @@ class SkillsLibrary:
                 equation = f"{number1}**(1./2.)"
             elif "x3" in equation:
                 equation = f"{number1}**(1./3.)"
+            elif "^" in equation:
+                answer = eval(equation.replace("*", "x"))
 
             if (answer is None) and equation:
                 try:
@@ -377,7 +390,7 @@ class SkillsLibrary:
                 except ZeroDivisionError:
                     return choice(["The answer is somwhere between infinity, negative infinity, and undefined.", f"The answer is undefined."])
                 except Exception:
-                    displayException("Calculator control_library (handled)", logging.INFO)
+                    displayException("Calculator Control Exception (handled).", logging.INFO)
                     return ""
 
             if not answer is None:
@@ -401,7 +414,7 @@ class SkillsLibrary:
                 return ""
 
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("Calculator Control Error.", logging.ERROR)
 
     def open_application(self, voice_data):
         confirmation = ""
@@ -411,8 +424,8 @@ class SkillsLibrary:
 
         def modified_app_names():
             clean_app_names = voice_data
-            special_app_names = ["vs code", "ms code", "ms vc", "microsoft excel", "spread sheet", "ms excel", "microsoft word", "ms word", "microsoft powerpoint", "ms powerpoint", "task scheduler",
-                                "visual studio code", "pse ticker", "command console", "command prompt", "control panel", "task manager", "resource monitor", "resource manager", "device manager", "windows services", "remove programs", "add remove"]
+            special_app_names = ["vs code", "sublime text", "ms code", "ms vc", "microsoft excel", "spread sheet", "ms excel", "microsoft word", "ms word", "microsoft powerpoint", "ms powerpoint", "task scheduler",
+                                 "visual studio code", "pse ticker", "command console", "command prompt", "control panel", "task manager", "resource monitor", "resource manager", "device manager", "windows services", "remove programs", "add remove"]
             for name in special_app_names:
                 if name in voice_data:
                     # make one word app name by using hyphen
@@ -421,7 +434,6 @@ class SkillsLibrary:
 
             # return unique list of words/app names
             return {word for word in clean_app_names.split(" ")}
-
 
         try:
             for app in modified_app_names():
@@ -490,6 +502,19 @@ class SkillsLibrary:
                     app_commands.append("start code -n")
                     app_names.append("Visual Studio Code")
 
+                elif is_match(app, ["sublime", "sublime-text"]):
+                    app_commands.append("start sublime_text -n")
+                    app_names.append("Sublime Text 3")
+
+                elif is_match(app, ["newsfeed", "news"]):
+                    app_names.append("Newsfeed Ticker")
+                    # change directory to NewsTicker library
+                    os.chdir(NEWS_SCRAPER_MODULE_DIR)
+                    # execute batch file that will open Newsfeed on a newo console window
+                    os.system('start cmd /k \"start News Ticker.bat\"')
+                    # get back to virtual assistant directory after command execution
+                    os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+
                 elif is_match(app, ["pse-ticker", "pse"]):
                     app_names.append("Philippine Stock Exchange Ticker")
                     # change directory to PSE library resides
@@ -498,7 +523,6 @@ class SkillsLibrary:
                     os.system(f'start cmd /k \"start_PSE.bat\"')
                     # get back to virtual assistant directory after command execution
                     os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
-                    
 
                 elif is_match(app, ["youtube", "google", "netflix", "github", "facebook", "twitter", "instagram", "wikipedia"]):
                     if app == "youtube":
@@ -529,6 +553,7 @@ class SkillsLibrary:
             # launch local applications using python's os.system class
             if len(app_commands) > 0:
                 open_app_thread = Thread(target=execute_map, args=("open system", app_commands,))
+                open_app_thread.setDaemon(True)
                 open_app_thread.start()
 
             # open the webapp in web browser
@@ -540,8 +565,7 @@ class SkillsLibrary:
                 confirmation = f"Ok! opening {' and '.join(app_names)}..."
 
         except Exception:
-            displayException(
-                f"**{self.assistant_name} could not find the specified app**", logging.DEBUG)
+            displayException("Open Application Control Error.", logging.DEBUG)
 
         return confirmation
 
@@ -555,7 +579,7 @@ class SkillsLibrary:
                     # open windows explorer and look for files using queries
                     explorer = f'explorer /root,"search-ms:query=name:{file_name}&crumb=location:{FILE_DIR}&"'
                     subprocess.Popen(explorer, shell=False, stdin=None,
-                                    stdout=None, stderr=None, close_fds=False)
+                                     stdout=None, stderr=None, close_fds=False)
                     response_message = f"Here's what I found for files with \"{file_name}\". I'm showing you the folder...\n"
 
                 # find files using command console
@@ -598,7 +622,7 @@ class SkillsLibrary:
                                         self.tts.speak("Searching...")
 
                         except KeyboardInterrupt as ex:
-                            displayException(f"Find File (handled)", logging.INFO)
+                            displayException(f"Find File Control Keyboard Interrupt (handled)", logging.INFO)
                             self.tts.speak("Search interrupted...")
 
                         if found_file_count > 0:
@@ -611,7 +635,7 @@ class SkillsLibrary:
                                 f"\n----- {found_file_count} files found -----\n")
                             response_message = f"I found {found_file_count} files. I'm showing you the directories where to see them.\n"
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("Find File Control Error.", logging.ERROR)
 
         return response_message
 
@@ -624,7 +648,7 @@ class SkillsLibrary:
             return f"Ok! I set the brightness by {percentage}%"
 
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("Screen Brightness Control Error", logging.ERROR)
 
     def control_wifi(self, voice_data):
         command = ""
@@ -641,9 +665,9 @@ class SkillsLibrary:
                 print(f"\033[1;33;41m{self.assistant_name} is offline...")
                 # although this will not be annouced anymore (offline), let's rather return something.
                 return f"Done! I {command} the wi-fi."
-        
+
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("Wi-Fi Control Error.", logging.ERROR)
 
         return ""
 
@@ -670,7 +694,7 @@ class SkillsLibrary:
                 # return f"{'Reboot' if '/r' in command else 'Shutdown'} is canceled."
 
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("Shutdown/Restart System Control Error.", logging.ERROR)
 
         return ""
 
@@ -683,9 +707,9 @@ class SkillsLibrary:
             wp = Wallpaper()
             wp.change_wallpaper()
             return "Ok! I changed your wallpaper..."
-            
+
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("Wallpaper Control Error.", logging.ERROR)
 
     def initiate_new_project(self, lang="Python", proj_name="NewPythonProject", mode="g"):
         # navigate to the ProjectGitInitAutomation directory - contains the libraries
@@ -695,7 +719,7 @@ class SkillsLibrary:
         os.system(f'start cmd /k \"create.bat\" {lang} {proj_name} {mode}')
         # get back to virtual assistant directory after command execution
         os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
-        return f"The new {lang} project should open in Visual Studio Code when done..." 
+        return f"The new {lang} project should open in Visual Studio Code when done..."
 
     def play_music(self, voice_data):
         songWasFound = False
@@ -715,7 +739,7 @@ class SkillsLibrary:
 
             # change the directory to location of batch file to execute
             os.chdir(UTILITIES_MODULE_DIR)
-            
+
             music_word_found = True if is_match(voice_data, ["music", "songs"]) else False
             meta_data = voice_data.lower().replace("&", "and").replace("music", "").replace("songs", "").strip()
 
@@ -723,7 +747,7 @@ class SkillsLibrary:
                 # mode = "compact"
                 response = f"Ok! Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
                 songWasFound = True
-            
+
             elif meta_data and "by" in meta_data.split(" ") and meta_data.find("by") > 0 and len(meta_data.split()) >= 3:
                 option = '"play by"'
 
@@ -739,7 +763,6 @@ class SkillsLibrary:
                 else:
                     response = f"I couldn't find \"{title}\" in your music."
 
-            
             elif meta_data:
                 option = '"play by"'
                 title = f'"{meta_data}"'
@@ -755,7 +778,7 @@ class SkillsLibrary:
                     response = f"Ok! Now playing \"{meta_data.capitalize()}\" {'music...' if music_word_found else '...'}"
                 else:
                     response = f"I couldn't find \"{meta_data.capitalize()}\" in your music."
-            
+
             if songWasFound:
                 mp.terminate_player()
                 # batch file to play some music in new window
@@ -765,9 +788,9 @@ class SkillsLibrary:
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
             return response
-        
+
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("Play Music Control Error.", logging.ERROR)
 
     def music_volume(self, volume):
 
@@ -783,9 +806,9 @@ class SkillsLibrary:
 
             # get back to virtual assistant directory
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
-        
+
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("Music Volume Control Error.", logging.ERROR)
 
     def news_scraper(self):
 
@@ -799,13 +822,14 @@ class SkillsLibrary:
             news = NewsTicker()
 
             # execute daemon to fetch breaking news in background
+            news.fetch_news()
             news.run_breaking_news_daemon()
 
             # get back to virtual assistant directory
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
             return news
-        
+
         except Exception:
-            displayException(__name__, logging.ERROR)
+            displayException("News Scraper Control Error.", logging.ERROR)
             return None

@@ -51,6 +51,7 @@
                 "I don't understand, what can I help you?",
                 "Is there something else I can help you with?",
                 "Sorry, I didn't get that. Can you restate the question?",
+                "Sorry, I didn't catch that. Could you say it again?",
                 "Hmmm... I don't have an answer for that. Is there something else I can help you with?"
             ]
         },
@@ -101,7 +102,7 @@
                 "Talk to you soon, goodbye...",
                 "Nice talking with you, goodbye!",
                 "It's been a pleasure. Goodbye!",
-                "Goodbye..."
+                "Ok, talk to you soon..."
             ]
         },
         {
@@ -120,7 +121,8 @@
                 "My name is <assistant_name>. That's my whole name.",
                 "My name is <assistant_name>, but you knew that already.",
                 "I'm <assistant_name>",
-                "I'm <assistant_name>. Pleased to meet you."
+                "I'm <assistant_name>. Pleased to meet you.",
+                "I'm <assistant_name>. But enough about me... how can I help you?"
             ]
         },
         {
@@ -323,6 +325,7 @@
         {
             "name": "news",
             "commands": [
+                "happening today",
                 "any news",
                 "on news",
                 "in news",
@@ -331,6 +334,10 @@
                 "top stories",
                 "top news",
                 "the news",
+                "what is latest",
+                "what's latest",
+                "what's the latest",
+                "what is the latest",
                 "latest news",
                 "flash news",
                 "newsflash",
@@ -347,7 +354,10 @@
                 "weather today",
                 "weather like",
                 "forecast weather",
-                "weather"
+                "the weather",
+                "weather in",
+                "weather on",
+                "weather for"
             ]
         },
         {
@@ -451,6 +461,33 @@
                 "does",
                 "show me the",
                 "show me"
+            ]
+        },
+        {
+            "name": "prepositions",
+            "commands": [
+                "of",
+                "with",
+                "at",
+                "from",
+                "into",
+                "during",
+                "including",
+                "until",
+                "against",
+                "among",
+                "throughout",
+                "despite",
+                "towards",
+                "regards",
+                "upon",
+                "concerning",
+                "to",
+                "in",
+                "for",
+                "on",
+                "by",
+                "about"
             ]
         }
     ]

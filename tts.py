@@ -18,16 +18,18 @@ ASSISTANT_BLACK_NAME = "\033[22;30;46m"
 MASTER_GREEN_MESSAGE = "\033[1;37;42m"
 MASTER_BLACK_NAME = "\033[22;30;42m"
 
+
 class SpeechAssistant:
+
     def __init__(self, masters_name, assistants_name):
         self.master_name = masters_name
         self.assistant_name = assistants_name
         self.sleep_assistant = False
-        
+        self.not_available_counter = 0
         self.recognizer = sr.Recognizer()
         # let's override the dynamic threshold to 4000,
         # so the timeout we set in listen() will be used
-        self.recognizer.dynamic_energy_threshold = False
+        self.recognizer.dynamic_energy_threshold = True
         self.recognizer.energy_threshold = 4000
 
         self.skill = SkillsLibrary(self, self.master_name, self.assistant_name)
@@ -39,11 +41,11 @@ class SpeechAssistant:
         if self.isSleeping():
             listen_timeout = 2
 
-        # adjust the recognizer sensitivity to ambient noise 
+        # adjust the recognizer sensitivity to ambient noise
         # and record audio from microphone
         with sr.Microphone() as source:
             if not self.isSleeping():
-                self.recognizer.adjust_for_ambient_noise(source, duration=1)
+                self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
 
             try:
                 # announce/play something before listening from microphone
@@ -55,21 +57,34 @@ class SpeechAssistant:
                 # try convert audio to text/string data
                 voice_text = self.recognizer.recognize_google(audio)
 
+                if self.isSleeping() and self.not_available_counter >= 3:
+                    print(f"\"{self.assistant_name}\" is active again.")
+
+                self.not_available_counter = 0
+
             except sr.UnknownValueError:
-                displayException("Could not understand audio.", logging.WARNING)
+                displayException(f"{self.assistant_name} could not understand what you have said.", logging.WARNING)
                 return voice_text
+
             except sr.RequestError:
-                displayException(f"{self.assistant_name} Not Available. You are not connected to the internet.", logging.ERROR)
+                self.not_available_counter += 1
+                if self.not_available_counter == 3:
+                    displayException(f"\"{self.assistant_name}\" Not Available.", logging.ERROR)
+
+                elif self.isSleeping():
+                    print(f"{self.assistant_name} is reconnecting...")
+
             except gTTSError:
                 displayException("gTTSError", logging.ERROR)
+
             except Exception as ex:
                 if not "listening timed out" in str(ex):
                     # bypass the timed out exception, (timeout=3, if total silence for 3 secs.)
                     displayException("Exception error")
 
         if not self.isSleeping() and voice_text.strip():
-            print(
-                f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_text}")
+            print(f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_text}")
+
         return voice_text.strip()
 
     def sleep(self, value):
@@ -124,5 +139,5 @@ class SpeechAssistant:
                 if not ("Cannot find the specified file." or "Permission denied:") in str(ex):
                     displayException("gtts Speak")
                     print(f"{self.assistant_name} Not Available. You are not connected to the internet.")
-        
-        
+                else:
+                    pass

@@ -3,31 +3,27 @@ import sys
 import webbrowser
 import linecache
 import logging
-import time
 import concurrent.futures as executor
 
-logging.basicConfig(filename="NewsScraper.log", filemode="w", level=logging.ERROR)
-logging.Formatter("%(asctime)s | %(levelname)s | %(message)s", "%m-%d-Y %I:%M:%S")
-
+logging.basicConfig(filename="VirtualAssistant.log", filemode="w", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-def displayException(exception_title="", ex_type=logging.CRITICAL):
-    (execution_type, execution_obj, tb) = sys.exc_info()
+def displayException(exception_title="", ex_type=logging.ERROR):
+    (execution_type, message, tb) = sys.exc_info()
 
     f = tb.tb_frame
-    ln = tb.tb_lineno
-    fname = f.f_code.co_filename
+    lineno = tb.tb_lineno
+    fname = f.f_code.co_filename.split("\\")[-1]
     linecache.checkcache(fname)
-    line = linecache.getline(fname, ln, f.f_globals)
-    log_data = "{}\nTarget:  {}\nMessage: {}\nLine:    {}".format(exception_title, line.strip(), execution_obj, ln)
+    target = linecache.getline(fname, lineno, f.f_globals)
+    log_data = "{}\nFile:  {}\nTarget:  {}\nMessage: {}\nLine:    {}".format(exception_title, fname, target.strip(), message, lineno)
 
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-        # line_len = len(str(execution_obj)) + 10
-        print("-" * 23)
-        print(exception_title)
-        print("-" * 23)
+        print("-" * 23, end="\n")
+        print(exception_title, end="\n")
+        print("-" * 23, end="\n")
 
     if ex_type == logging.DEBUG:
         logger.debug(log_data)
@@ -54,7 +50,6 @@ def is_match(voice_data, keywords):
 
 def clean_voice_data(voice_data, assistants_name):
     clean_data = voice_data.replace(assistants_name.strip().lower(), "").strip()
-
     return clean_data
 
 
@@ -99,8 +94,9 @@ def extract_metadata(voice_data, commands):
 
 def execute_map(func, *argv):
     task = ""
+
     if "open browser" in str(func):
-            func = webbrowser.get().open_new
+        func = webbrowser.get().open_new
     elif "open system" in str(func):
         func = os.system
 
