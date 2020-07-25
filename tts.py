@@ -5,7 +5,7 @@ import playsound
 import colorama
 import logging
 import time
-from helper import *
+from helper import displayException
 from gtts import gTTS
 from gtts.tts import gTTSError
 from skills_library import SkillsLibrary
@@ -59,31 +59,43 @@ class SpeechAssistant:
 
                 if self.isSleeping() and self.not_available_counter >= 3:
                     print(f"\"{self.assistant_name}\" is active again.")
-
-                self.not_available_counter = 0
+                    self.not_available_counter = 0
 
             except sr.UnknownValueError:
-                displayException(f"{self.assistant_name} could not understand what you have said.", logging.WARNING)
+                displayException(
+                    f"{self.assistant_name} could not understand what you have said.", logging.WARNING)
+
+                if self.isSleeping() and self.not_available_counter >= 3:
+                    print(f"\"{self.assistant_name}\" is active again.")
+                    self.not_available_counter = 0
+
                 return voice_text
 
             except sr.RequestError:
                 self.not_available_counter += 1
                 if self.not_available_counter == 3:
-                    displayException(f"\"{self.assistant_name}\" Not Available.", logging.ERROR)
+                    displayException(
+                        f"\"{self.assistant_name}\" Not Available.")
 
-                elif self.isSleeping():
-                    print(f"{self.assistant_name} is reconnecting...")
+                if self.isSleeping() and self.not_available_counter >= 3:
+                    print(f"{self.assistant_name}: reconnecting...")
 
             except gTTSError:
-                displayException("gTTSError", logging.ERROR)
+                displayException("gTTSError")
 
             except Exception as ex:
-                if not "listening timed out" in str(ex):
+                if "listening timed out" not in str(ex):
                     # bypass the timed out exception, (timeout=3, if total silence for 3 secs.)
-                    displayException("Exception error")
+                    displayException(
+                        "Exception occurred while analyzing audio.")
+                else:
+                    if self.isSleeping() and self.not_available_counter >= 3:
+                        print(f"\"{self.assistant_name}\" is active again.")
+                        self.not_available_counter = 0
 
         if not self.isSleeping() and voice_text.strip():
-            print(f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_text}")
+            print(
+                f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_text}")
 
         return voice_text.strip()
 
@@ -115,7 +127,8 @@ class SpeechAssistant:
                 elif start_prompt and audio_string:
                     tts.save(audio_file)
                     playsound.playsound(f"{AUDIO_FOLDER}/start prompt.mp3")
-                    print(f"{ASSISTANT_BLACK_NAME}{self.assistant_name}:{ASSISTANT_CYAN_MESSAGE} {audio_string}")
+                    print(
+                        f"{ASSISTANT_BLACK_NAME}{self.assistant_name}:{ASSISTANT_CYAN_MESSAGE} {audio_string}")
                     force_delete = True
 
                 elif end_prompt:
@@ -126,7 +139,8 @@ class SpeechAssistant:
 
                 else:
                     tts.save(audio_file)
-                    print(f"{ASSISTANT_BLACK_NAME}{self.assistant_name}:{ASSISTANT_CYAN_MESSAGE} {audio_string}")
+                    print(
+                        f"{ASSISTANT_BLACK_NAME}{self.assistant_name}:{ASSISTANT_CYAN_MESSAGE} {audio_string}")
 
                 # announce/play the generated audio
                 playsound.playsound(audio_file)
@@ -137,7 +151,9 @@ class SpeechAssistant:
 
             except Exception as ex:
                 if not ("Cannot find the specified file." or "Permission denied:") in str(ex):
-                    displayException("gtts Speak")
-                    print(f"{self.assistant_name} Not Available. You are not connected to the internet.")
+                    displayException(
+                        "Error occurred (gtts) while trying to speak.")
+                    print(
+                        f"{self.assistant_name} Not Available. You are not connected to the internet.")
                 else:
                     pass

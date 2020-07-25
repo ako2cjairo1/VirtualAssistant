@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import webbrowser
@@ -5,7 +6,8 @@ import linecache
 import logging
 import concurrent.futures as executor
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="w", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s")
+logging.basicConfig(filename="VirtualAssistant.log", filemode="w",
+                    level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
@@ -18,7 +20,8 @@ def displayException(exception_title="", ex_type=logging.ERROR):
     fname = f.f_code.co_filename.split("\\")[-1]
     linecache.checkcache(fname)
     target = linecache.getline(fname, lineno, f.f_globals)
-    log_data = "{}\nFile:  {}\nTarget:  {}\nMessage: {}\nLine:    {}".format(exception_title, fname, target.strip(), message, lineno)
+    log_data = "{}\nFile:  {}\nTarget:  {}\nMessage: {}\nLine:    {}".format(
+        exception_title, fname, target.strip(), message, lineno)
 
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
         print("-" * 23, end="\n")
@@ -48,9 +51,27 @@ def is_match(voice_data, keywords):
     return False
 
 
+def get_commands_from_json():
+    try:
+        if os.path.isfile("commands_db.json"):
+            with open("commands_db.json", "r", encoding="utf-8") as fl:
+                return json.load(fl)["command_db"]
+    except Exception:
+        pass
+        displayException("Get Commands Error.")
+
+
+def get_commands(command_name, assistant_name="", master_name=""):
+    commands = get_commands_from_json()
+    # get values of "commands", replace the placeholder name for <assistant_name> and <boss_name>
+    return [com.replace("<assistant_name>", assistant_name).replace("<boss_name>", master_name) for com in (
+        ([command["commands"] for command in commands if command["name"] == command_name])[0])]
+
+
 def clean_voice_data(voice_data, assistants_name):
-    clean_data = voice_data.replace(assistants_name.strip().lower(), "").strip()
-    return clean_data
+    # clean_data = voice_data.replace(assistants_name.strip().lower(), "").strip()
+
+    return extract_metadata(voice_data, get_commands("wakeup")).replace(assistants_name, "").strip()
 
 
 def convert_to_one_word_commands(voice_data, commands):
@@ -61,12 +82,14 @@ def convert_to_one_word_commands(voice_data, commands):
         # command contains 2 or more words
         if len(command.split(" ")) > 1 and command in meta_keyword:
             # put a hyphen in between to make it a 1 word command
-            meta_keyword = voice_data.replace(command, command.replace(" ", "-"))
+            meta_keyword = voice_data.replace(
+                command, command.replace(" ", "-"))
 
     # do the same with the commands list (put hyphen in between)
     # then, sort the commands based on their length,
     # so the longer commands will be evaluated first.
-    commands = sorted([com.replace(" ", "-") for com in commands], key=len, reverse=True)
+    commands = sorted([com.replace(" ", "-")
+                       for com in commands], key=len, reverse=True)
 
     return (voice_data if not meta_keyword else meta_keyword), commands
 

@@ -9,7 +9,7 @@ import wmi  # (screen brightness) Windows Management Instrumentation module
 import logging
 import concurrent.futures as task
 from threading import Thread
-from helper import *
+from helper import displayException, is_match, get_commands, clean_voice_data, extract_metadata, execute_map
 from urllib.parse import quote
 from random import choice
 from datetime import datetime as dt
@@ -19,7 +19,7 @@ FILE_DIR = "c:\\users\\dave"
 VIRTUAL_ASSISTANT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant"
 UTILITIES_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PythonUtilityProjects"
 INIT_PROJECT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\ProjectGitInitAutomation"
-PSE_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\PSE"
+PSE_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PSE"
 NEWS_SCRAPER_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\NewsScraper"
 DEV_PATH_DIR = os.environ.get("DevPath")
 WOLFRAM_APP_ID = os.environ.get("WOLFRAM_APP_ID")
@@ -32,6 +32,9 @@ class SkillsLibrary:
         self.assistant_name = assistants_name
         self.tts = tts
 
+    def _get_commands(self, command_name):
+        return get_commands(command_name, self.assistant_name, self.master_name)
+
     def ask_time(self, voice_data):
         if "in" in voice_data.lower().split(" "):
             return ""
@@ -43,7 +46,8 @@ class SkillsLibrary:
         result = ""
         # open google iste in web browser and show results
         if search_keyword:
-            open_browser_thread = Thread(target=execute_map, args=("open browser", [f"https://google.com/search?q={quote(search_keyword.strip())}"],))
+            open_browser_thread = Thread(target=execute_map, args=("open browser", [
+                                         f"https://google.com/search?q={quote(search_keyword.strip())}"],))
             open_browser_thread.start()
             result = f"Here's what I found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
 
@@ -53,7 +57,8 @@ class SkillsLibrary:
         result = ""
         # open youtube site in web browser and show results
         if search_keyword:
-            open_browser_thread = Thread(target=execute_map, args=("open browser", [f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"],))
+            open_browser_thread = Thread(target=execute_map, args=("open browser", [
+                                         f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"],))
             open_browser_thread.start()
             result = f"I found something on Youtube for \"{search_keyword}\"."
 
@@ -63,7 +68,8 @@ class SkillsLibrary:
         result = ""
         if location:
             # open a web browser and map
-            open_browser_thread = Thread(target=execute_map, args=("open browser", [f"https://google.nl/maps/place/{quote(location.strip())}/&amp;"],))
+            open_browser_thread = Thread(target=execute_map, args=("open browser", [
+                                         f"https://google.nl/maps/place/{quote(location.strip())}/&amp;"],))
             open_browser_thread.start()
             result = f"Here\'s the map location of \"{location.strip()}\". Opening your browser..."
 
@@ -72,10 +78,10 @@ class SkillsLibrary:
     def wolfram_search(self, voice_data):
         response = ""
         meta_data = ""
+        parts_of_speech = self._get_commands("parts of speech")
 
         try:
             client = wolframalpha.Client(WOLFRAM_APP_ID)
-            is_weather_report = False
 
             def _resolveListOrDict(value):
                 if isinstance(value, list):
@@ -85,65 +91,95 @@ class SkillsLibrary:
 
             def _removeBrackets(value):
                 if value:
-                    return value.replace("|", "").strip().split("(")[0]
+                    return value.replace("|", "").strip().split("(")[0].replace("  ", " ")
                 else:
                     return ""
 
             def _weatherReport(data):
                 report = ""
-                max_temp = ""
-                min_temp = ""
-                ave_temp = ""
-                conditions = []
-                current_hour = int(dt.now().strftime("%I"))
-                current_meridian_indicator = dt.now().strftime("%p")
-                time_frame = "morning" if ("AM" == current_meridian_indicator and current_hour <= 10) else ("afternoon" if (("AM" == current_meridian_indicator and current_hour > 10) or ("PM" == current_meridian_indicator and current_hour == 12) or ("PM" == current_meridian_indicator and current_hour <= 2)) else "night")
+                try:
+                    max_temp = ""
+                    min_temp = ""
+                    ave_temp = ""
+                    conditions = []
+                    current_hour = int(dt.now().strftime("%I"))
+                    current_meridian_indicator = dt.now().strftime("%p")
+                    time_frame = "morning" if ("AM" == current_meridian_indicator and current_hour <= 10) else ("afternoon" if (("AM" == current_meridian_indicator and current_hour > 10) or (
+                        "PM" == current_meridian_indicator and current_hour == 12) or ("PM" == current_meridian_indicator and current_hour <= 2)) else "night")
 
-                data = data.replace('rain', 'raining').replace('few clouds', 'cloudy').replace("clear", "clear skies")
+                    data = data.replace('rain', 'raining').replace(
+                        'few clouds', 'cloudy').replace("clear", "clear skies")
 
-                for item in data.split("\n"):
-                    if "°C" in item:
-                        temps = item.replace("between", "").replace("°C", "").split("and")
+                    for item in data.split("\n"):
+                        if "°C" in item:
+                            temps = item.replace("between", "").replace(
+                                "°C", "").split("and")
 
-                        if len(temps) > 1:
-                            min_temp = temps[0].strip()
-                            max_temp = temps[1].strip()
-                            ave_temp = str((int(max_temp) + int(min_temp)) // 2)
-                        else:
-                            ave_temp = item.replace("°C", "").strip()
-
-                    elif is_match(item, ["|"]):
-                        for cond in item.split("|"):
-                            if time_frame == "morning" and "early morning" in cond:
-                                conditions.append(cond[:cond.index("(")].strip())
-                            elif time_frame == "afternoon" and "afternoon" in cond:
-                                conditions.append(cond[:cond.index("(")].strip())
-                            elif "(" in cond:
-                                conditions.append(cond[:cond.index("(")].strip())
-                            # conditions.append(cond.strip())
-
-                        if max_temp and min_temp:
-                            if len(conditions) > 2:
-                                report = f"{conditions[0]} and {ave_temp}°C. Expect mixed conditions starting {time_frame} and the rest of the day. Temperatures are heading down from {max_temp}°C to {min_temp}°C."
+                            if len(temps) > 1:
+                                min_temp = temps[0].strip()
+                                max_temp = temps[1].strip()
+                                ave_temp = str(
+                                    (int(max_temp) + int(min_temp)) // 2)
                             else:
-                                report = f"{conditions[0]} and {ave_temp}°C. Expect {' and '.join(conditions)} starting {time_frame} with mixed conditions for the rest of the day. Temperatures are heading down from {max_temp}°C to {min_temp}°C."
+                                ave_temp = item.replace("°C", "").strip()
+
+                        elif is_match(item, ["|"]):
+                            for cond in item.split("|"):
+                                if time_frame == "morning" and "early morning" in cond:
+                                    if "(" in cond:
+                                        conditions.append(
+                                            cond[:cond.index("(")].strip())
+                                elif time_frame == "afternoon" and "afternoon" in cond:
+                                    if "(" in cond:
+                                        conditions.append(
+                                            cond[:cond.index("(")].strip())
+                                elif "(" in cond:
+                                    conditions.append(
+                                        cond[:cond.index("(")].strip())
+                                # conditions.append(cond.strip())
+
+                            if max_temp and min_temp:
+                                if len(conditions) > 2:
+                                    report = f"{conditions[0]} and {ave_temp}°C. Expect mixed conditions starting {time_frame} and the rest of the day. Temperatures are heading down from {max_temp}°C to {min_temp}°C."
+                                else:
+                                    report = f"{conditions[0]} and {ave_temp}°C. Expect {' and '.join(conditions)} starting {time_frame} with mixed conditions for the rest of the day. Temperatures are heading down from {max_temp}°C to {min_temp}°C."
+                            else:
+                                conditions = ' and '.join(conditions)
+                                report = f"{ave_temp}°C with mixed condition like {conditions}."
                         else:
-                            conditions = ' and '.join(conditions)
-                            report = f"{ave_temp}°C with mixed condition like {conditions}."
-                    else:
-                        conditions = item.strip()
-                        report = f"{conditions} and {ave_temp}°C."
+                            conditions = item.strip()
+                            report = f"{conditions} and {ave_temp}°C."
+
+                except Exception:
+                    pass
+                    displayException("Wolfram|Alpha Weather Report Error.")
 
                 return report
 
-            weather_keywords = ["weather forecast", "weather today", "weather like", "forecast weather", "the weather", "weather in", "weather on", "weather for"]
-            if is_match(voice_data, weather_keywords):
-                if is_match(voice_data, ["in", "for"]):
-                    meta_data = extract_metadata(voice_data, (["in", "for"] + weather_keywords))
-                    voice_data = f"weather forecast for {meta_data}"
+            weather_commands = self._get_commands("weather")
+            report_type = "weather forecast"
+            current_location = "Malolos, Bulacan"
+            is_weather_report = False
+
+            if is_match(voice_data, weather_commands):
+                meta_data = extract_metadata(
+                    voice_data, (["in", "on", "for"] + weather_commands)).replace("forecast", "")
+
+                if is_match(voice_data, ["rain", "precipitation"]):
+                    report_type = "rain forecast"
+                elif is_match(voice_data, ["temperature"]):
+                    report_type = "temperature"
+
+                # let's build the query for weather, temperature or precipitation forecast.
+                # this will be our parameter input in Wolfram API
+                if is_match(voice_data, ["in", "on", "for"]):
+                    if meta_data:
+                        voice_data = f"{report_type} for {meta_data}"
+                    else:
+                        voice_data = f"{report_type} for {current_location}"
                 else:
-                    meta_data = extract_metadata(voice_data, weather_keywords)
-                    voice_data = f"weather forecast for Malolos, Bulacan {meta_data}"
+                    meta_data = extract_metadata(voice_data, weather_commands)
+                    voice_data = f"{report_type} for {current_location} {meta_data}"
                 is_weather_report = True
 
             # send query to Wolfram Alpha
@@ -170,36 +206,56 @@ class SkillsLibrary:
                     wolfram_response = _resolveListOrDict(pod1["subpod"])
 
                     # if no answers found return a blank response
-                    if (wolfram_response is None) or is_match(wolfram_response, ["(data not available)", "(no data available)"]):
-                        return response
+                    if (wolfram_response is None) or is_match(wolfram_response, ["(data not available)", "(no data available)", "(unknown)"]):
+                        return ""
 
                     # create a weather report
                     if is_weather_report:
+                        # rain forecast (precipitation)
+                        if "precipitation" in question:
+                            precipitation_forecast = ""
+
+                            if "rain" in wolfram_response:
+                                precipitation_forecast = choice(
+                                    [f"The forecast calls for {wolfram_response} for{question}", f"Yes, I think we'll see some {wolfram_response} for {question}"])
+                            else:
+                                precipitation_forecast = choice(
+                                    [f"It doesn't look like it's going to {wolfram_response} for{question}", f"I don't believe it will {wolfram_response} for {question}"]).replace("no precipitation", "rain")
+                            return precipitation_forecast.replace("precipitation forecast", "").replace("rain\n", "rain on ")
+
+                        # weather and temperature forecast
+                        report_heading = "Here's the " + question.replace("temperature", "temperature for").replace(
+                            "weather forecast", "weather forecast for").replace("\n", ", ")
                         report_prefix = "It's currently"
-                        if is_match(meta_data, ["tomorrow", "morning", "afternoon", "evening", "night", "noon", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]):
+
+                        if report_type == "weather forecast":
+                            wolfram_response = _weatherReport(wolfram_response)
+
+                        if is_match(meta_data, self._get_commands("time and day")):
                             report_prefix = f"{meta_data.capitalize()} will be"
 
-                        return f"Here's the {question.capitalize()}.\n\n{report_prefix} {_weatherReport(wolfram_response)}"
+                        return f"{report_heading}. \n\n{report_prefix} {wolfram_response}"
 
                     # remove "according to" phrase in wolfram response
                     if is_match(wolfram_response, ["(according to"]):
-                        wolfram_response = wolfram_response.split("(according to")[0]
+                        wolfram_response = wolfram_response.split(
+                            "(according to")[0]
 
                     if is_match(wolfram_response, ["I was created by"]):
                         wolfram_response = f"I was created by {self.master_name}."
 
-                    # replace "Q:" and "A:" prefixes and replace new space instead
-                    if is_match(wolfram_response, ["Q: ", "A: "]):
-                        wolfram_response = wolfram_response.replace("Q: ", "").replace("A: ", "\n\n")
-
                     wolfram_meta = wolfram_response.split("|")
-                    parts_of_speech = ["noun", "pronoun", "verb", "adjective", "adverb", "preposition", "conjunction", "interjection"]
+
+                    # replace "Q:" and "A:" prefixes and replace new space instead
+                    if is_match(wolfram_response, ["Q: ", "A: "]) or is_match(question, ["tell me a joke."]):
+                        response = wolfram_response.replace(
+                            "Q: ", "").replace("A: ", "\n\n")
 
                     # we found an array of information, let's disect if necessary
-                    if wolfram_response.count("|") > 2:
+                    elif wolfram_response.count("|") > 2:
                         if is_match(wolfram_response, parts_of_speech):
                             # responding to definition of terms, and using the first answer in the list as definition
-                            response = f"\"{question.capitalize()}\" \n. ({wolfram_meta[1]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
+                            response = f"\"{question}\" \n. ({wolfram_meta[1]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                         else:
                             # respond by showing list of information
                             response = "Here's some information."
@@ -233,12 +289,13 @@ class SkillsLibrary:
                         # responding to "do you know my name?"
                         elif is_match(wolfram_response, ["my name is"]):
                             # replace "Wolfram|Aplha" to assistant's name.
-                            response = wolfram_response[:(wolfram_response.lower().find("my name is") + 11)] + self.assistant_name + ". Are you " + self.master_name + "?"
+                            response = wolfram_response[:(wolfram_response.lower().find(
+                                "my name is") + 11)] + self.assistant_name + ". Are you " + self.master_name + "?"
 
                         else:
                             # responding to definition of terms
                             if is_match(wolfram_response, parts_of_speech):
-                                response = f"\"{question.capitalize()}\" \n. ({wolfram_meta[0]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
+                                response = f"\"{question}\" \n. ({wolfram_meta[0]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                             else:
                                 response = wolfram_response
 
@@ -246,7 +303,8 @@ class SkillsLibrary:
                     else:
                         if is_match(voice_data, ["how do you spell", "spell", "spelling", "spells"]):
 
-                            question = question.replace("spellings", "").strip()
+                            question = question.replace(
+                                "spellings", "").strip()
                             if len(wolfram_response) > len(question):
                                 # there are one or more word spelling, we need to figure out which one is in question.
                                 word_found = False
@@ -262,10 +320,19 @@ class SkillsLibrary:
                                     wolfram_response = question
 
                             # let's split the letters of response to simulate spelling the word(s).
-                            response = f'{question.capitalize()}\n\n . {" . ".join(list(wolfram_response.capitalize()))}'
+                            response = f'{question}\n\n . {" . ".join(list(wolfram_response.capitalize()))}'
                         else:
                             if "happy birthday to you." in question.lower():
-                                response = wolfram_response.replace("<fill in name of birthday person>", self.master_name)
+                                response = wolfram_response.replace(
+                                    "<fill in name of birthday person>", self.master_name)
+                            elif wolfram_response.isdigit():
+                                numeric_response = wolfram_response
+                                if "date" not in question.lower():
+                                    numeric_response = "{:,}".format(
+                                        int(wolfram_response))
+
+                                # response = f"{question} is {numeric_response}"
+                                response = numeric_response
                             else:
                                 response = wolfram_response
 
@@ -275,12 +342,13 @@ class SkillsLibrary:
                         return response
                     else:
                         if question:
-                            return f"{question.capitalize()} is {response}."
+                            return f"{question} is {response}."
                         else:
-                            return f"{question.capitalize()} {response}."
+                            return f"{question} {response}."
 
         except Exception:
-            displayException("Wolfram|Alpha Search Control Error.", logging.ERROR)
+            pass
+            displayException("Wolfram|Alpha Search Control Error.")
 
         # if no answers found return a blank response
         return response
@@ -296,17 +364,18 @@ class SkillsLibrary:
                 return summary
 
             except wikipedia.exceptions.WikipediaException:
-                displayException("Wikipedia Search Control (handled)", logging.INFO)
+                displayException(
+                    "Wikipedia Search Control (handled)", logging.INFO)
 
                 if ("who" or "who's") in voice_data.lower():
-                    result = f"I don't know who that is but,"
+                    result = "I don't know who that is but,"
                 else:
-                    result = f"I don't know what that is but,"
+                    result = "I don't know what that is but,"
 
                 return f"{result} {self.google(wiki_keyword.strip())}"
 
             except Exception:
-                displayException("Wikipedia Search Control Error.", logging.ERROR)
+                displayException("Wikipedia Search Control Error.")
 
         return result
 
@@ -318,7 +387,8 @@ class SkillsLibrary:
         equation = ""
 
         # evaluate if there are square root or cube root questions, replace with single word
-        evaluated_voice_data = voice_data.replace(",", "").replace("power of", "power#of").replace("square root", "square#root").replace("cube root", "cube#root").split(" ")
+        evaluated_voice_data = voice_data.replace(",", "").replace("power of", "power#of").replace(
+            "square root", "square#root").replace("cube root", "cube#root").split(" ")
 
         try:
             for word in evaluated_voice_data:
@@ -381,24 +451,27 @@ class SkillsLibrary:
             elif "x3" in equation:
                 equation = f"{number1}**(1./3.)"
             elif "^" in equation:
-                answer = eval(equation.replace("*", "x"))
+                # can't evaluate
+                return ""
 
             if (answer is None) and equation:
                 try:
                     # evaluate the equation made
                     answer = eval(equation.replace(",", ""))
                 except ZeroDivisionError:
-                    return choice(["The answer is somwhere between infinity, negative infinity, and undefined.", f"The answer is undefined."])
+                    return choice(["The answer is somwhere between infinity, negative infinity, and undefined.", "The answer is undefined."])
                 except Exception:
-                    displayException("Calculator Control Exception (handled).", logging.INFO)
+                    displayException(
+                        "Calculator Control Exception (handled).", logging.INFO)
                     return ""
 
-            if not answer is None:
+            if answer is not None:
                 with_decimal_point = float('{:.02f}'.format(answer))
 
                 # check answer for decimal places,
                 # convert to whole number if decimal point value is ".00"
-                positive_float = int((str(with_decimal_point).split('.'))[1]) > 0
+                positive_float = int(
+                    (str(with_decimal_point).split('.'))[1]) > 0
 
                 format_answer = with_decimal_point if positive_float else int(
                     answer)
@@ -414,7 +487,7 @@ class SkillsLibrary:
                 return ""
 
         except Exception:
-            displayException("Calculator Control Error.", logging.ERROR)
+            displayException("Calculator Control Error.")
 
     def open_application(self, voice_data):
         confirmation = ""
@@ -438,7 +511,8 @@ class SkillsLibrary:
         try:
             for app in modified_app_names():
                 if is_match(app, ["explorer", "folder"]):
-                    app_commands.append("start explorer C:\\Users\\Dave\\DEVENV\\Python")
+                    app_commands.append(
+                        "start explorer C:\\Users\\Dave\\DEVENV\\Python")
                     app_names.append("Windows Explorer")
 
                 elif is_match(app, ["control-panel"]):
@@ -520,7 +594,7 @@ class SkillsLibrary:
                     # change directory to PSE library resides
                     os.chdir(PSE_MODULE_DIR)
                     # open PSE ticker in new window
-                    os.system(f'start cmd /k \"start_PSE.bat\"')
+                    os.system('start cmd /k \"start_PSE.bat\"')
                     # get back to virtual assistant directory after command execution
                     os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
@@ -552,13 +626,15 @@ class SkillsLibrary:
 
             # launch local applications using python's os.system class
             if len(app_commands) > 0:
-                open_app_thread = Thread(target=execute_map, args=("open system", app_commands,))
+                open_app_thread = Thread(
+                    target=execute_map, args=("open system", app_commands,))
                 open_app_thread.setDaemon(True)
                 open_app_thread.start()
 
             # open the webapp in web browser
             if len(urls) > 0:
-                open_browser_thread = Thread(target=execute_map, args=("open browser", urls,))
+                open_browser_thread = Thread(
+                    target=execute_map, args=("open browser", urls,))
                 open_browser_thread.start()
 
             if len(app_names) > 0:
@@ -622,7 +698,8 @@ class SkillsLibrary:
                                         self.tts.speak("Searching...")
 
                         except KeyboardInterrupt as ex:
-                            displayException(f"Find File Control Keyboard Interrupt (handled)", logging.INFO)
+                            displayException(
+                                "Find File Control Keyboard Interrupt (handled)", logging.INFO)
                             self.tts.speak("Search interrupted...")
 
                         if found_file_count > 0:
@@ -635,20 +712,22 @@ class SkillsLibrary:
                                 f"\n----- {found_file_count} files found -----\n")
                             response_message = f"I found {found_file_count} files. I'm showing you the directories where to see them.\n"
         except Exception:
-            displayException("Find File Control Error.", logging.ERROR)
+            displayException("Find File Control Error.")
 
         return response_message
 
     def screen_brightness(self, voice_data):
         try:
-            percentage = int([val for val in voice_data.replace('%', '').split(' ') if val.isdigit()][0]) if True else 50
+            percentage = int([val for val in voice_data.replace(
+                '%', '').split(' ') if val.isdigit()][0]) if True else 50
             # set the screen brightness (in percentage)
-            wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[0].WmiSetBrightness(percentage, 0)
+            wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
+                0].WmiSetBrightness(percentage, 0)
 
             return f"Ok! I set the brightness by {percentage}%"
 
         except Exception:
-            displayException("Screen Brightness Control Error", logging.ERROR)
+            displayException("Screen Brightness Control Error.")
 
     def control_wifi(self, voice_data):
         command = ""
@@ -667,7 +746,7 @@ class SkillsLibrary:
                 return f"Done! I {command} the wi-fi."
 
         except Exception:
-            displayException("Wi-Fi Control Error.", logging.ERROR)
+            displayException("Wi-Fi Control Error.")
 
         return ""
 
@@ -694,7 +773,7 @@ class SkillsLibrary:
                 # return f"{'Reboot' if '/r' in command else 'Shutdown'} is canceled."
 
         except Exception:
-            displayException("Shutdown/Restart System Control Error.", logging.ERROR)
+            displayException("Shutdown/Restart System Control Error.")
 
         return ""
 
@@ -709,7 +788,7 @@ class SkillsLibrary:
             return "Ok! I changed your wallpaper..."
 
         except Exception:
-            displayException("Wallpaper Control Error.", logging.ERROR)
+            displayException("Wallpaper Control Error.")
 
     def initiate_new_project(self, lang="Python", proj_name="NewPythonProject", mode="g"):
         # navigate to the ProjectGitInitAutomation directory - contains the libraries
@@ -740,8 +819,10 @@ class SkillsLibrary:
             # change the directory to location of batch file to execute
             os.chdir(UTILITIES_MODULE_DIR)
 
-            music_word_found = True if is_match(voice_data, ["music", "songs"]) else False
-            meta_data = voice_data.lower().replace("&", "and").replace("music", "").replace("songs", "").strip()
+            music_word_found = True if is_match(
+                voice_data, ["music", "songs"]) else False
+            meta_data = voice_data.lower().replace("&", "and").replace(
+                "music", "").replace("songs", "").strip()
 
             if meta_data == "":
                 # mode = "compact"
@@ -782,7 +863,8 @@ class SkillsLibrary:
             if songWasFound:
                 mp.terminate_player()
                 # batch file to play some music in new window
-                os.system(f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
+                os.system(
+                    f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
 
             # get back to virtual assistant directory
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
@@ -790,7 +872,7 @@ class SkillsLibrary:
             return response
 
         except Exception:
-            displayException("Play Music Control Error.", logging.ERROR)
+            displayException("Play Music Control Error.")
 
     def music_volume(self, volume):
 
@@ -808,7 +890,7 @@ class SkillsLibrary:
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
         except Exception:
-            displayException("Music Volume Control Error.", logging.ERROR)
+            displayException("Music Volume Control Error.")
 
     def news_scraper(self):
 
@@ -831,5 +913,25 @@ class SkillsLibrary:
             return news
 
         except Exception:
-            displayException("News Scraper Control Error.", logging.ERROR)
+            pass
+            displayException("News Scraper Control Error.")
             return None
+
+    def toast_notification(self, title, message):
+
+        try:
+            import sys
+            sys.path.append(UTILITIES_MODULE_DIR)
+            from send_toast import ToastMessage
+            notification = ToastMessage()
+            # change the directory to location of batch file to execute
+            os.chdir(UTILITIES_MODULE_DIR)
+
+            notification.send_toast(title, message)
+
+            # get back to virtual assistant directory
+            os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+
+        except Exception:
+            pass
+            displayException("Music Volume Control Error.")

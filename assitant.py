@@ -6,7 +6,7 @@ from datetime import datetime as dt
 from random import choice, randint
 from colorama import init
 import requests
-from helper import *
+from helper import displayException, is_match, get_commands, clean_voice_data, extract_metadata, execute_map
 from tts import SpeechAssistant
 from skills_library import SkillsLibrary
 
@@ -25,22 +25,23 @@ class VirtualAssistant(SpeechAssistant):
         self.assistant_name = assistants_name
         self.listen_timeout = listen_timeout
         self.breaking_news_reported = []
-        self.command_db = []
-        self.get_commands_from_json()
 
-    def get_commands_from_json(self):
-        try:
-            if os.path.isfile("commands_db.json"):
-                with open("commands_db.json", "r", encoding="utf-8") as fl:
-                    self.command_db = json.load(fl)["command_db"]
-        except Exception:
-            displayException("Get Commands Error.", logging.ERROR)
+    # def get_commands_from_json(self):
+    #     try:
+    #         if os.path.isfile("commands_db.json"):
+    #             with open("commands_db.json", "r", encoding="utf-8") as fl:
+    #                 self.command_db = json.load(fl)["command_db"]
+    #     except Exception:
+    #         pass
+    #         displayException("Get Commands Error.")
 
     def maximize_command_interface(self, maximize=True):
         if maximize:
-            os.system("CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 900 400 /siz 491 336 /TOP")
+            os.system(
+                "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 900 400 /siz 491 336 /TOP")
         else:
-            os.system("CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 1174 533 /siz 217 203 /NOT")
+            os.system(
+                "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 1174 533 /siz 217 203 /NOT")
 
     def activate(self):
         skills = SkillsLibrary(super(), self.master_name, self.assistant_name)
@@ -49,7 +50,8 @@ class VirtualAssistant(SpeechAssistant):
         news = skills.news_scraper()
 
         def _awake_greetings(start_prompt=True):
-            self.speak(choice(_get_commands("wakeup_responses")), start_prompt=start_prompt)
+            self.speak(choice(_get_commands("wakeup_responses")),
+                       start_prompt=start_prompt)
 
         def _wake_assistant(listen_timeout=1, voice_data=""):
             if listen_timeout == 0:
@@ -63,18 +65,21 @@ class VirtualAssistant(SpeechAssistant):
                 # wake command is invoked and the user ask question immediately.
                 if len(voice_data.split(" ")) > 2 and is_match(voice_data, wakeup_command):
                     self.maximize_command_interface()
-                    print(f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
+                    print(
+                        f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
                     self.sleep(False)
                     # play end speaking prompt sound effect
                     self.speak("<start prompt>", start_prompt=True)
                     print(f"{self.assistant_name}: (awaken)")
-                    _formulate_responses(clean_voice_data(voice_data, self.assistant_name))
+                    # _formulate_responses(clean_voice_data(voice_data, self.assistant_name))
+                    _formulate_responses(voice_data)
                     return True
 
                 # wake commands is invoked and expected to ask for another command
                 elif is_match(voice_data, wakeup_command):
                     self.maximize_command_interface()
-                    print(f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
+                    print(
+                        f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
                     print(f"{self.assistant_name}: (awaken)")
                     self.sleep(False)
                     # announce greeting from assistant
@@ -116,7 +121,8 @@ class VirtualAssistant(SpeechAssistant):
             # commands to terminate virtual assistant
             if is_match(voice_data, _get_commands("terminate")):
                 if self.isSleeping():
-                    print(f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
+                    print(
+                        f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
 
                 # play end prompt sound effect
                 self.speak("<end prompt>", end_prompt=True)
@@ -137,10 +143,13 @@ class VirtualAssistant(SpeechAssistant):
         def _unknown_responses():
             return choice(_get_commands("unknown_responses"))
 
-        def _get_commands(action):
-            # get values of "commands", replace the placeholder name for <assistant_name> and <boss_name>
-            return [com.replace("<assistant_name>", self.assistant_name).replace("<boss_name>", self.master_name) for com in (
-                ([command["commands"] for command in self.command_db if command["name"] == action])[0])]
+        # def _get_commands(action):
+        #     # get values of "commands", replace the placeholder name for <assistant_name> and <boss_name>
+        #     return [com.replace("<assistant_name>", self.assistant_name).replace("<boss_name>", self.master_name) for com in (
+        #         ([command["commands"] for command in self.command_db if command["name"] == action])[0])]
+
+        def _get_commands(command_name):
+            return get_commands(command_name, self.assistant_name, self.master_name)
 
         def _formulate_responses(voice_data):
             response_message = ""
@@ -166,7 +175,8 @@ class VirtualAssistant(SpeechAssistant):
                 # commands for greeting
                 greeting_commands = _get_commands("greeting")
                 if is_match(voice_data, greeting_commands):
-                    meta_keyword = extract_metadata(voice_data, greeting_commands)
+                    meta_keyword = extract_metadata(
+                        voice_data, greeting_commands)
 
                     # it's a greeting if no extracted metadata, or..
                     # metadata is assistant's name, or..
@@ -177,7 +187,8 @@ class VirtualAssistant(SpeechAssistant):
 
                 # commands to ask for assistant's name
                 if is_match(voice_data, _get_commands("ask_assistant_name")):
-                    self.speak(f"{choice(_get_commands('ask_assistant_name_response'))}.")
+                    self.speak(
+                        f"{choice(_get_commands('ask_assistant_name_response'))}.")
                     return
 
                 # commands to change wallpaper
@@ -203,7 +214,8 @@ class VirtualAssistant(SpeechAssistant):
                 # commands for playing music
                 music_commands = _get_commands("play_music")
                 if is_match(voice_data, music_commands):
-                    music_keyword = extract_metadata(voice_data, music_commands)
+                    music_keyword = extract_metadata(
+                        voice_data, music_commands)
                     music_response = skills.play_music(music_keyword)
 
                     if music_response:
@@ -243,7 +255,8 @@ class VirtualAssistant(SpeechAssistant):
                 # commands for creating a new project automation
                 create_project_commands = _get_commands("create_project")
                 if is_match(voice_data, create_project_commands):
-                    new_proj_metadata = extract_metadata(voice_data, create_project_commands)
+                    new_proj_metadata = extract_metadata(
+                        voice_data, create_project_commands)
 
                     if new_proj_metadata:
                         lang = "python"
@@ -254,7 +267,8 @@ class VirtualAssistant(SpeechAssistant):
                             lang = new_proj_metadata[(lang_idx + 2):]
 
                         self.speak("Ok! Just a momement.")
-                        create_proj_response = skills.initiate_new_project(lang=lang, proj_name=proj_name)
+                        create_proj_response = skills.initiate_new_project(
+                            lang=lang, proj_name=proj_name)
                         self.speak(f"Initiating new {lang} project.")
                         self.speak(create_proj_response)
                         return
@@ -298,7 +312,8 @@ class VirtualAssistant(SpeechAssistant):
                 # commands to find local files and document
                 find_file_commands = _get_commands("find_file")
                 if is_match(voice_data, find_file_commands):
-                    file_keyword = extract_metadata(voice_data, find_file_commands)
+                    file_keyword = extract_metadata(
+                        voice_data, find_file_commands)
                     find_file_response = skills.find_file(file_keyword)
 
                     if find_file_response:
@@ -312,9 +327,14 @@ class VirtualAssistant(SpeechAssistant):
 
                 preposition_words = _get_commands("prepositions")
                 # commands for news briefing
-                news_commands = _get_commands("news") + [f"news {news_preposition}" for news_preposition in preposition_words]
+                news_commands = _get_commands(
+                    "news") + [f"news {news_preposition}" for news_preposition in preposition_words]
                 if is_match(voice_data, news_commands):
                     news_response = ""
+
+                    self.speak("I'm on it...")
+                    print("\n Fetching information from news channels...")
+
                     # change the directory to location of NewsTicker Library
                     os.chdir(NEWS_SCRAPER_MODULE_DIR)
                     news.fetch_news()
@@ -322,13 +342,16 @@ class VirtualAssistant(SpeechAssistant):
                     os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
                     # get meta data to use for news headline search
-                    news_meta_data = extract_metadata(voice_data, news_commands + preposition_words)
+                    news_meta_data = extract_metadata(
+                        voice_data, news_commands + preposition_words)
+                    about = f"on \"{news_meta_data}\"" if news_meta_data else ""
 
                     # breaking news report
                     if is_match(voice_data, ["breaking news"]):
                         # if news.check_breaking_news() and self.can_listen:
                         if news.check_breaking_news():
-                            news_response = _breaking_news_report(on_demand=True)
+                            news_response = _breaking_news_report(
+                                on_demand=True)
                         else:
                             news_response = "Sorry, no Breaking News available (at the moment)."
 
@@ -338,23 +361,26 @@ class VirtualAssistant(SpeechAssistant):
 
                         # top 3 latest news report
                         if is_match(voice_data, ["news briefing", "flash briefing", "news report", "top news", "top stories", "happening today"]):
-                            news_briefing = news.cast_latest_news(news_meta_data)
+                            news_briefing = news.cast_latest_news(
+                                news_meta_data)
                             number_of_results = len(news_briefing)
 
                             if "happening today" in voice_data:
                                 # what's happening/happend from Wolfram
-                                response_from_wolfram = skills.wolfram_search(voice_data)
+                                response_from_wolfram = skills.wolfram_search(
+                                    voice_data)
                                 if response_from_wolfram:
-                                    news_response = f"{response_from_wolfram} Famous events happend on this day in history. \n\n"
+                                    news_response = f"{response_from_wolfram} This day in history. \n\n"
 
                             if number_of_results > 0:
                                 if number_of_results > 2:
                                     number_of_results = 3
 
-                                news_response += "Here's your flash briefing...\n\n"
+                                news_response += f"Here's your flash briefing {about}.\n\n"
                                 for i in range(0, number_of_results):
                                     news_response += f"{news_briefing[i]['report']}\n\n"
-                                    source_urls.append(news_briefing[i]["source url"])
+                                    source_urls.append(
+                                        news_briefing[i]["source url"])
 
                         # top 1 latest news report
                         elif is_match(voice_data, ["latest", "most", "recent", "flash news", "news flash"]):
@@ -362,23 +388,27 @@ class VirtualAssistant(SpeechAssistant):
                             if len(news_deets) > 0:
                                 # get the first index (latest) on the list of news
                                 top_news = news_deets[0]
-                                news_response = f"Here's the latest news...\n {top_news['report']}\n\n"
+                                news_response = f"Here's the latest news {about}.\n {top_news['report']}\n\n"
                                 source_urls.append(top_news["source url"])
 
                         # random news report for today
                         else:
                             latest_news = news.cast_latest_news(news_meta_data)
                             if len(latest_news) > 0:
+                                if news_meta_data:
+                                    news_response = f"Here's what I found {about}.\n\n"
                                 # choose random news from list of latest news today
                                 random_news_today = choice(latest_news)
-                                news_response = f"{random_news_today['report']}\n\n"
-                                source_urls.append(random_news_today["source url"])
+                                news_response += f"{random_news_today['report']}\n\n"
+                                source_urls.append(
+                                    random_news_today["source url"])
 
                         if len(source_urls) > 0:
                             # convert the list of source_urls to set to remove duplicate.
-                            open_source_url_thread = Thread(target=execute_map, args=("open browser", set(source_urls),))
+                            open_source_url_thread = Thread(
+                                target=execute_map, args=("open browser", set(source_urls),))
                             open_source_url_thread.start()
-                            news_response += "More details of this news in the source article. It should be in your web browser now..."
+                            news_response += "More details of this news in the source article. It should be in your web browser now."
 
                     if news_meta_data and not news_response:
                         news_response = f"I couldn't find \"{news_meta_data}\" on your News Feed. Sorry about that."
@@ -414,7 +444,8 @@ class VirtualAssistant(SpeechAssistant):
                 google_maps_commands = _get_commands("google_maps")
                 if ask_google and is_match(voice_data, google_maps_commands):
                     # extract the location name
-                    location = extract_metadata(voice_data, google_maps_commands)
+                    location = extract_metadata(
+                        voice_data, google_maps_commands)
 
                     if location:
                         response_message += skills.google_maps(location)
@@ -443,7 +474,8 @@ class VirtualAssistant(SpeechAssistant):
                     # extract the keyword
                     wiki_keyword = extract_metadata(voice_data, wiki_commands)
                     # get aswers from wikipedia
-                    wiki_result = skills.wikipedia_search(wiki_keyword=wiki_keyword, voice_data=voice_data)
+                    wiki_result = skills.wikipedia_search(
+                        wiki_keyword=wiki_keyword, voice_data=voice_data)
 
                     keyword_list = wiki_keyword.lower().split(" ")
                     # if answer from wikipedia contains more than 2 words
@@ -468,7 +500,8 @@ class VirtualAssistant(SpeechAssistant):
                 google_commands = _get_commands("google")
                 if ask_google and is_match(voice_data, google_commands):
                     # remove these commands on keyword to search on google
-                    google_keyword = extract_metadata(voice_data, google_commands)
+                    google_keyword = extract_metadata(
+                        voice_data, google_commands)
 
                     # search on google if we have a keyword
                     if google_keyword:
@@ -482,7 +515,8 @@ class VirtualAssistant(SpeechAssistant):
                     # it's' a confirmation if no extracted metadata or..
                     # metadata have matched with confirmation commands.
                     if not confimation_keyword or is_match(confimation_keyword, confirmation_commands):
-                        self.speak(choice(_get_commands("confirmation_responses")))
+                        self.speak(
+                            choice(_get_commands("confirmation_responses")))
 
                         # return immediately, it is a confirmation command,
                         # we don't need further contextual answers
@@ -499,7 +533,8 @@ class VirtualAssistant(SpeechAssistant):
                 return True
 
             except Exception:
-                displayException("Error forumulating response.", logging.ERROR)
+                pass
+                displayException("Error forumulating response.")
 
         def _check_connection():
             retry_count = 0
@@ -514,13 +549,15 @@ class VirtualAssistant(SpeechAssistant):
                         # we got a connection, end the check process and proceed to remaining function
                         return True
                     elif retry_count == 1:
-                        print(f"{self.assistant_name} Not Available.\nYou are not connected to the Internet")
+                        print(
+                            f"{self.assistant_name} Not Available.\nYou are not connected to the Internet")
                     elif retry_count >= 10:
                         retry_count = 0
 
                 except Exception:
+                    pass
                     if retry_count == 1:
-                        displayException("Connection Error.", logging.ERROR)
+                        displayException("Internet Connection Error.")
                         print("\n**Trying to connect...")
                         time.sleep(5)
 
@@ -557,16 +594,16 @@ class VirtualAssistant(SpeechAssistant):
 
             try:
                 if news.check_breaking_news() or on_demand:
-                    newBreakingNews = False
+                    new_breaking_news = False
                     breaking_news_update = news.breaking_news_update
 
                     news_briefing = []
                     for bn in breaking_news_update:
                         if on_demand or not any(bn["headline"].lower() in breaking_news.lower() for breaking_news in self.breaking_news_reported):
                             news_briefing.append(bn["headline"])
-                            newBreakingNews = True
+                            new_breaking_news = True
 
-                    if newBreakingNews:
+                    if new_breaking_news:
                         self.breaking_news_reported = []
                         self.breaking_news_reported.extend(news_briefing)
 
@@ -576,10 +613,12 @@ class VirtualAssistant(SpeechAssistant):
                         else:
                             self.speak("Breaking News Alert!")
 
-                        source_urls = [source["source url"] for source in breaking_news_update]
+                        source_urls = [source["source url"]
+                                       for source in breaking_news_update]
                         if len(source_urls) > 0:
                             # convert the list of source_urls to set to remove duplicate.
-                            open_news_url_thread = Thread(target=execute_map, args=("open browser", set(source_urls),))
+                            open_news_url_thread = Thread(
+                                target=execute_map, args=("open browser", set(source_urls),))
                             open_news_url_thread.start()
 
                         # cast the breaking news
@@ -597,7 +636,8 @@ class VirtualAssistant(SpeechAssistant):
 
             except Exception:
                 pass
-                displayException("Error while reading the breaking news report.", logging.ERROR)
+                displayException(
+                    "Error while reading the breaking news report.")
 
             if on_demand:
                 return response
@@ -605,31 +645,38 @@ class VirtualAssistant(SpeechAssistant):
         def _breaking_news_notification(timeout=60):
             timeout_counter = 0
 
-            while True:
-                timeout_counter += 1
+            try:
+                while True:
+                    timeout_counter += 1
 
-                if timeout_counter >= timeout:
-                    try:
+                    if timeout_counter >= timeout:
                         if news.check_breaking_news():
                             timeout_counter = 0
                             found = False
 
                             for bn in news.breaking_news_update:
                                 if not found:
-                                    if not any(bn["headline"].lower() in breaking_news.lower() for breaking_news in self.breaking_news_reported):
+                                    headline = bn["headline"].lower()
+                                    if not any(headline in breaking_news.lower() for breaking_news in self.breaking_news_reported):
                                         found = True
 
                                         # self.maximize_command_interface()
-                                        self.speak("Breaking News Alert!")
+                                        # self.speak("Breaking News Alert!")
+
+                                        # if self.isSleeping():
+                                        #     time.sleep(1)
+                                        #     # put back to normal volume level
+                                        #     skills.music_volume(70)
+                                        skills.toast_notification(
+                                            "Breaking News Alert!", headline)
 
                                         # if self.isSleeping():
                                         #     self.sleep(False)
                                         break
+                    time.sleep(1)
 
-                    except:
-                        pass
-
-                time.sleep(1)
+            except Exception:
+                pass
 
         """
         Main handler of virtual assistant
@@ -652,12 +699,14 @@ class VirtualAssistant(SpeechAssistant):
 
             # announce breaking news notification
             # every minute (60 sec)
-            breaking_news_notification = Thread(target=_breaking_news_notification, args=(60,))
+            breaking_news_notification = Thread(
+                target=_breaking_news_notification, args=(60,))
             breaking_news_notification.setDaemon(True)
             breaking_news_notification.start()
 
             # play speaking prompt sound effect and say greetings
-            self.speak(choice(_get_commands("start_greeting")), start_prompt=True)
+            self.speak(choice(_get_commands("start_greeting")),
+                       start_prompt=True)
 
             try:
                 while True:
@@ -695,7 +744,8 @@ class VirtualAssistant(SpeechAssistant):
                         if listen_time == 1:
                             print(f"{self.assistant_name}: listening...")
                         elif listen_time == randint(2, (self.listen_timeout - 2)):
-                            self.speak(choice(["I'm here...", "I'm listening..."]), start_prompt=False)
+                            self.speak(
+                                choice(["I'm here...", "I'm listening..."]), start_prompt=False)
 
                         # listen for commands
                         voice_data = self.listen_to_audio()
@@ -744,14 +794,9 @@ class VirtualAssistant(SpeechAssistant):
                             # volume up the music player, if applicable
                             skills.music_volume(70)
 
-                            # get updates of commands from json file
-                            get_commands_thread = Thread(target=self.get_commands_from_json)
-                            get_commands_thread.setDaemon(True)
-                            get_commands_thread.start()
-
             except Exception:
                 pass
-                displayException("Error while starting virtual assistant.", logging.ERROR)
+                displayException("Error while starting virtual assistant.")
 
         # check internet connectivity every second
         # before proceeding to main()

@@ -351,13 +351,19 @@
             "name": "weather",
             "commands": [
                 "weather forecast",
+                "forecast weather",
                 "weather today",
                 "weather like",
                 "forecast weather",
+                "forecast today",
+                "forecast for today",
                 "the weather",
                 "weather in",
                 "weather on",
-                "weather for"
+                "weather for",
+                "temperature",
+                "rain",
+                "precipitation"
             ]
         },
         {
@@ -488,6 +494,37 @@
                 "on",
                 "by",
                 "about"
+            ]
+        },
+        {
+            "name": "parts of speech",
+            "commands": [
+                "noun",
+                "pronoun",
+                "verb",
+                "adjective",
+                "adverb",
+                "preposition",
+                "conjunction",
+                "interjection"
+            ]
+        },
+        {
+            "name": "time and day",
+            "commands": [
+                "tomorrow",
+                "morning",
+                "afternoon",
+                "evening",
+                "night",
+                "noon",
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
             ]
         }
     ]
