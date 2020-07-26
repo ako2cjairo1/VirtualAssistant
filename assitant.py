@@ -25,15 +25,7 @@ class VirtualAssistant(SpeechAssistant):
         self.assistant_name = assistants_name
         self.listen_timeout = listen_timeout
         self.breaking_news_reported = []
-
-    # def get_commands_from_json(self):
-    #     try:
-    #         if os.path.isfile("commands_db.json"):
-    #             with open("commands_db.json", "r", encoding="utf-8") as fl:
-    #                 self.command_db = json.load(fl)["command_db"]
-    #     except Exception:
-    #         pass
-    #         displayException("Get Commands Error.")
+        self.is_online = False
 
     def maximize_command_interface(self, maximize=True):
         if maximize:
@@ -44,10 +36,9 @@ class VirtualAssistant(SpeechAssistant):
                 "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 1174 533 /siz 217 203 /NOT")
 
     def activate(self):
-        skills = SkillsLibrary(super(), self.master_name, self.assistant_name)
-
+        skills = None
         # init news scraper (daemon)
-        news = skills.news_scraper()
+        news = None
 
         def _awake_greetings(start_prompt=True):
             self.speak(choice(_get_commands("wakeup_responses")),
@@ -131,6 +122,7 @@ class VirtualAssistant(SpeechAssistant):
                 _mute_assistant(f"stop {self.assistant_name}")
 
                 print(f"\n{self.assistant_name} assistant DEACTIVATED.\n")
+                self.respond_to_bot("(Offline)")
                 # terminate and end the virtual assistant application
 
                 # volume up the music player, if applicable
@@ -142,11 +134,6 @@ class VirtualAssistant(SpeechAssistant):
 
         def _unknown_responses():
             return choice(_get_commands("unknown_responses"))
-
-        # def _get_commands(action):
-        #     # get values of "commands", replace the placeholder name for <assistant_name> and <boss_name>
-        #     return [com.replace("<assistant_name>", self.assistant_name).replace("<boss_name>", self.master_name) for com in (
-        #         ([command["commands"] for command in self.command_db if command["name"] == action])[0])]
 
         def _get_commands(command_name):
             return get_commands(command_name, self.assistant_name, self.master_name)
@@ -333,7 +320,7 @@ class VirtualAssistant(SpeechAssistant):
                     news_response = ""
 
                     self.speak("I'm on it...")
-                    print("\n Fetching information from news channels...")
+                    print("\n Fetching information from news channels...\n")
 
                     # change the directory to location of NewsTicker Library
                     os.chdir(NEWS_SCRAPER_MODULE_DIR)
@@ -547,6 +534,7 @@ class VirtualAssistant(SpeechAssistant):
                     # 200 means we got connection to web
                     if response.status_code == 200:
                         # we got a connection, end the check process and proceed to remaining function
+                        self.is_online = True
                         return True
                     elif retry_count == 1:
                         print(
@@ -557,7 +545,7 @@ class VirtualAssistant(SpeechAssistant):
                 except Exception:
                     pass
                     if retry_count == 1:
-                        displayException("Internet Connection Error.")
+                        displayException(f"{self.assistant_name} Not Available.\nYou are not connected to the Internet")
                         print("\n**Trying to connect...")
                         time.sleep(5)
 
@@ -580,9 +568,13 @@ class VirtualAssistant(SpeechAssistant):
                         # put back to normal volume level
                         skills.music_volume(70)
 
-                # if time_ticker == 0 and ((hr == 9 or hr == 10) and mn == 30 and sec == 00):
-                #     self.speak(f"Happy birthday to you... happy birthday to you... Happy Birthday, dear {self.master_name}... Happy birthday to you!")
-                #     time_ticker += 1
+                # send "Fun Holiday" notification every 10:00:30 AM
+                if time_ticker == 0 and ((hr == 10) and mn == 00 and sec == 30):
+                    skills.fun_holiday()
+
+                # if time_ticker == 0 and ((mn % 1) == 0 and sec == 00):
+                #     # notification here
+                #     pass
 
                 if time_ticker >= 1:
                     time_ticker = 0
@@ -647,11 +639,9 @@ class VirtualAssistant(SpeechAssistant):
 
             try:
                 while True:
-                    timeout_counter += 1
-
-                    if timeout_counter >= timeout:
+                    if timeout_counter == 0 or timeout_counter >= timeout:
                         if news.check_breaking_news():
-                            timeout_counter = 0
+                            timeout_counter = 1
                             found = False
 
                             for bn in news.breaking_news_update:
@@ -660,19 +650,10 @@ class VirtualAssistant(SpeechAssistant):
                                     if not any(headline in breaking_news.lower() for breaking_news in self.breaking_news_reported):
                                         found = True
 
-                                        # self.maximize_command_interface()
-                                        # self.speak("Breaking News Alert!")
-
-                                        # if self.isSleeping():
-                                        #     time.sleep(1)
-                                        #     # put back to normal volume level
-                                        #     skills.music_volume(70)
                                         skills.toast_notification(
                                             "Breaking News Alert!", headline)
-
-                                        # if self.isSleeping():
-                                        #     self.sleep(False)
                                         break
+                    timeout_counter += 1
                     time.sleep(1)
 
             except Exception:
@@ -705,8 +686,7 @@ class VirtualAssistant(SpeechAssistant):
             breaking_news_notification.start()
 
             # play speaking prompt sound effect and say greetings
-            self.speak(choice(_get_commands("start_greeting")),
-                       start_prompt=True)
+            self.speak(choice(_get_commands("start_greeting")), start_prompt=True)
 
             try:
                 while True:
@@ -743,6 +723,7 @@ class VirtualAssistant(SpeechAssistant):
 
                         if listen_time == 1:
                             print(f"{self.assistant_name}: listening...")
+                            self.respond_to_bot("listening...")
                         elif listen_time == randint(2, (self.listen_timeout - 2)):
                             self.speak(
                                 choice(["I'm here...", "I'm listening..."]), start_prompt=False)
@@ -791,16 +772,27 @@ class VirtualAssistant(SpeechAssistant):
                             self.sleep(True)
                             # show if assistant is sleeping (muted).
                             print(f"{self.assistant_name}: ZzzzZz")
+                            self.respond_to_bot("ZzzzZz")
                             # volume up the music player, if applicable
                             skills.music_volume(70)
 
             except Exception:
                 pass
-                displayException("Error while starting virtual assistant.")
+                error_message = "Error while starting virtual assistant."
+                displayException(error_message)
+                self.respond_to_bot(error_message)
 
         # check internet connectivity every second
         # before proceeding to main()
-        if _check_connection():
-            while not _start_virtual_assistant():
-                print("\n**Trying to recover from internal error...")
-                time.sleep(5)
+        while not _check_connection():
+            recover_message = "\n**Trying to recover from internal error..."
+            print(recover_message)
+            self.respond_to_bot(recover_message)
+            time.sleep(5)
+
+        if self.is_online:
+            skills = SkillsLibrary(super(), self.master_name, self.assistant_name)
+            # init news scraper (daemon)
+            news = skills.news_scraper()
+
+            _start_virtual_assistant()

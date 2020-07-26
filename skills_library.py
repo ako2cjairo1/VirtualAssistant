@@ -358,8 +358,8 @@ class SkillsLibrary:
         if wiki_keyword:
             try:
                 summary = wikipedia.summary(wiki_keyword.strip(), sentences=2)
-                if len(summary.split(" ")) > 15 and len(summary.split(".")[0]) > 15:
-                    summary = summary.split(".")[0]
+                if len(summary.split(" ")) > 15 or len(summary.split(".")[0].split(" ")) > 15:
+                    summary = summary.split(".")[0] + "."
 
                 return summary
 
@@ -890,6 +890,7 @@ class SkillsLibrary:
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
         except Exception:
+            pass
             displayException("Music Volume Control Error.")
 
     def news_scraper(self):
@@ -917,7 +918,7 @@ class SkillsLibrary:
             displayException("News Scraper Control Error.")
             return None
 
-    def toast_notification(self, title, message):
+    def toast_notification(self, title, message, duration=600):
 
         try:
             import sys
@@ -927,7 +928,37 @@ class SkillsLibrary:
             # change the directory to location of batch file to execute
             os.chdir(UTILITIES_MODULE_DIR)
 
-            notification.send_toast(title, message)
+            notification.send_toast(title, message, duration=duration)
+            self.tts.respond_to_bot(title)
+            self.tts.respond_to_bot(message)
+
+            # get back to virtual assistant directory
+            os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+
+        except Exception:
+            pass
+            displayException("Music Volume Control Error.")
+
+    def fun_holiday(self):
+        try:
+            import sys
+            sys.path.append(NEWS_SCRAPER_MODULE_DIR)
+            from FunHolidays import FunHoliday
+            fh = FunHoliday()
+            # change the directory to location of batch file to execute
+            os.chdir(NEWS_SCRAPER_MODULE_DIR)
+
+            result = fh.get_fun_holiday()
+            if result["success"] == "true":
+                holiday = result["holiday"]
+
+                title = f'Today is \"{holiday["title"]}\"'
+                message = holiday["heading"]
+
+                self.toast_notification(title, message, duration=300)
+                self.tts.respond_to_bot(title)
+                self.tts.respond_to_bot(message)
+                # print(f'Date: {holiday["date"]}\nTitle: {holiday["title"]}\nHeading: {holiday["heading"]}\nDid You Know? {holiday["did you know"]}\nURL: {holiday["source url"]}')
 
             # get back to virtual assistant directory
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)

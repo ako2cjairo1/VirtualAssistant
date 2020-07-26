@@ -9,6 +9,8 @@ from helper import displayException
 from gtts import gTTS
 from gtts.tts import gTTSError
 from skills_library import SkillsLibrary
+from telegram import TelegramBot
+from threading import Thread
 
 AUDIO_FOLDER = "./text-to-speech-audio"
 
@@ -33,6 +35,14 @@ class SpeechAssistant:
         self.recognizer.energy_threshold = 4000
 
         self.skill = SkillsLibrary(self, self.master_name, self.assistant_name)
+        self.bot = TelegramBot("1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI")
+        self.chat_id = None
+        self.update_id = None
+        self.bot_command = None
+
+        bot_command_thread = Thread(target=self.get_command_from_bot)
+        bot_command_thread.setDaemon(True)
+        bot_command_thread.start()
 
     def listen_to_audio(self, ask=None):
         voice_text = ""
@@ -52,21 +62,27 @@ class SpeechAssistant:
                 if ask:
                     self.speak(ask)
 
-                # listening
-                audio = self.recognizer.listen(source, timeout=listen_timeout)
-                # try convert audio to text/string data
-                voice_text = self.recognizer.recognize_google(audio)
+                if self.bot_command and "/start" not in self.bot_command:
+                    voice_text = self.bot_command
+                    self.bot_command = None
+                else:
+                    # listening
+                    audio = self.recognizer.listen(source, timeout=listen_timeout)
+                    # try convert audio to text/string data
+                    voice_text = self.recognizer.recognize_google(audio)
 
-                if self.isSleeping() and self.not_available_counter >= 3:
-                    print(f"\"{self.assistant_name}\" is active again.")
-                    self.not_available_counter = 0
+                # if self.isSleeping() and self.not_available_counter >= 3:
+                #     print(f"\"{self.assistant_name}\" is active again.")
+                self.not_available_counter = 0
 
             except sr.UnknownValueError:
                 displayException(
                     f"{self.assistant_name} could not understand what you have said.", logging.WARNING)
 
                 if self.isSleeping() and self.not_available_counter >= 3:
-                    print(f"\"{self.assistant_name}\" is active again.")
+                    message = f"\"{self.assistant_name}\" is active again."
+                    print(message)
+                    self.respond_to_bot(message)
                     self.not_available_counter = 0
 
                 return voice_text
@@ -74,11 +90,14 @@ class SpeechAssistant:
             except sr.RequestError:
                 self.not_available_counter += 1
                 if self.not_available_counter == 3:
-                    displayException(
-                        f"\"{self.assistant_name}\" Not Available.")
+                    message = f"\"{self.assistant_name}\" Not Available."
+                    displayException(message)
+                    self.respond_to_bot(message)
 
                 if self.isSleeping() and self.not_available_counter >= 3:
-                    print(f"{self.assistant_name}: reconnecting...")
+                    message = f"{self.assistant_name}: reconnecting..."
+                    print(message)
+                    self.respond_to_bot(message)
 
             except gTTSError:
                 displayException("gTTSError")
@@ -88,10 +107,6 @@ class SpeechAssistant:
                     # bypass the timed out exception, (timeout=3, if total silence for 3 secs.)
                     displayException(
                         "Exception occurred while analyzing audio.")
-                else:
-                    if self.isSleeping() and self.not_available_counter >= 3:
-                        print(f"\"{self.assistant_name}\" is active again.")
-                        self.not_available_counter = 0
 
         if not self.isSleeping() and voice_text.strip():
             print(
@@ -105,12 +120,24 @@ class SpeechAssistant:
     def isSleeping(self):
         return self.sleep_assistant
 
+    def respond_to_bot(self, audio_string):
+        self.bot.send_message(audio_string, self.chat_id)
+
+    def get_command_from_bot(self):
+        while True:
+            updates = self.bot.get_updates(self.update_id)
+            if updates["ok"] and len(updates["result"]) > 0:
+                self.update_id = self.bot.get_last_update_id(updates) + 1
+                # handle_updates(updates)
+                command, self.chat_id = self.bot.get_last_chat_id_and_text(updates)
+                self.bot_command = command.strip().lower()
+            time.sleep(0.5)
+
     def speak(self, audio_string, start_prompt=False, end_prompt=False, mute_prompt=False):
         if audio_string.strip():
             try:
                 # volume up the music player, if applicable
                 self.skill.music_volume(30)
-
                 force_delete = False
                 # init google's text-to-speech module
                 tts = gTTS(text=audio_string, lang="en-us", slow=False)
@@ -129,6 +156,9 @@ class SpeechAssistant:
                     playsound.playsound(f"{AUDIO_FOLDER}/start prompt.mp3")
                     print(
                         f"{ASSISTANT_BLACK_NAME}{self.assistant_name}:{ASSISTANT_CYAN_MESSAGE} {audio_string}")
+
+                    self.respond_to_bot(audio_string)
+
                     force_delete = True
 
                 elif end_prompt:
@@ -142,6 +172,8 @@ class SpeechAssistant:
                     print(
                         f"{ASSISTANT_BLACK_NAME}{self.assistant_name}:{ASSISTANT_CYAN_MESSAGE} {audio_string}")
 
+                    self.respond_to_bot(audio_string)
+
                 # announce/play the generated audio
                 playsound.playsound(audio_file)
 
@@ -153,7 +185,17 @@ class SpeechAssistant:
                 if not ("Cannot find the specified file." or "Permission denied:") in str(ex):
                     displayException(
                         "Error occurred (gtts) while trying to speak.")
-                    print(
-                        f"{self.assistant_name} Not Available. You are not connected to the internet.")
+                    message = f"{self.assistant_name} Not Available. You are not connected to the internet."
+                    print(message)
+                    self.respond_to_bot(message)
                 else:
-                    pass
+                    self.not_available_counter += 1
+                    if self.not_available_counter == 3:
+                        message = f"\"{self.assistant_name}\" Not Available."
+                        displayException(message)
+                        self.respond_to_bot(message)
+
+                    if self.isSleeping() and self.not_available_counter >= 3:
+                        message = f"{self.assistant_name}: reconnecting..."
+                        print(message)
+                        self.respond_to_bot(message)

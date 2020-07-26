@@ -59,13 +59,16 @@ def get_commands_from_json():
     except Exception:
         pass
         displayException("Get Commands Error.")
+        return list()
 
 
 def get_commands(command_name, assistant_name="", master_name=""):
     commands = get_commands_from_json()
-    # get values of "commands", replace the placeholder name for <assistant_name> and <boss_name>
-    return [com.replace("<assistant_name>", assistant_name).replace("<boss_name>", master_name) for com in (
-        ([command["commands"] for command in commands if command["name"] == command_name])[0])]
+    if commands:
+        # get values of "commands", replace the placeholder name for <assistant_name> and <boss_name>
+        return [com.replace("<assistant_name>", assistant_name).replace("<boss_name>", master_name) for com in (
+            ([command["commands"] for command in commands if command["name"] == command_name])[0])]
+    return list()
 
 
 def clean_voice_data(voice_data, assistants_name):
