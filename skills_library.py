@@ -32,6 +32,12 @@ class SkillsLibrary:
         self.assistant_name = assistants_name
         self.tts = tts
 
+    def print(self, message):
+        print(message)
+
+        message = message.replace(f"{self.assistant_name}:", "")
+        self.tts.respond_to_bot(message)
+
     def _get_commands(self, command_name):
         return get_commands(command_name, self.assistant_name, self.master_name)
 
@@ -46,10 +52,16 @@ class SkillsLibrary:
         result = ""
         # open google iste in web browser and show results
         if search_keyword:
-            open_browser_thread = Thread(target=execute_map, args=("open browser", [
-                                         f"https://google.com/search?q={quote(search_keyword.strip())}"],))
+            link = f"https://google.com/search?q={quote(search_keyword.strip())}"
+
+            open_browser_thread = Thread(target=execute_map, args=("open browser", [link],))
             open_browser_thread.start()
             result = f"Here's what I found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
+
+            # let get the redirected url (if possible) from link we have
+            redirect_url = requests.get(link)
+            # send the link to bot
+            self.tts.respond_to_bot(redirect_url.url)
 
         return result
 
@@ -57,21 +69,30 @@ class SkillsLibrary:
         result = ""
         # open youtube site in web browser and show results
         if search_keyword:
-            open_browser_thread = Thread(target=execute_map, args=("open browser", [
-                                         f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"],))
+            link = f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"
+
+            open_browser_thread = Thread(target=execute_map, args=("open browser", [link],))
             open_browser_thread.start()
             result = f"I found something on Youtube for \"{search_keyword}\"."
+
+            # send the link to bot
+            self.tts.respond_to_bot(link)
 
         return result
 
     def google_maps(self, location):
         result = ""
         if location:
+            link = f"https://google.nl/maps/place/{quote(location.strip())}/&amp;"
             # open a web browser and map
-            open_browser_thread = Thread(target=execute_map, args=("open browser", [
-                                         f"https://google.nl/maps/place/{quote(location.strip())}/&amp;"],))
+            open_browser_thread = Thread(target=execute_map, args=("open browser", [link],))
             open_browser_thread.start()
             result = f"Here\'s the map location of \"{location.strip()}\". Opening your browser..."
+
+            # let get the redirected url (if possible) from link we have
+            redirect_url = requests.get(link)
+            # send the link to bot
+            self.tts.respond_to_bot(redirect_url.url)
 
         return result
 
@@ -261,7 +282,7 @@ class SkillsLibrary:
                             response = "Here's some information."
 
                             for deet in wolfram_response.split(" | "):
-                                print(f">> {deet}.")
+                                self.print(f">> {deet}.")
 
                     # we found an array of information, let's disect if necessary
                     elif wolfram_response.count("\n") > 3:
@@ -269,7 +290,7 @@ class SkillsLibrary:
                         response = "Here's some information."
 
                         for deet in wolfram_response.split("\n"):
-                            print(f">> {deet}.")
+                            self.print(f">> {deet}.")
 
                     # we found at least 1 set of defition, disect further if necessary
                     elif is_match(wolfram_response, ["|"]):
@@ -636,6 +657,9 @@ class SkillsLibrary:
                 open_browser_thread = Thread(
                     target=execute_map, args=("open browser", urls,))
                 open_browser_thread.start()
+                # send the links to bot
+                with task.ThreadPoolExecutor() as exec:
+                    exec.map(self.tts.respond_to_bot, urls)
 
             if len(app_names) > 0:
                 confirmation = f"Ok! opening {' and '.join(app_names)}..."
@@ -693,7 +717,7 @@ class SkillsLibrary:
 
                                     # announce every 5000th file is done searched
                                     if file_count > 0 and ((file_count % 5000) == 0):
-                                        print(
+                                        self.print(
                                             f"{self.assistant_name}: so far, I found {found_file_count} o/f {file_count}")
                                         self.tts.speak("Searching...")
 
@@ -705,10 +729,10 @@ class SkillsLibrary:
                         if found_file_count > 0:
                             # show the directories of files found
                             for fl in files_found:
-                                print(fl.replace("'", "").replace(
+                                self.print(fl.replace("'", "").replace(
                                     "(Files Found)", f"Files found: {found_file_count}"))
 
-                            print(
+                            self.print(
                                 f"\n----- {found_file_count} files found -----\n")
                             response_message = f"I found {found_file_count} files. I'm showing you the directories where to see them.\n"
         except Exception:
@@ -741,7 +765,7 @@ class SkillsLibrary:
                 # announce before going off-line
                 self.tts.speak(f"Done! I {command} the wi-fi.\n")
                 os.system(f"netsh interface set interface \"Wi-Fi\" {command}")
-                print(f"\033[1;33;41m{self.assistant_name} is offline...")
+                self.print(f"\033[1;33;41m{self.assistant_name} is offline...")
                 # although this will not be annouced anymore (offline), let's rather return something.
                 return f"Done! I {command} the wi-fi."
 

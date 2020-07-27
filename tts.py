@@ -20,6 +20,8 @@ ASSISTANT_BLACK_NAME = "\033[22;30;46m"
 MASTER_GREEN_MESSAGE = "\033[1;37;42m"
 MASTER_BLACK_NAME = "\033[22;30;42m"
 
+VIRTUAL_ASSISTANT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant"
+
 
 class SpeechAssistant:
 
@@ -64,15 +66,13 @@ class SpeechAssistant:
 
                 if self.bot_command and "/start" not in self.bot_command:
                     voice_text = self.bot_command
-                    self.bot_command = None
+                    # self.bot_command = None
                 else:
                     # listening
                     audio = self.recognizer.listen(source, timeout=listen_timeout)
                     # try convert audio to text/string data
                     voice_text = self.recognizer.recognize_google(audio)
 
-                # if self.isSleeping() and self.not_available_counter >= 3:
-                #     print(f"\"{self.assistant_name}\" is active again.")
                 self.not_available_counter = 0
 
             except sr.UnknownValueError:
@@ -112,6 +112,10 @@ class SpeechAssistant:
             print(
                 f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_text}")
 
+        if not self.bot_command and voice_text.strip():
+            self.respond_to_bot(f"(I heared) you said: {voice_text}")
+
+        self.bot_command = None
         return voice_text.strip()
 
     def sleep(self, value):
@@ -128,9 +132,20 @@ class SpeechAssistant:
             updates = self.bot.get_updates(self.update_id)
             if updates["ok"] and len(updates["result"]) > 0:
                 self.update_id = self.bot.get_last_update_id(updates) + 1
+
+                if not self.chat_id:
+                    self.bot.send_message("/start", self.update_id)
+
                 # handle_updates(updates)
                 command, self.chat_id = self.bot.get_last_chat_id_and_text(updates)
                 self.bot_command = command.strip().lower()
+
+                if self.isSleeping():
+                    self.bot_command = f"hey {self.assistant_name} {self.bot_command}"
+                    # lower the volume of music player (if there is playing)
+                    # so listening microphone will not block our bot_command request
+                    self.skill.music_volume(20)
+
             time.sleep(0.5)
 
     def speak(self, audio_string, start_prompt=False, end_prompt=False, mute_prompt=False):

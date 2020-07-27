@@ -98,24 +98,30 @@ def convert_to_one_word_commands(voice_data, commands):
 
 
 def extract_metadata(voice_data, commands):
+    extraction_success = False
+    extracted = True
+
+    voice_data = voice_data.replace("?", "").replace(",", " ").strip()
     meta_keyword, commands = convert_to_one_word_commands(voice_data, commands)
     voice_data_list = meta_keyword.lower().split(" ")
-    extracted = True
 
     for command in (com.lower() for com in commands):
         # remove the first occurance of command from voice data
         if command in voice_data_list:
             extracted = False
+            extraction_success = True
             meta_keyword = meta_keyword[(meta_keyword.find(
                 command) + len(command)):].strip()
 
             # apply recursion until we extracted the meta_data
             return extract_metadata(meta_keyword, commands)
 
-    if extracted:
+    if extracted and extraction_success:
         # set to original voice_data if no meta_keword was found
         # else, use meta_keyword and make it as one string
         return (voice_data.strip().lower() if not meta_keyword else meta_keyword.strip().lower())
+
+    return voice_data.strip().lower()
 
 
 def execute_map(func, *argv):

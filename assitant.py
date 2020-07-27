@@ -27,6 +27,14 @@ class VirtualAssistant(SpeechAssistant):
         self.breaking_news_reported = []
         self.is_online = False
 
+    def print(self, message):
+        print(message)
+
+        # send response to bot except for the word "listening..."
+        if message != f"{self.assistant_name}: listening...":
+            message = message.replace(f"{self.assistant_name}:", "")
+            self.respond_to_bot(message)
+
     def maximize_command_interface(self, maximize=True):
         if maximize:
             os.system(
@@ -56,12 +64,12 @@ class VirtualAssistant(SpeechAssistant):
                 # wake command is invoked and the user ask question immediately.
                 if len(voice_data.split(" ")) > 2 and is_match(voice_data, wakeup_command):
                     self.maximize_command_interface()
-                    print(
+                    self.print(
                         f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
                     self.sleep(False)
                     # play end speaking prompt sound effect
                     self.speak("<start prompt>", start_prompt=True)
-                    print(f"{self.assistant_name}: (awaken)")
+                    self.print(f"{self.assistant_name}: (awaken)")
                     # _formulate_responses(clean_voice_data(voice_data, self.assistant_name))
                     _formulate_responses(voice_data)
                     return True
@@ -69,9 +77,9 @@ class VirtualAssistant(SpeechAssistant):
                 # wake commands is invoked and expected to ask for another command
                 elif is_match(voice_data, wakeup_command):
                     self.maximize_command_interface()
-                    print(
+                    self.print(
                         f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
-                    print(f"{self.assistant_name}: (awaken)")
+                    self.print(f"{self.assistant_name}: (awaken)")
                     self.sleep(False)
                     # announce greeting from assistant
                     _awake_greetings()
@@ -96,7 +104,7 @@ class VirtualAssistant(SpeechAssistant):
                 # minimize the command interface
                 self.maximize_command_interface(False)
                 # don't listen for commands temporarily
-                print(f"{self.assistant_name}: (in mute)")
+                self.print(f"{self.assistant_name}: (in mute)")
 
                 # play end prompt sound effect
                 self.speak("(mute/sleep prompt)", mute_prompt=True)
@@ -112,7 +120,7 @@ class VirtualAssistant(SpeechAssistant):
             # commands to terminate virtual assistant
             if is_match(voice_data, _get_commands("terminate")):
                 if self.isSleeping():
-                    print(
+                    self.print(
                         f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
 
                 # play end prompt sound effect
@@ -121,8 +129,7 @@ class VirtualAssistant(SpeechAssistant):
                 self.speak(choice(_get_commands("terminate_response")))
                 _mute_assistant(f"stop {self.assistant_name}")
 
-                print(f"\n{self.assistant_name} assistant DEACTIVATED.\n")
-                self.respond_to_bot("(Offline)")
+                self.print(f"\n{self.assistant_name} assistant DEACTIVATED.\n")
                 # terminate and end the virtual assistant application
 
                 # volume up the music player, if applicable
@@ -320,7 +327,7 @@ class VirtualAssistant(SpeechAssistant):
                     news_response = ""
 
                     self.speak("I'm on it...")
-                    print("\n Fetching information from news channels...\n")
+                    self.print("\n Fetching information from news channels...\n")
 
                     # change the directory to location of NewsTicker Library
                     os.chdir(NEWS_SCRAPER_MODULE_DIR)
@@ -337,8 +344,7 @@ class VirtualAssistant(SpeechAssistant):
                     if is_match(voice_data, ["breaking news"]):
                         # if news.check_breaking_news() and self.can_listen:
                         if news.check_breaking_news():
-                            news_response = _breaking_news_report(
-                                on_demand=True)
+                            news_response = _breaking_news_report(on_demand=True)
                         else:
                             news_response = "Sorry, no Breaking News available (at the moment)."
 
@@ -366,8 +372,7 @@ class VirtualAssistant(SpeechAssistant):
                                 news_response += f"Here's your flash briefing {about}.\n\n"
                                 for i in range(0, number_of_results):
                                     news_response += f"{news_briefing[i]['report']}\n\n"
-                                    source_urls.append(
-                                        news_briefing[i]["source url"])
+                                    source_urls.append(news_briefing[i]["source url"])
 
                         # top 1 latest news report
                         elif is_match(voice_data, ["latest", "most", "recent", "flash news", "news flash"]):
@@ -395,6 +400,13 @@ class VirtualAssistant(SpeechAssistant):
                             open_source_url_thread = Thread(
                                 target=execute_map, args=("open browser", set(source_urls),))
                             open_source_url_thread.start()
+
+                            for link in set(source_urls):
+                                # let get the redirected url (if possible) from link we have
+                                redirect_url = requests.get(link)
+                                # send the link to bot
+                                self.respond_to_bot(redirect_url.url)
+
                             news_response += "More details of this news in the source article. It should be in your web browser now."
 
                     if news_meta_data and not news_response:
@@ -522,6 +534,7 @@ class VirtualAssistant(SpeechAssistant):
             except Exception:
                 pass
                 displayException("Error forumulating response.")
+                self.respond_to_bot("Error forumulating response.")
 
         def _check_connection():
             retry_count = 0
@@ -537,7 +550,7 @@ class VirtualAssistant(SpeechAssistant):
                         self.is_online = True
                         return True
                     elif retry_count == 1:
-                        print(
+                        self.print(
                             f"{self.assistant_name} Not Available.\nYou are not connected to the Internet")
                     elif retry_count >= 10:
                         retry_count = 0
@@ -546,7 +559,7 @@ class VirtualAssistant(SpeechAssistant):
                     pass
                     if retry_count == 1:
                         displayException(f"{self.assistant_name} Not Available.\nYou are not connected to the Internet")
-                        print("\n**Trying to connect...")
+                        self.print("\n**Trying to connect...")
                         time.sleep(5)
 
                 time.sleep(1)
@@ -575,6 +588,16 @@ class VirtualAssistant(SpeechAssistant):
                 # if time_ticker == 0 and ((mn % 1) == 0 and sec == 00):
                 #     # notification here
                 #     pass
+
+                if self.bot_command and "/restart" in self.bot_command:
+                    self.bot_command = f"goodbye {self.assistant_name}"
+                    # change directory to NewsTicker library
+                    os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+                    # execute batch file that will open Newsfeed on a newo console window
+                    # os.system('start cmd /k \"start start_brenda.bat\"')
+                    os.system(f'start cmd /k "start_brenda.bat"')
+                    _deactivate(f"goodbye {self.assistant_name}")
+                    exit()
 
                 if time_ticker >= 1:
                     time_ticker = 0
@@ -613,6 +636,12 @@ class VirtualAssistant(SpeechAssistant):
                                 target=execute_map, args=("open browser", set(source_urls),))
                             open_news_url_thread.start()
 
+                            for link in set(source_urls):
+                                # let get the redirected url (if possible) from link we have
+                                redirect_url = requests.get(link)
+                                # send the link to bot
+                                self.respond_to_bot(redirect_url.url)
+
                         # cast the breaking news
                         for breaking_news in news.cast_breaking_news():
                             if on_demand:
@@ -650,8 +679,10 @@ class VirtualAssistant(SpeechAssistant):
                                     if not any(headline in breaking_news.lower() for breaking_news in self.breaking_news_reported):
                                         found = True
 
-                                        skills.toast_notification(
-                                            "Breaking News Alert!", headline)
+                                        skills.toast_notification("Breaking News Alert!", headline)
+
+                                        # skills.toast_notification("Breaking News Alert!", headline)
+                                        # self.respond_to_bot(_breaking_news_report())
                                         break
                     timeout_counter += 1
                     time.sleep(1)
@@ -672,7 +703,7 @@ class VirtualAssistant(SpeechAssistant):
             # volume up the music player, if applicable
             skills.music_volume(30)
 
-            print(f"\n\n\"{self.assistant_name}\" is active...")
+            self.print(f"\n\n\"{self.assistant_name}\" is active...")
 
             announcetime_thread = Thread(target=_announce_time)
             announcetime_thread.setDaemon(True)
@@ -722,8 +753,7 @@ class VirtualAssistant(SpeechAssistant):
                             (3) formulate responses for lower level commands """
 
                         if listen_time == 1:
-                            print(f"{self.assistant_name}: listening...")
-                            self.respond_to_bot("listening...")
+                            self.print(f"{self.assistant_name}: listening...")
                         elif listen_time == randint(2, (self.listen_timeout - 2)):
                             self.speak(
                                 choice(["I'm here...", "I'm listening..."]), start_prompt=False)
@@ -771,8 +801,7 @@ class VirtualAssistant(SpeechAssistant):
                         if sleep_counter == 1:
                             self.sleep(True)
                             # show if assistant is sleeping (muted).
-                            print(f"{self.assistant_name}: ZzzzZz")
-                            self.respond_to_bot("ZzzzZz")
+                            self.print(f"{self.assistant_name}: ZzzzZz")
                             # volume up the music player, if applicable
                             skills.music_volume(70)
 
@@ -780,14 +809,11 @@ class VirtualAssistant(SpeechAssistant):
                 pass
                 error_message = "Error while starting virtual assistant."
                 displayException(error_message)
-                self.respond_to_bot(error_message)
 
         # check internet connectivity every second
         # before proceeding to main()
         while not _check_connection():
-            recover_message = "\n**Trying to recover from internal error..."
-            print(recover_message)
-            self.respond_to_bot(recover_message)
+            self.print("\n**Trying to recover from internal error...")
             time.sleep(5)
 
         if self.is_online:
