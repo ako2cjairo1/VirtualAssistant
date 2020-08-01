@@ -1,0 +1,53 @@
+08-01-2020 09:55:08 AM | ERROR | ------------------------------------------------------------
+08-01-2020 09:55:09 AM | ERROR | ------------------------------------------------------------
+08-01-2020 09:55:09 AM | ERROR | ------------------------------------------------------------
+08-01-2020 09:57:40 AM | ERROR | ------------------------------------------------------------
+08-01-2020 09:57:40 AM | ERROR | ------------------------------------------------------------
+08-01-2020 09:57:42 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:00:24 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:00:24 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:00:27 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:01:27 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:01:27 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:01:30 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:08:33 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:10:08 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:10:11 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:10:12 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:10:17 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:11:02 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:12:34 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:14:34 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:14:44 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:14:44 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:14:49 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:14:52 AM | CRITICAL | C:\Users\Dave\DEVENV\Python\NewsScraper\NewsScraper.py
+File:  Error while parsing html.
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000241A65C5790>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    245
+08-01-2020 10:14:52 AM | CRITICAL | C:\Users\Dave\DEVENV\Python\NewsScraper\NewsScraper.py
+File:  Error while parsing html.
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000241A65C5F70>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    245
+08-01-2020 10:15:02 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:15:29 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:18:04 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:19:40 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:20:26 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:20:53 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:20:57 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:20:59 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:21:04 AM | ERROR | ------------------------------------------------------------
+08-01-2020 10:21:16 AM | CRITICAL | C:\Users\Dave\DEVENV\Python\NewsScraper\NewsScraper.py
+File:  Error while parsing html.
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000019DEDFF0760>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    245
+08-01-2020 10:21:16 AM | CRITICAL | C:\Users\Dave\DEVENV\Python\NewsScraper\NewsScraper.py
+File:  Error while parsing html.
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000019DEDFF0490>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    245
+08-01-2020 11:46:25 AM | ERROR | ------------------------------------------------------------

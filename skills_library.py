@@ -55,6 +55,7 @@ class SkillsLibrary:
             link = f"https://google.com/search?q={quote(search_keyword.strip())}"
 
             open_browser_thread = Thread(target=execute_map, args=("open browser", [link],))
+            open_browser_thread.setDaemon(True)
             open_browser_thread.start()
             result = f"Here's what I found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
 
@@ -72,6 +73,7 @@ class SkillsLibrary:
             link = f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"
 
             open_browser_thread = Thread(target=execute_map, args=("open browser", [link],))
+            open_browser_thread.setDaemon(True)
             open_browser_thread.start()
             result = f"I found something on Youtube for \"{search_keyword}\"."
 
@@ -86,6 +88,7 @@ class SkillsLibrary:
             link = f"https://google.nl/maps/place/{quote(location.strip())}/&amp;"
             # open a web browser and map
             open_browser_thread = Thread(target=execute_map, args=("open browser", [link],))
+            open_browser_thread.setDaemon(True)
             open_browser_thread.start()
             result = f"Here\'s the map location of \"{location.strip()}\". Opening your browser..."
 
@@ -279,18 +282,24 @@ class SkillsLibrary:
                             response = f"\"{question}\" \n. ({wolfram_meta[1]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                         else:
                             # respond by showing list of information
-                            response = "Here's some information."
+                            self.tts.speak("Here's some information.")
 
                             for deet in wolfram_response.split(" | "):
                                 self.print(f">> {deet}.")
+                            print("\n")
+
+                            return "success"
 
                     # we found an array of information, let's disect if necessary
                     elif wolfram_response.count("\n") > 3:
                         # respond by showing list of information
-                        response = "Here's some information."
+                        self.tts.speak("Here's some information.")
 
                         for deet in wolfram_response.split("\n"):
                             self.print(f">> {deet}.")
+                        print("\n")
+
+                        return "success"
 
                     # we found at least 1 set of defition, disect further if necessary
                     elif is_match(wolfram_response, ["|"]):
@@ -379,7 +388,7 @@ class SkillsLibrary:
         if wiki_keyword:
             try:
                 summary = wikipedia.summary(wiki_keyword.strip(), sentences=2)
-                if len(summary.split(" ")) > 15 or len(summary.split(".")[0].split(" ")) > 15:
+                if len(summary.split(" ")) > 30 or len(summary.split(".")[0].split(" ")) > 30:
                     summary = summary.split(".")[0] + "."
 
                 return summary
@@ -656,13 +665,17 @@ class SkillsLibrary:
             if len(urls) > 0:
                 open_browser_thread = Thread(
                     target=execute_map, args=("open browser", urls,))
+                open_browser_thread.setDaemon(True)
                 open_browser_thread.start()
                 # send the links to bot
                 with task.ThreadPoolExecutor() as exec:
                     exec.map(self.tts.respond_to_bot, urls)
 
             if len(app_names) > 0:
+                alternate_responses = self._get_commands("acknowledge response")
                 confirmation = f"Ok! opening {' and '.join(app_names)}..."
+                alternate_responses.append(confirmation)
+                confirmation = choice(alternate_responses)
 
         except Exception:
             displayException("Open Application Control Error.", logging.DEBUG)
@@ -748,7 +761,8 @@ class SkillsLibrary:
             wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
                 0].WmiSetBrightness(percentage, 0)
 
-            return f"Ok! I set the brightness by {percentage}%"
+            alternate_responses = self._get_commands("acknowledge response")
+            return f"{choice(alternate_responses)} I set the brightness by {percentage}%"
 
         except Exception:
             displayException("Screen Brightness Control Error.")
@@ -809,7 +823,9 @@ class SkillsLibrary:
 
             wp = Wallpaper()
             wp.change_wallpaper()
-            return "Ok! I changed your wallpaper..."
+
+            alternate_responses = self._get_commands("acknowledge response")
+            return f"{choice(alternate_responses)} I changed your wallpaper..."
 
         except Exception:
             displayException("Wallpaper Control Error.")
@@ -850,7 +866,8 @@ class SkillsLibrary:
 
             if meta_data == "":
                 # mode = "compact"
-                response = f"Ok! Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
+                alternate_responses = self._get_commands("acknowledge response")
+                response = f"{choice(alternate_responses)} Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
                 songWasFound = True
 
             elif meta_data and "by" in meta_data.split(" ") and meta_data.find("by") > 0 and len(meta_data.split()) >= 3:
@@ -864,7 +881,9 @@ class SkillsLibrary:
                     songWasFound = True
                     artist = f'"{artist}"'
                     genre = title
-                    response = f"Ok! Playing \"{title}\" by {artist}..."
+
+                    alternate_responses = self._get_commands("acknowledge response")
+                    response = f"{choice(alternate_responses)} Playing \"{title}\" by {artist}..."
                 else:
                     response = f"I couldn't find \"{title}\" in your music."
 
@@ -880,7 +899,8 @@ class SkillsLibrary:
 
                 if mp.search_song_by(meta_data, meta_data, meta_data):
                     songWasFound = True
-                    response = f"Ok! Now playing \"{meta_data.capitalize()}\" {'music...' if music_word_found else '...'}"
+                    alternate_responses = self._get_commands("acknowledge response")
+                    response = f"{choice(alternate_responses)} Now playing \"{meta_data.capitalize()}\" {'music...' if music_word_found else '...'}"
                 else:
                     response = f"I couldn't find \"{meta_data.capitalize()}\" in your music."
 
@@ -914,7 +934,6 @@ class SkillsLibrary:
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
         except Exception:
-            pass
             displayException("Music Volume Control Error.")
 
     def news_scraper(self):
@@ -938,7 +957,6 @@ class SkillsLibrary:
             return news
 
         except Exception:
-            pass
             displayException("News Scraper Control Error.")
             return None
 
@@ -953,14 +971,13 @@ class SkillsLibrary:
             os.chdir(UTILITIES_MODULE_DIR)
 
             notification.send_toast(title, message, duration=duration)
-            self.tts.respond_to_bot(title)
+            self.tts.respond_to_bot(f"‼️ {title} ‼️")
             self.tts.respond_to_bot(message)
 
             # get back to virtual assistant directory
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
         except Exception:
-            pass
             displayException("Music Volume Control Error.")
 
     def fun_holiday(self):
@@ -988,5 +1005,10 @@ class SkillsLibrary:
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
         except Exception:
-            pass
             displayException("Music Volume Control Error.")
+
+    def system_volume(self, vol):
+        # get back to virtual assistant directory after command execution
+        os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+        # execute batch file that will open Newsfeed on a newo console window
+        os.system(f'start cmd /k "set_system_volume.bat {vol}"')

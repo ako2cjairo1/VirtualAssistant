@@ -6,7 +6,9 @@
                 "Hi, <boss_name> how can I help you?",
                 "Hi, I'm <assistant_name>, how can I help you?",
                 "What can I help you <boss_name>.",
-                "What's up!"
+                "What's up!",
+                "My systems are online and fully operational.",
+                "My computing software is fully operational and ready for work."
             ]
         },
         {
@@ -38,7 +40,8 @@
                 "don't listen <assistant_name>",
                 "<assistant_name> don't listen",
                 "go to sleep <assistant_name>",
-                "<assistant_name> go to sleep"
+                "<assistant_name> go to sleep",
+                "nevermind <assistant_name>"
             ]
         },
         {
@@ -79,11 +82,11 @@
         {
             "name": "greeting_responses",
             "commands": [
-                "very well, thanks",
+                "Very well, thanks",
                 "I'm fine",
                 "I'm great!",
-                "hi",
-                "hello"
+                "Hi",
+                "Hello"
             ]
         },
         {
@@ -140,12 +143,22 @@
             ]
         },
         {
+            "name": "acknowledge response",
+            "commands": [
+                "Sure thing...",
+                "Alright!",
+                "Ok! <boss_name>.",
+                "Right away <boss_name>..."
+            ]
+        },
+        {
             "name": "confirmation_responses",
             "commands": [
-                "ok",
-                "alright",
-                "that's great!",
-                "let me know if there's something else I can help you with."
+                "Ok",
+                "Alright",
+                "That's great!",
+                "Your appreciation is noted.",
+                "Let me know if there's something else I can help you with."
             ]
         },
         {
@@ -199,10 +212,39 @@
             ]
         },
         {
+            "name": "system volume",
+            "commands": [
+                "set volume to",
+                "set volume by",
+                "set the volume to",
+                "set the volume by",
+                "increase volume",
+                "increase the volume",
+                "increase volume by",
+                "increase volume to",
+                "increase the volume by",
+                "decrease volume",
+                "decrease the volume",
+                "decrease the volume to",
+                "decrease volume by",
+                "decrease volume to",
+                "decrease the volume by",
+                "decrease the volume to",
+                "turn up volume",
+                "turn up the volume",
+                "turn down volume",
+                "turn down the volume",
+                "volume up",
+                "volume down"
+            ]
+        },
+        {
             "name": "brightness",
             "commands": [
                 "set the brightness to",
                 "set brightness to",
+                "set the brightness by",
+                "set brightness by",
                 "bring up the brightness to",
                 "bring up brightness to",
                 "bring brightness to",

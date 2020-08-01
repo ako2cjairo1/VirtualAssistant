@@ -2,14 +2,19 @@ import json
 import os
 import sys
 import webbrowser
+import requests
 import linecache
 import logging
+import time
 import concurrent.futures as executor
+from random import choice
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="w",
-                    level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s")
+logging.basicConfig(filename="VirtualAssistant.log", filemode="a",
+                    level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+VIRTUAL_ASSISTANT_COMMANDS_DB = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant\\commands_db.json"
 
 
 def displayException(exception_title="", ex_type=logging.ERROR):
@@ -20,8 +25,10 @@ def displayException(exception_title="", ex_type=logging.ERROR):
     fname = f.f_code.co_filename.split("\\")[-1]
     linecache.checkcache(fname)
     target = linecache.getline(fname, lineno, f.f_globals)
-    log_data = "{}\nFile:  {}\nTarget:  {}\nMessage: {}\nLine:    {}".format(
+    log_data = "=" * 60
+    log_data += "{}\nFile:  {}\nTarget:  {}\nMessage: {}\nLine:    {}".format(
         exception_title, fname, target.strip(), message, lineno)
+    log_data = "-" * 60
 
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
         print("-" * 23, end="\n")
@@ -53,28 +60,33 @@ def is_match(voice_data, keywords):
 
 def get_commands_from_json():
     try:
-        if os.path.isfile("commands_db.json"):
-            with open("commands_db.json", "r", encoding="utf-8") as fl:
+        if os.path.isfile(VIRTUAL_ASSISTANT_COMMANDS_DB):
+            with open(VIRTUAL_ASSISTANT_COMMANDS_DB, "r", encoding="utf-8") as fl:
                 return json.load(fl)["command_db"]
+
     except Exception:
         pass
         displayException("Get Commands Error.")
-        return list()
 
 
 def get_commands(command_name, assistant_name="", master_name=""):
     commands = get_commands_from_json()
+    master_aliases = [master_name, "Boss", "Sir"]
     if commands:
         # get values of "commands", replace the placeholder name for <assistant_name> and <boss_name>
-        return [com.replace("<assistant_name>", assistant_name).replace("<boss_name>", master_name) for com in (
+        return [com.replace("<assistant_name>", assistant_name).replace("<boss_name>", choice(master_aliases)) for com in (
             ([command["commands"] for command in commands if command["name"] == command_name])[0])]
     return list()
 
 
-def clean_voice_data(voice_data, assistants_name):
-    # clean_data = voice_data.replace(assistants_name.strip().lower(), "").strip()
+def clean_voice_data(voice_data, assistant_name):
+    return extract_metadata(voice_data, get_commands("wakeup")).replace(assistant_name.lower(), "").strip()
 
-    return extract_metadata(voice_data, get_commands("wakeup")).replace(assistants_name, "").strip()
+
+def is_match_and_bare(voice_data, commands, assistant_name):
+    meta_data = extract_metadata(voice_data, commands)
+    clean_commands = [clean_voice_data(command, assistant_name) for command in commands]
+    return extract_metadata(meta_data, clean_commands) == ""
 
 
 def convert_to_one_word_commands(voice_data, commands):
@@ -136,3 +148,37 @@ def execute_map(func, *argv):
         task = [result for result in zip(*argv, exec.map(func, *argv))]
 
     return task
+
+
+def check_connection():
+    retry_count = 0
+
+    while True:
+        try:
+            os.system("cls")
+            print("\n Checking internet connectivity...", end="")
+            retry_count += 1
+            response = requests.get("http://google.com", timeout=300)
+
+            # 200 means we got connection to web
+            if response.status_code == 200:
+                print("OK!")
+                time.sleep(2)
+                # we got a connection, end the check process and proceed to remaining function
+                return True
+
+            elif retry_count == 1:
+                print("You are not connected to the Internet")
+
+            elif retry_count >= 10:
+                retry_count = 0
+
+        except Exception:
+            pass
+            if retry_count == 1:
+                os.system("cls")
+                displayException("Exception occurred while checking for internet connection.")
+                print("\n **Trying to re-connect...", end="")
+                time.sleep(5)
+
+        time.sleep(1)
