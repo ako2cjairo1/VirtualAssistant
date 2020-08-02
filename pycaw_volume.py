@@ -2,6 +2,7 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from comtypes import CLSCTX_ALL
 from ctypes import cast, POINTER
 from argparse import ArgumentParser
+import time
 
 
 class SysVolume:
@@ -27,8 +28,8 @@ class SysVolume:
                     value = float(current_volume_level - value)
 
                 elif vol.isdigit():
-                    value = int(vol)
-                    value = float(-30 + (value * 3))
+                    percentage = int(vol) / 100
+                    value = (-30 - (-30 * percentage))
 
                 # ensure value in range
                 if value > 0.0:
@@ -42,7 +43,7 @@ class SysVolume:
                 # max: 0.0
                 # min: -65.25
                 self.volume.SetMasterVolumeLevel(value, None)
-                return str(((self.volume.GetMasterVolumeLevel() / -30) * 100) // 10)
+                return str(((self.volume.GetMasterVolumeLevel() / -30) * 100))
 
         except Exception as ex:
             raise Exception(f"SYSTEM VOLUME LIBRARY Encountered an Error. {str(ex)}")

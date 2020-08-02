@@ -74,7 +74,7 @@ class SpeechAssistant:
                 if ask:
                     self.speak(ask)
 
-                if self.bot_command and "/start" not in self.bot_command:
+                if self.bot_command and "/" not in self.bot_command:
                     voice_text = self.bot_command
                     # self.bot_command = None
                 else:
@@ -162,7 +162,7 @@ class SpeechAssistant:
 
                 # handles the RESTAR command sequece of virtual assistant application
                 if self.bot_command and "/restart" in self.bot_command:
-                    self.bot_command = f"goodbye {self.assistant_name}"
+                    self.bot_command = f"restart {self.assistant_name}"
                     # lower the volume of music player (if it's currently playing)
                     # so listening microphone will not block our bot_command request
                     self.skill.music_volume(20)
@@ -170,17 +170,15 @@ class SpeechAssistant:
                     self.restart_request = True
                     break
 
-                elif self.bot_command:
+                elif self.bot_command and "/" not in self.bot_command:
                     # lower the volume of music player (if it's currently playing)
                     # so listening microphone will not block our bot_command request
                     self.skill.music_volume(20)
                     # let's use a wakeup command if she's sleeping.
                     if self.isSleeping():
                         self.bot_command = f"hey {self.assistant_name} {self.bot_command}"
-                        # # reset the last command so that we will not execute this code block multiple times
-                        # self.bot.last_command = None
 
-                time.sleep(1)
+                time.sleep(0.5)
 
             except Exception:
                 displayException("Error while handling bot commands.")
@@ -196,6 +194,9 @@ class SpeechAssistant:
                     force_delete = False
                     # init google's text-to-speech module
                     tts = gTTS(text=audio_string, lang="en-us", slow=False)
+
+                    # make sure we're in the correct directory of batch file to execute
+                    os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
                     if not os.path.isdir(AUDIO_FOLDER):
                         os.mkdir(AUDIO_FOLDER)

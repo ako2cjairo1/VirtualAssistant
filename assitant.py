@@ -7,7 +7,7 @@ from datetime import datetime as dt
 from random import choice, randint
 from colorama import init
 import requests
-from helper import displayException, is_match, is_match_and_bare, get_commands, clean_voice_data, extract_metadata, execute_map
+from helper import displayException, is_match, is_match_and_bare, get_commands, clean_voice_data, extract_metadata, execute_map, check_connection
 from tts import SpeechAssistant
 from skills_library import SkillsLibrary
 
@@ -16,6 +16,9 @@ NEWS_SCRAPER_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\NewsScraper"
 
 MASTER_GREEN_MESSAGE = "\033[1;37;42m"
 MASTER_BLACK_NAME = "\033[22;30;42m"
+
+ASSISTANT_CYAN_MESSAGE = "\033[1;37;46m"
+ASSISTANT_BLACK_NAME = "\033[22;30;46m"
 
 
 class VirtualAssistant(SpeechAssistant):
@@ -27,6 +30,7 @@ class VirtualAssistant(SpeechAssistant):
         self.listen_timeout = listen_timeout
         self.breaking_news_reported = []
         self.is_online = False
+        self.notification = True
 
         self.skills = None
         # init news scraper (daemon)
@@ -45,11 +49,25 @@ class VirtualAssistant(SpeechAssistant):
                 "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 1174 533 /siz 217 203 /NOT")
 
     def restart(self):
+        self.print("\n Comencing restart...")
+        time.sleep(3)
         # make sure we're in the correct directory of batch file to execute
         os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+        AUDIO_FOLDER = "./text-to-speech-audio"
+
+        self.print(" Cleaning up...")
+        for aud_file in os.listdir(AUDIO_FOLDER):
+            if "prompt.mp3" not in aud_file:
+                audio_file = f"{AUDIO_FOLDER}/{aud_file}"
+                # delete the audio file after announcing to save mem space
+                os.remove(audio_file)
+
+        self.print(" Initiating new instance...")
         # execute batch file that will open a new instance of virtual assistant
         os.system(f'start cmd /k "start_brenda.bat"')
 
+        self.print(" Done!")
+        time.sleep(3)
         sys.exit()
         exit()
 
@@ -63,19 +81,20 @@ class VirtualAssistant(SpeechAssistant):
             # play end prompt sound effect
             self.speak("<end prompt>", end_prompt=True)
             self.sleep(False)
-            self.speak(choice(self._get_commands("terminate_response")))
-            self.mute_assistant(f"stop {self.assistant_name}")
 
-            self.print(f"\n{self.assistant_name} assistant DEACTIVATED.\n")
-            # terminate and end the virtual assistant application
-
-            if self.restart_request:
+            if "restart" in voice_data or self.restart_request:
                 self.restart()
                 self.restart_request = False
+
             else:
+                self.speak(choice(self._get_commands("terminate_response")))
+                self.mute_assistant(f"stop {self.assistant_name}")
+                self.print(f"\n{self.assistant_name} assistant DEACTIVATED.\n")
                 # volume up the music player, if applicable
                 self.skills.music_volume(70)
 
+            time.sleep(2)
+            # terminate and end the virtual assistant application
             sys.exit()
             exit()
 
@@ -230,7 +249,7 @@ class VirtualAssistant(SpeechAssistant):
                         not_confirmation = False
                         use_calc = False
                         if "I couldn't find" not in music_response:
-                            # mute assistant when playing music
+                            # mute and sleep assistant when playing music
                             self.sleep(True)
 
                 # commands for controlling screen brightness, wi-fi and to shutdown/restart system
@@ -261,7 +280,7 @@ class VirtualAssistant(SpeechAssistant):
                 if is_match(voice_data, system_volume_commands):
                     volume_meta = extract_metadata(voice_data, system_volume_commands)
 
-                    vol_value = [value for value in volume_meta.split(" ") if value.replace("%", "").isdigit()]
+                    vol_value = [value.replace("%", "") for value in volume_meta.split(" ") if value.replace("%", "").isdigit()]
                     if len(vol_value):
                         vol_value = vol_value[0]
                     else:
@@ -438,8 +457,7 @@ class VirtualAssistant(SpeechAssistant):
                                 # choose random news from list of latest news today
                                 random_news_today = choice(latest_news)
                                 news_response += f"{random_news_today['report']}\n\n"
-                                source_urls.append(
-                                    random_news_today["source url"])
+                                source_urls.append(random_news_today["source url"])
 
                         if len(source_urls) > 0:
                             # convert the list of source_urls to set to remove duplicate.
@@ -560,9 +578,11 @@ class VirtualAssistant(SpeechAssistant):
                     # it's' a confirmation if no extracted metadata or..
                     # metadata have matched with confirmation commands.
                     if not confimation_keyword or is_match(confimation_keyword, confirmation_commands):
-                        self.speak(
-                            choice(self._get_commands("confirmation_responses")))
-
+                        self.speak(choice(self._get_commands("confirmation_responses")))
+                        # # play end prompt sound effect and go to sleep
+                        # self.mute_assistant(f"stop {self.assistant_name}")
+                        # mute and sleep assistant when playing music
+                        self.sleep(True)
                         # return immediately, it is a confirmation command,
                         # we don't need further contextual answers
                         return
@@ -582,34 +602,6 @@ class VirtualAssistant(SpeechAssistant):
                 displayException("Error forumulating response.")
                 self.respond_to_bot("Error forumulating response.")
 
-        def _check_connection():
-            retry_count = 0
-
-            while True:
-                try:
-                    retry_count += 1
-                    response = requests.get("http://google.com", timeout=300)
-
-                    # 200 means we got connection to web
-                    if response.status_code == 200:
-                        # we got a connection, end the check process and proceed to remaining function
-                        self.is_online = True
-                        return True
-                    elif retry_count == 1:
-                        self.print(
-                            f"{self.assistant_name} Not Available.\nYou are not connected to the Internet")
-                    elif retry_count >= 10:
-                        retry_count = 0
-
-                except Exception:
-                    pass
-                    if retry_count == 1:
-                        displayException(f"{self.assistant_name} Not Available.\nYou are not connected to the Internet")
-                        self.print("\n**Trying to connect...")
-                        time.sleep(5)
-
-                time.sleep(1)
-
         def _heart_beat():
             time_ticker = 0
             while True:
@@ -628,18 +620,24 @@ class VirtualAssistant(SpeechAssistant):
                         self.skills.music_volume(70)
 
                 # send "Fun Holiday" notification every 10:00:30 AM
-                if time_ticker == 0 and ((hr == 10) and mn == 00 and sec == 30):
+                if self.notification and time_ticker == 0 and ((hr == 10) and mn == 00 and sec == 30):
                     self.skills.fun_holiday()
 
-                # if time_ticker == 0 and ((mn % 1) == 0 and sec == 00):
-                #     # notification here
-                #     pass
+                # Enable/Disable Notifications
+                if self.bot_command:
+                    if "/disable notification" in self.bot_command:
+                        self.notification = False
+                        self.print(" (Notification is Off)")
+                        self.bot.last_command = None
 
-                # if self.bot_command:
-                #     print(f"from HEART BEAT: {self.bot_command}")
+                    elif "/enable notification" in self.bot_command:
+                        self.notification = True
+                        self.print(" (Notification is On)")
+                        self.bot.last_command = None
 
+                # Restart request
                 if not self.polling or self.restart_request:
-                    self.bot_command = f"goodbye {self.assistant_name}"
+                    self.bot_command = f"restart {self.assistant_name}"
 
                 if time_ticker >= 1:
                     time_ticker = 0
@@ -711,23 +709,32 @@ class VirtualAssistant(SpeechAssistant):
             try:
                 while True:
                     if timeout_counter == 0 or timeout_counter >= timeout:
-                        if self.news.check_breaking_news():
+                        if self.news.check_breaking_news() and self.notification:
                             timeout_counter = 1
-                            found = False
 
+                            news_briefing = []
+                            headlines = ""
                             for bn in self.news.breaking_news_update:
-                                if not found:
-                                    headline = bn["headline"]
-                                    if not any(headline.lower() in breaking_news.lower() for breaking_news in self.breaking_news_reported):
-                                        found = True
+                                headline = bn["headline"]
+                                if not any(headline.lower() in breaking_news.lower() for breaking_news in self.breaking_news_reported):
+                                    news_briefing.append(bn["headline"])
+                                    headlines += f">> {headline}\n\n"
 
-                                        self.skills.toast_notification("* * * BREAKING NEWS * * *", headline)
-                                        break
+                            if len(news_briefing) > 0:
+                                if len(headlines) > 255:
+                                    # use the firts headline if the whole news is > 255 chars
+                                    headlines = f">> {news_briefing[0]} ..more"
+                                    if len(headlines) > 255:
+                                        headlines = f">> {news_briefing[0][:240]}...more"
+
+                                self.skills.toast_notification("* * * BREAKING NEWS * * *", headlines)
+
                     timeout_counter += 1
                     time.sleep(1)
 
             except Exception:
                 pass
+                displayException("Error while sending Breaking News notification.")
 
         """
         Main handler of virtual assistant
@@ -742,6 +749,9 @@ class VirtualAssistant(SpeechAssistant):
             # volume up the music player, if applicable
             self.skills.music_volume(30)
 
+            if self.restart_request:
+                return False
+
             self.print(f"\n\n\"{self.assistant_name}\" is active...")
 
             announcetime_thread = Thread(target=_heart_beat)
@@ -755,7 +765,7 @@ class VirtualAssistant(SpeechAssistant):
             breaking_news_notification.setDaemon(True)
             breaking_news_notification.start()
 
-            # time.sleep(3)
+            time.sleep(3)
             # play speaking prompt sound effect and say greetings
             self.speak(choice(self._get_commands("start_greeting")), start_prompt=True)
 
@@ -845,17 +855,13 @@ class VirtualAssistant(SpeechAssistant):
                             # volume up the music player, if applicable
                             self.skills.music_volume(70)
 
-            except Exception:
-                displayException("Error while starting virtual assistant.")
+            except Exception as ex:
+                displayException(f"General Error while running virtual assistant. {str(ex)}")
 
         try:
             # check internet connectivity every second
-            # before proceeding to main()
-            while not _check_connection():
-                self.print("\n**Trying to recover from internal error...")
-                time.sleep(5)
-
-            if self.is_online:
+            # before proceeding to starting virtual assistant
+            if check_connection():
                 self.skills = SkillsLibrary(super(), self.master_name, self.assistant_name)
                 # init news scraper (daemon)
                 self.news = self.skills.news_scraper()
@@ -871,8 +877,9 @@ class VirtualAssistant(SpeechAssistant):
             displayException("Error while starting virtual assistant.")
             time.sleep(5)
 
-            os.system("cls")
-            self.bot_command = f"goodbye {self.assistant_name}"
+            # os.system("cls")
+            self.bot_command = f"restart {self.assistant_name}"
             self.skill.music_volume(20)
             # set the restart flag to true
             self.restart_request = True
+            self.restart()

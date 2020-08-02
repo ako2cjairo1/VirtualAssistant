@@ -8,6 +8,7 @@ import logging
 import time
 import concurrent.futures as executor
 from random import choice
+import colorama
 
 logging.basicConfig(filename="VirtualAssistant.log", filemode="a",
                     level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
@@ -15,6 +16,8 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 VIRTUAL_ASSISTANT_COMMANDS_DB = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant\\commands_db.json"
+ERROR_RED_MESSAGE = "\033[1;33;41m"
+COLOR_RESET = "\033[0;39;49m"
 
 
 def displayException(exception_title="", ex_type=logging.ERROR):
@@ -32,7 +35,7 @@ def displayException(exception_title="", ex_type=logging.ERROR):
 
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
         print("-" * 23, end="\n")
-        print(exception_title, end="\n")
+        print(f"{ERROR_RED_MESSAGE} {exception_title} {COLOR_RESET}", end="\n")
         print("-" * 23, end="\n")
 
     if ex_type == logging.DEBUG:
@@ -56,6 +59,17 @@ def is_match(voice_data, keywords):
     if (any(map(lambda word: word in voice_data.lower(), lowercase_keywords))):
         return True
     return False
+
+# def is_match(voice_data, keywords):
+#     lowercase_keywords = [keyword.lower().strip() for keyword in keywords]
+
+#     if len(voice_data.split(" ")) > 1:
+#         if voice_data.lower() in " ".join(lowercase_keywords):
+#             return True
+#     else:
+#         if (any(map(lambda word: word == voice_data.lower(), lowercase_keywords))):
+#             return True
+#     return False
 
 
 def get_commands_from_json():
@@ -162,7 +176,7 @@ def check_connection():
 
             # 200 means we got connection to web
             if response.status_code == 200:
-                print("OK!")
+                print(" Connected!")
                 time.sleep(2)
                 # we got a connection, end the check process and proceed to remaining function
                 return True

@@ -187,7 +187,7 @@ class SkillsLibrary:
 
             if is_match(voice_data, weather_commands):
                 meta_data = extract_metadata(
-                    voice_data, (["in", "on", "for"] + weather_commands)).replace("forecast", "")
+                    voice_data, (["in", "on", "for", "this"] + weather_commands)).replace("forecast", "")
 
                 if is_match(voice_data, ["rain", "precipitation"]):
                     report_type = "rain forecast"
@@ -196,7 +196,7 @@ class SkillsLibrary:
 
                 # let's build the query for weather, temperature or precipitation forecast.
                 # this will be our parameter input in Wolfram API
-                if is_match(voice_data, ["in", "on", "for"]):
+                if is_match(voice_data, ["in", "on", "for", "this"]):
                     if meta_data:
                         voice_data = f"{report_type} for {meta_data}"
                     else:
@@ -378,7 +378,7 @@ class SkillsLibrary:
 
         except Exception:
             pass
-            displayException("Wolfram|Alpha Search Control Error.")
+            displayException("Wolfram|Alpha Search Skill Error.")
 
         # if no answers found return a blank response
         return response
@@ -395,7 +395,7 @@ class SkillsLibrary:
 
             except wikipedia.exceptions.WikipediaException:
                 displayException(
-                    "Wikipedia Search Control (handled)", logging.INFO)
+                    "Wikipedia Search Skill (handled)", logging.INFO)
 
                 if ("who" or "who's") in voice_data.lower():
                     result = "I don't know who that is but,"
@@ -405,7 +405,7 @@ class SkillsLibrary:
                 return f"{result} {self.google(wiki_keyword.strip())}"
 
             except Exception:
-                displayException("Wikipedia Search Control Error.")
+                displayException("Wikipedia Search Skill Error.")
 
         return result
 
@@ -492,7 +492,7 @@ class SkillsLibrary:
                     return choice(["The answer is somwhere between infinity, negative infinity, and undefined.", "The answer is undefined."])
                 except Exception:
                     displayException(
-                        "Calculator Control Exception (handled).", logging.INFO)
+                        "Calculator Skill Exception (handled).", logging.INFO)
                     return ""
 
             if answer is not None:
@@ -517,7 +517,7 @@ class SkillsLibrary:
                 return ""
 
         except Exception:
-            displayException("Calculator Control Error.")
+            displayException("Calculator Skill Error.")
 
     def open_application(self, voice_data):
         confirmation = ""
@@ -527,7 +527,7 @@ class SkillsLibrary:
 
         def modified_app_names():
             clean_app_names = voice_data
-            special_app_names = ["vs code", "sublime text", "ms code", "ms vc", "microsoft excel", "spread sheet", "ms excel", "microsoft word", "ms word", "microsoft powerpoint", "ms powerpoint", "task scheduler",
+            special_app_names = ["vs code", "sublime text", "wi-fi manager", "wi-fi monitoring", "ms code", "ms vc", "microsoft excel", "spread sheet", "ms excel", "microsoft word", "ms word", "microsoft powerpoint", "ms powerpoint", "task scheduler",
                                  "visual studio code", "pse ticker", "command console", "command prompt", "control panel", "task manager", "resource monitor", "resource manager", "device manager", "windows services", "remove programs", "add remove"]
             for name in special_app_names:
                 if name in voice_data:
@@ -619,6 +619,15 @@ class SkillsLibrary:
                     # get back to virtual assistant directory after command execution
                     os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
+                elif is_match(app, ["wi-fi-monitoring", "wi-fi-manager"]):
+                    app_names.append("Wi-Fi Manager")
+                    # change directory to Wi-Fi manager library
+                    os.chdir(UTILITIES_MODULE_DIR)
+                    # execute batch file that will open Wi-Fi manager on a newo console window
+                    os.system('start cmd /k \"wifi manager.bat\"')
+                    # get back to virtual assistant directory after command execution
+                    os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+
                 elif is_match(app, ["pse-ticker", "pse"]):
                     app_names.append("Philippine Stock Exchange Ticker")
                     # change directory to PSE library resides
@@ -678,7 +687,7 @@ class SkillsLibrary:
                 confirmation = choice(alternate_responses)
 
         except Exception:
-            displayException("Open Application Control Error.", logging.DEBUG)
+            displayException("Open Application Skill Error.", logging.DEBUG)
 
         return confirmation
 
@@ -736,7 +745,7 @@ class SkillsLibrary:
 
                         except KeyboardInterrupt as ex:
                             displayException(
-                                "Find File Control Keyboard Interrupt (handled)", logging.INFO)
+                                "Find File Skill Keyboard Interrupt (handled)", logging.INFO)
                             self.tts.speak("Search interrupted...")
 
                         if found_file_count > 0:
@@ -749,7 +758,7 @@ class SkillsLibrary:
                                 f"\n----- {found_file_count} files found -----\n")
                             response_message = f"I found {found_file_count} files. I'm showing you the directories where to see them.\n"
         except Exception:
-            displayException("Find File Control Error.")
+            displayException("Find File Skill Error.")
 
         return response_message
 
@@ -765,26 +774,30 @@ class SkillsLibrary:
             return f"{choice(alternate_responses)} I set the brightness by {percentage}%"
 
         except Exception:
-            displayException("Screen Brightness Control Error.")
+            displayException("Screen Brightness Skill Error.")
 
     def control_wifi(self, voice_data):
         command = ""
         try:
-            if "on" in voice_data or "open" in voice_data:
+            if is_match(voice_data, ["on", "open", "enable"]):
+                # if "on" in voice_data or "open" in voice_data:
                 command = "enabled"
-            elif "off" in voice_data or "close" in voice_data:
+            if is_match(voice_data, ["off", "close", "disable"]):
+                # elif "off" in voice_data or "close" in voice_data:
                 command = "disabled"
 
             if command:
-                # announce before going off-line
-                self.tts.speak(f"Done! I {command} the wi-fi.\n")
                 os.system(f"netsh interface set interface \"Wi-Fi\" {command}")
-                self.print(f"\033[1;33;41m{self.assistant_name} is offline...")
-                # although this will not be annouced anymore (offline), let's rather return something.
-                return f"Done! I {command} the wi-fi."
+
+                if "disabled" in command:
+                    # announce before going off-line
+                    self.print(f"\033[1;33;41m {self.assistant_name} is Offline...")
+
+                alternate_responses = self._get_commands("acknowledge response")
+                return f"{choice(alternate_responses)} I {command} the Wi-Fi."
 
         except Exception:
-            displayException("Wi-Fi Control Error.")
+            displayException("Wi-Fi Skill Error.")
 
         return ""
 
@@ -811,7 +824,7 @@ class SkillsLibrary:
                 # return f"{'Reboot' if '/r' in command else 'Shutdown'} is canceled."
 
         except Exception:
-            displayException("Shutdown/Restart System Control Error.")
+            displayException("Shutdown/Restart System Skill Error.")
 
         return ""
 
@@ -828,7 +841,7 @@ class SkillsLibrary:
             return f"{choice(alternate_responses)} I changed your wallpaper..."
 
         except Exception:
-            displayException("Wallpaper Control Error.")
+            displayException("Wallpaper Skill Error.")
 
     def initiate_new_project(self, lang="Python", proj_name="NewPythonProject", mode="g"):
         # navigate to the ProjectGitInitAutomation directory - contains the libraries
@@ -916,7 +929,7 @@ class SkillsLibrary:
             return response
 
         except Exception:
-            displayException("Play Music Control Error.")
+            displayException("Play Music Skill Error.")
 
     def music_volume(self, volume):
 
@@ -934,7 +947,7 @@ class SkillsLibrary:
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
         except Exception:
-            displayException("Music Volume Control Error.")
+            displayException("Music Volume Skill Error.")
 
     def news_scraper(self):
 
@@ -957,7 +970,7 @@ class SkillsLibrary:
             return news
 
         except Exception:
-            displayException("News Scraper Control Error.")
+            displayException("News Scraper Skill Error.")
             return None
 
     def toast_notification(self, title, message, duration=600):
@@ -978,7 +991,7 @@ class SkillsLibrary:
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
         except Exception:
-            displayException("Music Volume Control Error.")
+            displayException("Toast Notification Skill Error.")
 
     def fun_holiday(self):
         try:
@@ -1005,7 +1018,7 @@ class SkillsLibrary:
             os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
 
         except Exception:
-            displayException("Music Volume Control Error.")
+            displayException("Fun Holiday Skill Error.")
 
     def system_volume(self, vol):
         # get back to virtual assistant directory after command execution

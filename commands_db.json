@@ -93,9 +93,13 @@
             "name": "terminate",
             "commands": [
                 "turn off <assistant_name>",
+                "<assistant_name> turn off",
+                "restart <assistant_name>",
+                "<assistant_name> restart",
                 "deactivate <assistant_name>",
                 "<assistant_name> deactivate",
-                "goodbye <assistant_name>"
+                "goodbye <assistant_name>",
+                "<assistant_name> goodbye"
             ]
         },
         {
@@ -139,13 +143,13 @@
                 "ok",
                 "thank you",
                 "thanks",
-                "all right"
+                "Alright"
             ]
         },
         {
             "name": "acknowledge response",
             "commands": [
-                "Sure thing...",
+                "Sure thing!",
                 "Alright!",
                 "Ok! <boss_name>.",
                 "Right away <boss_name>..."
@@ -235,7 +239,9 @@
                 "turn down volume",
                 "turn down the volume",
                 "volume up",
-                "volume down"
+                "volume down",
+                "volume by",
+                "volume to"
             ]
         },
         {
@@ -245,6 +251,7 @@
                 "set brightness to",
                 "set the brightness by",
                 "set brightness by",
+                "dim the screen to",
                 "bring up the brightness to",
                 "bring up brightness to",
                 "bring brightness to",
@@ -318,8 +325,7 @@
                 "disable the wi-fi",
                 "enable wi-fi",
                 "disable wi-fi",
-                "close wi-fi",
-                "open wi-fi"
+                "close wi-fi"
             ]
         },
         {
