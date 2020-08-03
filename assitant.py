@@ -11,15 +11,6 @@ from helper import displayException, is_match, is_match_and_bare, get_commands, 
 from tts import SpeechAssistant
 from skills_library import SkillsLibrary
 
-VIRTUAL_ASSISTANT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant"
-NEWS_SCRAPER_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\NewsScraper"
-
-MASTER_GREEN_MESSAGE = "\033[1;37;42m"
-MASTER_BLACK_NAME = "\033[22;30;42m"
-
-ASSISTANT_CYAN_MESSAGE = "\033[1;37;46m"
-ASSISTANT_BLACK_NAME = "\033[22;30;46m"
-
 
 class VirtualAssistant(SpeechAssistant):
 
@@ -52,7 +43,7 @@ class VirtualAssistant(SpeechAssistant):
         self.print("\n Comencing restart...")
         time.sleep(3)
         # make sure we're in the correct directory of batch file to execute
-        os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+        os.chdir(self.ASSISTANT_DIR)
         AUDIO_FOLDER = "./text-to-speech-audio"
 
         self.print(" Cleaning up...")
@@ -76,7 +67,7 @@ class VirtualAssistant(SpeechAssistant):
         if is_match(voice_data, self._get_commands("terminate")):
             if self.isSleeping():
                 self.print(
-                    f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
+                    f"{self.BLACK_GREEN}{self.master_name}:{self.GREEN} {voice_data}")
 
             # play end prompt sound effect
             self.speak("<end prompt>", end_prompt=True)
@@ -141,8 +132,7 @@ class VirtualAssistant(SpeechAssistant):
                 # wake command is invoked and the user ask question immediately.
                 if len(voice_data.split(" ")) > 2 and is_match(voice_data, wakeup_command):
                     self.maximize_command_interface()
-                    self.print(
-                        f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
+                    self.print(f"{self.BLACK_GREEN}{self.master_name}:{self.GREEN} {voice_data}")
                     self.sleep(False)
                     # play end speaking prompt sound effect
                     self.speak("<start prompt>", start_prompt=True)
@@ -154,7 +144,7 @@ class VirtualAssistant(SpeechAssistant):
                 elif is_match(voice_data, wakeup_command):
                     self.maximize_command_interface()
                     self.print(
-                        f"{MASTER_BLACK_NAME}{self.master_name}:{MASTER_GREEN_MESSAGE} {voice_data}")
+                        f"{self.BLACK_GREEN}{self.master_name}:{self.GREEN} {voice_data}")
                     self.print(f"{self.assistant_name}: (awaken)")
                     self.sleep(False)
                     # announce greeting from assistant
@@ -392,13 +382,13 @@ class VirtualAssistant(SpeechAssistant):
                     self.print("\n Fetching information from news channels...\n")
 
                     import sys
-                    sys.path.append(NEWS_SCRAPER_MODULE_DIR)
+                    sys.path.append(self.NEWS_DIR)
 
                     # change the directory to location of NewsTicker Library
-                    os.chdir(NEWS_SCRAPER_MODULE_DIR)
+                    os.chdir(self.NEWS_DIR)
                     self.news.fetch_news()
                     # get back to virtual assistant directory
-                    os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+                    os.chdir(self.ASSISTANT_DIR)
 
                     # get meta data to use for news headline search
                     news_meta_data = extract_metadata(

@@ -14,28 +14,19 @@ from urllib.parse import quote
 from random import choice
 from datetime import datetime as dt
 from word2number import w2n
-
-FILE_DIR = "c:\\users\\dave"
-VIRTUAL_ASSISTANT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant"
-UTILITIES_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PythonUtilityProjects"
-INIT_PROJECT_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\ProjectGitInitAutomation"
-PSE_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\PSE"
-NEWS_SCRAPER_MODULE_DIR = "C:\\Users\\Dave\\DEVENV\\Python\\NewsScraper"
-DEV_PATH_DIR = os.environ.get("DevPath")
-WOLFRAM_APP_ID = os.environ.get("WOLFRAM_APP_ID")
+from settings import Configuration
 
 
-class SkillsLibrary:
+class SkillsLibrary(Configuration):
 
     def __init__(self, tts, masters_name, assistants_name):
+        super().__init__()
         self.master_name = masters_name
         self.assistant_name = assistants_name
         self.tts = tts
 
     def print(self, message):
         print(message)
-
-        message = message.replace(f"{self.assistant_name}:", "")
         self.tts.respond_to_bot(message)
 
     def _get_commands(self, command_name):
@@ -105,7 +96,7 @@ class SkillsLibrary:
         parts_of_speech = self._get_commands("parts of speech")
 
         try:
-            client = wolframalpha.Client(WOLFRAM_APP_ID)
+            client = wolframalpha.Client(self.WOLFRAM_APP_ID)
 
             def _resolveListOrDict(value):
                 if isinstance(value, list):
@@ -613,29 +604,29 @@ class SkillsLibrary:
                 elif is_match(app, ["newsfeed", "news"]):
                     app_names.append("Newsfeed Ticker")
                     # change directory to NewsTicker library
-                    os.chdir(NEWS_SCRAPER_MODULE_DIR)
+                    os.chdir(self.NEWS_DIR)
                     # execute batch file that will open Newsfeed on a newo console window
                     os.system('start cmd /k \"start News Ticker.bat\"')
                     # get back to virtual assistant directory after command execution
-                    os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+                    os.chdir(self.ASSISTANT_DIR)
 
                 elif is_match(app, ["wi-fi-monitoring", "wi-fi-manager"]):
                     app_names.append("Wi-Fi Manager")
                     # change directory to Wi-Fi manager library
-                    os.chdir(UTILITIES_MODULE_DIR)
+                    os.chdir(self.UTILS_DIR)
                     # execute batch file that will open Wi-Fi manager on a newo console window
                     os.system('start cmd /k \"wifi manager.bat\"')
                     # get back to virtual assistant directory after command execution
-                    os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+                    os.chdir(self.ASSISTANT_DIR)
 
                 elif is_match(app, ["pse-ticker", "pse"]):
                     app_names.append("Philippine Stock Exchange Ticker")
                     # change directory to PSE library resides
-                    os.chdir(PSE_MODULE_DIR)
+                    os.chdir(self.PSE_DIR)
                     # open PSE ticker in new window
                     os.system('start cmd /k \"start_PSE.bat\"')
                     # get back to virtual assistant directory after command execution
-                    os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+                    os.chdir(self.ASSISTANT_DIR)
 
                 elif is_match(app, ["youtube", "google", "netflix", "github", "facebook", "twitter", "instagram", "wikipedia"]):
                     if app == "youtube":
@@ -699,7 +690,7 @@ class SkillsLibrary:
                 # find files using windows explorer
                 if using_explorer:
                     # open windows explorer and look for files using queries
-                    explorer = f'explorer /root,"search-ms:query=name:{file_name}&crumb=location:{FILE_DIR}&"'
+                    explorer = f'explorer /root,"search-ms:query=name:{file_name}&crumb=location:{self.FILE_DIR}&"'
                     subprocess.Popen(explorer, shell=False, stdin=None,
                                      stdout=None, stderr=None, close_fds=False)
                     response_message = f"Here's what I found for files with \"{file_name}\". I'm showing you the folder...\n"
@@ -720,7 +711,7 @@ class SkillsLibrary:
 
                         try:
                             # start the file search
-                            for subdir, dirs, files in os.walk(FILE_DIR):
+                            for subdir, dirs, files in os.walk(self.FILE_DIR):
                                 for file_ in files:
                                     isFileFound = False
                                     file_count += 1
@@ -733,7 +724,7 @@ class SkillsLibrary:
                                         fn = (os.path.join(
                                             subdir, file_).lower().split("\\"))[-1]
                                         fname = os.path.join(subdir, file_).lower().replace(
-                                            FILE_DIR, "..").replace(fn, "")
+                                            self.FILE_DIR, "..").replace(fn, "")
 
                                         files_found.add(f"'{fname}'")
 
@@ -831,7 +822,7 @@ class SkillsLibrary:
     def wallpaper(self):
         try:
             import sys
-            sys.path.append(UTILITIES_MODULE_DIR)
+            sys.path.append(self.UTILS_DIR)
             from wallpaper import Wallpaper
 
             wp = Wallpaper()
@@ -846,11 +837,11 @@ class SkillsLibrary:
     def initiate_new_project(self, lang="Python", proj_name="NewPythonProject", mode="g"):
         # navigate to the ProjectGitInitAutomation directory - contains the libraries
         # to automate creation of project, it pushes the initial commit files to Github if possible
-        os.chdir(INIT_PROJECT_MODULE_DIR)
+        os.chdir(self.INIT_PROJ_DIR)
         # batch file to execute project initiation in new window
         os.system(f'start cmd /k \"create.bat\" {lang} {proj_name} {mode}')
         # get back to virtual assistant directory after command execution
-        os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+        os.chdir(self.ASSISTANT_DIR)
         return f"The new {lang} project should open in Visual Studio Code when done..."
 
     def play_music(self, voice_data):
@@ -865,12 +856,12 @@ class SkillsLibrary:
 
         try:
             import sys
-            sys.path.append(UTILITIES_MODULE_DIR)
+            sys.path.append(self.UTILS_DIR)
             from musicplayer import MusicPlayer
             mp = MusicPlayer()
 
             # change the directory to location of batch file to execute
-            os.chdir(UTILITIES_MODULE_DIR)
+            os.chdir(self.UTILS_DIR)
 
             music_word_found = True if is_match(
                 voice_data, ["music", "songs"]) else False
@@ -924,7 +915,7 @@ class SkillsLibrary:
                     f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
 
             # get back to virtual assistant directory
-            os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+            os.chdir(self.ASSISTANT_DIR)
 
             return response
 
@@ -935,16 +926,16 @@ class SkillsLibrary:
 
         try:
             import sys
-            sys.path.append(UTILITIES_MODULE_DIR)
+            sys.path.append(self.UTILS_DIR)
             from musicplayer import MusicPlayer
             mp = MusicPlayer()
             # change the directory to location of batch file to execute
-            os.chdir(UTILITIES_MODULE_DIR)
+            os.chdir(self.UTILS_DIR)
 
             mp.music_player_volume(volume)
 
             # get back to virtual assistant directory
-            os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+            os.chdir(self.ASSISTANT_DIR)
 
         except Exception:
             displayException("Music Volume Skill Error.")
@@ -953,11 +944,11 @@ class SkillsLibrary:
 
         try:
             import sys
-            sys.path.append(NEWS_SCRAPER_MODULE_DIR)
+            sys.path.append(self.NEWS_DIR)
             from NewsScraper import NewsTicker
 
             # change the directory to location of batch file to execute
-            os.chdir(NEWS_SCRAPER_MODULE_DIR)
+            os.chdir(self.NEWS_DIR)
             news = NewsTicker()
 
             # execute daemon to fetch breaking news in background
@@ -965,7 +956,7 @@ class SkillsLibrary:
             news.run_breaking_news_daemon()
 
             # get back to virtual assistant directory
-            os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+            os.chdir(self.ASSISTANT_DIR)
 
             return news
 
@@ -977,18 +968,18 @@ class SkillsLibrary:
 
         try:
             import sys
-            sys.path.append(UTILITIES_MODULE_DIR)
+            sys.path.append(self.UTILS_DIR)
             from send_toast import ToastMessage
             notification = ToastMessage()
             # change the directory to location of batch file to execute
-            os.chdir(UTILITIES_MODULE_DIR)
+            os.chdir(self.UTILS_DIR)
 
             notification.send_toast(title, message, duration=duration)
             self.tts.respond_to_bot(f"‼️ {title} ‼️")
             self.tts.respond_to_bot(message)
 
             # get back to virtual assistant directory
-            os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+            os.chdir(self.ASSISTANT_DIR)
 
         except Exception:
             displayException("Toast Notification Skill Error.")
@@ -996,11 +987,11 @@ class SkillsLibrary:
     def fun_holiday(self):
         try:
             import sys
-            sys.path.append(NEWS_SCRAPER_MODULE_DIR)
+            sys.path.append(self.NEWS_DIR)
             from FunHolidays import FunHoliday
             fh = FunHoliday()
             # change the directory to location of batch file to execute
-            os.chdir(NEWS_SCRAPER_MODULE_DIR)
+            os.chdir(self.NEWS_DIR)
 
             result = fh.get_fun_holiday()
             if result["success"] == "true":
@@ -1015,13 +1006,13 @@ class SkillsLibrary:
                 # print(f'Date: {holiday["date"]}\nTitle: {holiday["title"]}\nHeading: {holiday["heading"]}\nDid You Know? {holiday["did you know"]}\nURL: {holiday["source url"]}')
 
             # get back to virtual assistant directory
-            os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+            os.chdir(self.ASSISTANT_DIR)
 
         except Exception:
             displayException("Fun Holiday Skill Error.")
 
     def system_volume(self, vol):
         # get back to virtual assistant directory after command execution
-        os.chdir(VIRTUAL_ASSISTANT_MODULE_DIR)
+        os.chdir(self.ASSISTANT_DIR)
         # execute batch file that will open Newsfeed on a newo console window
         os.system(f'start cmd /k "set_system_volume.bat {vol}"')

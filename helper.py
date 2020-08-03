@@ -1,5 +1,6 @@
 import json
 import os
+import colorama
 import sys
 import webbrowser
 import requests
@@ -8,16 +9,15 @@ import logging
 import time
 import concurrent.futures as executor
 from random import choice
-import colorama
+from settings import Configuration
+
 
 logging.basicConfig(filename="VirtualAssistant.log", filemode="a",
                     level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-VIRTUAL_ASSISTANT_COMMANDS_DB = "C:\\Users\\Dave\\DEVENV\\Python\\VirtualAssistant\\commands_db.json"
-ERROR_RED_MESSAGE = "\033[1;33;41m"
-COLOR_RESET = "\033[0;39;49m"
+config = Configuration()
 
 
 def displayException(exception_title="", ex_type=logging.ERROR):
@@ -33,11 +33,6 @@ def displayException(exception_title="", ex_type=logging.ERROR):
         exception_title, fname, target.strip(), message, lineno)
     log_data = "-" * 60
 
-    if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-        print("-" * 23, end="\n")
-        print(f"{ERROR_RED_MESSAGE} {exception_title} {COLOR_RESET}", end="\n")
-        print("-" * 23, end="\n")
-
     if ex_type == logging.DEBUG:
         logger.debug(log_data)
 
@@ -52,6 +47,11 @@ def displayException(exception_title="", ex_type=logging.ERROR):
 
     elif ex_type == logging.CRITICAL:
         logger.critical(log_data)
+
+    if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+        print("-" * 23, end="\n")
+        print(f"{config.RED} {exception_title} {config.COLOR_RESET}", end="\n")
+        print("-" * 23, end="\n")
 
 
 def is_match(voice_data, keywords):
@@ -74,8 +74,8 @@ def is_match(voice_data, keywords):
 
 def get_commands_from_json():
     try:
-        if os.path.isfile(VIRTUAL_ASSISTANT_COMMANDS_DB):
-            with open(VIRTUAL_ASSISTANT_COMMANDS_DB, "r", encoding="utf-8") as fl:
+        if os.path.isfile(config.COMMANDS_DB):
+            with open(config.COMMANDS_DB, "r", encoding="utf-8") as fl:
                 return json.load(fl)["command_db"]
 
     except Exception:
