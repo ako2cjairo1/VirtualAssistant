@@ -185,6 +185,20 @@ def check_connection():
             elif retry_count >= 10:
                 retry_count = 0
 
+        except requests.ConnectionError as e:
+            displayException("Connection Error. You are not connected to the Internet.")
+            print("\n **Trying to re-connect...", end="")
+            time.sleep(5)
+        except requests.Timeout as e:
+            displayException("Timeout Error.")
+            print("\n **Trying to re-connect...", end="")
+            time.sleep(5)
+        except requests.RequestException:
+            displayException("General Error")
+            print("\n **Trying to re-connect...", end="")
+            time.sleep(5)
+            continue
+
         except Exception:
             pass
             if retry_count == 1:
@@ -192,5 +206,6 @@ def check_connection():
                 displayException("Exception occurred while checking for internet connection.")
                 print("\n **Trying to re-connect...", end="")
                 time.sleep(5)
+                continue
 
         time.sleep(1)

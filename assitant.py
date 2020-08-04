@@ -263,6 +263,11 @@ class VirtualAssistant(SpeechAssistant):
                     _awake_greetings(start_prompt=False)
                     return
 
+                # today's breafing
+                if is_match(voice_data, ["happening today", "what did I miss"]):
+                    _happening_today()
+                    return True
+
                 # commands for playing music
                 music_commands = self._get_commands("play_music")
                 if is_match(voice_data, music_commands):
@@ -452,18 +457,11 @@ class VirtualAssistant(SpeechAssistant):
                                 news_meta_data)
                             number_of_results = len(news_briefing)
 
-                            if "happening today" in voice_data:
-                                # what's happening/happend from Wolfram
-                                response_from_wolfram = self.skills.wolfram_search(voice_data)
-                                if response_from_wolfram and response_from_wolfram != "success":
-                                    print(f".{response_from_wolfram}.")
-                                    news_response = f"From this day in history. \n\n{response_from_wolfram}"
-
                             if number_of_results > 0:
                                 if number_of_results > 2:
                                     number_of_results = 3
 
-                                news_response += f"\n\nHere's your flash briefing {about}.\n\n"
+                                news_response += f"\n\nHere are your latest news briefing {about}.\n\n"
                                 for i in range(0, number_of_results):
                                     news_response += f"{news_briefing[i]['report']}\n\n"
                                     source_urls.append(news_briefing[i]["source url"])
@@ -554,6 +552,11 @@ class VirtualAssistant(SpeechAssistant):
                 if ask_wolfram and not any(word for word in voice_data.split() if word in confirmation_commands):
                     # using commands from google to extract useful meta data for wolfram search
                     wolfram_response = self.skills.wolfram_search(voice_data)
+                    # fun holiday information from timeanddate.com
+                    title, message, did_you_know = self.skills.fun_holiday()
+                    if wolfram_response and message and "today is" in message:
+                        wolfram_response += f"\n\nAccording to TimeAndDate.com, {message}\n{did_you_know}"
+
                     if wolfram_response:
                         response_message += wolfram_response
                         ask_wikipedia = False
@@ -562,7 +565,7 @@ class VirtualAssistant(SpeechAssistant):
 
                 # commands for wikipedia, exception is "weather" commands
                 wiki_commands = self._get_commands("wikipedia")
-                if ask_wikipedia and is_match(voice_data, wiki_commands) and not ("weather" in voice_data):
+                if ask_wikipedia and is_match(voice_data, wiki_commands):
                     # extract the keyword
                     wiki_keyword = extract_metadata(voice_data, wiki_commands)
                     # get aswers from wikipedia
@@ -631,6 +634,71 @@ class VirtualAssistant(SpeechAssistant):
                 displayException("Error forumulating response.")
                 self.respond_to_bot("Error forumulating response.")
 
+        def _happening_today():
+            # Today's date and time
+            date_today_response_from_wolfram = self.skills.wolfram_search("what day is it?")
+            response_time = self.skills.ask_time("what time is it?")
+
+            # breaking news, if there's any
+            breaking_news_response = _breaking_news_report(on_demand=True)
+
+            # top latest news today
+            news_briefing = self.news.cast_latest_news()
+            number_of_results = len(news_briefing)
+
+            # what happend today in history from Wolfram|Alpha
+            response_from_wolfram = self.skills.wolfram_search("this day in history")
+
+            # fun holiday information from timeanddate.com
+            title, fun_holiday_info, did_you_know = self.skills.fun_holiday()
+
+            # what's weather forecast today from Wolfram|Alpha
+            weather_response_from_wolfram = self.skills.wolfram_search("what's the weather like?")
+
+            # sunrise/sunset forecast today from Wolfram|Alpha
+            sunrise_response_from_wolfram = self.skills.wolfram_search("when is the sunrise?").split("(")[0]
+            sunset_response_from_wolfram = self.skills.wolfram_search("when is the sunset?").split("(")[0]
+
+            if date_today_response_from_wolfram and response_time:
+                self.speak(f"{date_today_response_from_wolfram} {response_time}")
+
+            self.speak("Here's what's happening today.")
+
+            if breaking_news_response:
+                self.speak(breaking_news_response.replace("Here's the ", ""))
+
+            if number_of_results > 0:
+                if number_of_results > 2:
+                    number_of_results = 3
+
+                self.speak(f"Here are the latest news today:")
+                for i in range(0, number_of_results):
+                    # let's get the redirected url (if possible) from link we have
+                    redirect_url = requests.get(news_briefing[i]["source url"])
+                    # send the link to bot
+                    self.respond_to_bot(redirect_url.url)
+                    self.speak(f"{news_briefing[i]['report']}")
+
+            if response_from_wolfram:
+                self.speak("From this day in history.")
+                self.speak(response_from_wolfram)
+
+            if fun_holiday_info:
+                self.speak(f"From timeanddate.com, {title}\n{fun_holiday_info}\n{did_you_know}")
+
+            if weather_response_from_wolfram:
+                self.speak(weather_response_from_wolfram)
+
+            if sunrise_response_from_wolfram and sunset_response_from_wolfram:
+                self.speak(f"{sunrise_response_from_wolfram} and {sunset_response_from_wolfram}")
+
+            if dt.now().hour <= 10:
+                music_response = self.skills.play_music("morning music")
+                if music_response:
+                    self.speak("Now playing your morning music...")
+                    # mute and sleep assistant when playing music
+                    self.sleep(True)
+
         def _heart_beat():
             time_ticker = 0
             while True:
@@ -650,7 +718,8 @@ class VirtualAssistant(SpeechAssistant):
 
                 # send "Fun Holiday" notification every 10:00:30 AM
                 if self.notification and time_ticker == 0 and ((hr == 10) and mn == 00 and sec == 30):
-                    self.skills.fun_holiday()
+                    title, message, _ = self.skills.fun_holiday()
+                    self.skills.toast_notification(title, message)
 
                 # Enable/Disable Notifications
                 if self.bot_command:

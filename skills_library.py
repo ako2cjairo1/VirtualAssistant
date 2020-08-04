@@ -312,24 +312,18 @@ class SkillsLibrary(Configuration):
                             response = f"\"{question}\" \n. ({wolfram_meta[1]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                         else:
                             # respond by showing list of information
-                            self.tts.speak("Here's some information.")
-
                             for deet in wolfram_response.split(" | "):
-                                self.print(f">> {deet}.")
-                            print("\n")
+                                response += f"{deet}.\n"
 
-                            return "success"
+                            return f"Here's some information..\n{response}"
 
                     # we found an array of information, let's disect if necessary
                     elif wolfram_response.count("\n") > 3:
                         # respond by showing list of information
-                        self.tts.speak("Here's some information.")
+                        for deet in wolfram_response.split(" | "):
+                            response += f"{deet}.\n"
 
-                        for deet in wolfram_response.split("\n"):
-                            self.print(f">> {deet}.")
-                        print("\n")
-
-                        return "success"
+                        return f"Here's some information..\n{response}"
 
                     # we found at least 1 set of defition, disect further if necessary
                     elif is_match(wolfram_response, ["|"]):
@@ -1038,11 +1032,9 @@ class SkillsLibrary(Configuration):
 
                 title = f'Today is \"{holiday["title"]}\"'
                 message = holiday["heading"]
+                did_you_know = f'Did you know. {holiday["did you know"]}'
 
-                self.toast_notification(title, message, duration=300)
-                self.tts.respond_to_bot(title)
-                self.tts.respond_to_bot(message)
-                # print(f'Date: {holiday["date"]}\nTitle: {holiday["title"]}\nHeading: {holiday["heading"]}\nDid You Know? {holiday["did you know"]}\nURL: {holiday["source url"]}')
+                return title, message, did_you_know
 
             # get back to virtual assistant directory
             os.chdir(self.ASSISTANT_DIR)

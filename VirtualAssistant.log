@@ -1,0 +1,18 @@
+08-04-2020 11:56:21 AM | ERROR | assitant | Error forumulating response.
+File:    assitant.py
+Target:  self.speak(news_briefing)
+Message: 'list' object has no attribute 'strip'
+Line:    488
+------------------------------------------------
+08-04-2020 02:44:34 PM | ERROR | assitant | Error forumulating response.
+File:    assitant.py
+Target:  _happening_today()
+Message: name 'voice_data' is not defined
+Line:    456
+------------------------------------------
+08-04-2020 03:33:26 PM | ERROR | tts | Exception occurred while trying to speak.
+File:    tts.py
+Target:  os.remove(audio_file)
+Message: [WinError 2] The system cannot find the file specified: './text-to-speech-audio/assistants-audio-181.mp3'
+Line:    268
+-------------------------------------------------------------------------------------------------------------------
