@@ -2,14 +2,53 @@ import os
 import sys
 import time
 import json
+import linecache
+import logging
 from threading import Thread
 from datetime import datetime as dt
 from random import choice, randint
 from colorama import init
 import requests
-from helper import displayException, is_match, is_match_and_bare, get_commands, clean_voice_data, extract_metadata, execute_map, check_connection
+from helper import is_match, is_match_and_bare, get_commands, clean_voice_data, extract_metadata, execute_map, check_connection
 from tts import SpeechAssistant
 from skills_library import SkillsLibrary
+
+logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
+logger = logging.getLogger(__name__)
+
+
+def displayException(exception_title="", ex_type=logging.ERROR):
+    (execution_type, message, tb) = sys.exc_info()
+
+    f = tb.tb_frame
+    lineno = tb.tb_lineno
+    fname = f.f_code.co_filename.split("\\")[-1]
+    linecache.checkcache(fname)
+    target = linecache.getline(fname, lineno, f.f_globals)
+
+    line_len = len(str(message)) + 10
+    log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
+    log_data += ("-" * line_len)
+
+    if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+        print("-" * 23)
+        print(exception_title)
+        print("-" * 23)
+
+    if ex_type == logging.DEBUG:
+        logger.debug(log_data)
+
+    elif ex_type == logging.INFO:
+        logger.info(log_data)
+
+    elif ex_type == logging.WARNING:
+        logger.warning(log_data)
+
+    elif ex_type == logging.ERROR:
+        logger.error(log_data)
+
+    elif ex_type == logging.CRITICAL:
+        logger.critical(log_data)
 
 
 class VirtualAssistant(SpeechAssistant):
@@ -846,7 +885,7 @@ class VirtualAssistant(SpeechAssistant):
                             self.skills.music_volume(70)
 
             except Exception as ex:
-                displayException(f"General Error while running virtual assistant. {str(ex)}")
+                displayException(f"General Error while running virtual assistant.")
 
         try:
             # check internet connectivity every second

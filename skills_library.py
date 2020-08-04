@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 import subprocess
 import webbrowser
@@ -6,15 +7,53 @@ import wikipedia
 import wolframalpha
 import time
 import wmi  # (screen brightness) Windows Management Instrumentation module
+import linecache
 import logging
 import concurrent.futures as task
 from threading import Thread
-from helper import displayException, is_match, get_commands, clean_voice_data, extract_metadata, execute_map
+from helper import is_match, get_commands, clean_voice_data, extract_metadata, execute_map
 from urllib.parse import quote
 from random import choice
 from datetime import datetime as dt
 from word2number import w2n
 from settings import Configuration
+
+logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
+logger = logging.getLogger(__name__)
+
+
+def displayException(exception_title="", ex_type=logging.ERROR):
+    (execution_type, message, tb) = sys.exc_info()
+
+    f = tb.tb_frame
+    lineno = tb.tb_lineno
+    fname = f.f_code.co_filename.split("\\")[-1]
+    linecache.checkcache(fname)
+    target = linecache.getline(fname, lineno, f.f_globals)
+
+    line_len = len(str(message)) + 10
+    log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
+    log_data += ("-" * line_len)
+
+    if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+        print("-" * 23)
+        print(exception_title)
+        print("-" * 23)
+
+    if ex_type == logging.DEBUG:
+        logger.debug(log_data)
+
+    elif ex_type == logging.INFO:
+        logger.info(log_data)
+
+    elif ex_type == logging.WARNING:
+        logger.warning(log_data)
+
+    elif ex_type == logging.ERROR:
+        logger.error(log_data)
+
+    elif ex_type == logging.CRITICAL:
+        logger.critical(log_data)
 
 
 class SkillsLibrary(Configuration):

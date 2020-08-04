@@ -95,12 +95,7 @@ class TelegramBot(Configuration):
 
                     self.last_command = command.strip().lower()
 
-                # elif updates["ok"] and len(updates["result"]) <= 0:
-                #     print(f"NO UPDATE: {self.last_update_id}")
-                # else:
-                #     print(f"UNKNOWN POLL UPDATE: {self.last_update_id}")
-
                 time.sleep(0.5)
 
-        except Exception as ex:
-            raise Exception(f"Error while polling. {str(ex)}")
+        except Exception:
+            raise Exception(f"Error polling bot, trying to poll again...")

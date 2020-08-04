@@ -12,12 +12,10 @@ from random import choice
 from settings import Configuration
 
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="a",
-                    level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
-
 config = Configuration()
+
+logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
+logger = logging.getLogger(__name__)
 
 
 def displayException(exception_title="", ex_type=logging.ERROR):
@@ -28,10 +26,15 @@ def displayException(exception_title="", ex_type=logging.ERROR):
     fname = f.f_code.co_filename.split("\\")[-1]
     linecache.checkcache(fname)
     target = linecache.getline(fname, lineno, f.f_globals)
-    log_data = "=" * 60
-    log_data += "{}\nFile:  {}\nTarget:  {}\nMessage: {}\nLine:    {}".format(
-        exception_title, fname, target.strip(), message, lineno)
-    log_data = "-" * 60
+
+    line_len = len(str(message)) + 10
+    log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
+    log_data += ("-" * line_len)
+
+    if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+        print("-" * 23)
+        print(exception_title)
+        print("-" * 23)
 
     if ex_type == logging.DEBUG:
         logger.debug(log_data)
@@ -47,11 +50,6 @@ def displayException(exception_title="", ex_type=logging.ERROR):
 
     elif ex_type == logging.CRITICAL:
         logger.critical(log_data)
-
-    if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-        print("-" * 23, end="\n")
-        print(f"{config.RED} {exception_title} {config.COLOR_RESET}", end="\n")
-        print("-" * 23, end="\n")
 
 
 def is_match(voice_data, keywords):
