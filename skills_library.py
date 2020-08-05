@@ -18,42 +18,7 @@ from datetime import datetime as dt
 from word2number import w2n
 from settings import Configuration
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
 logger = logging.getLogger(__name__)
-
-
-def displayException(exception_title="", ex_type=logging.ERROR):
-    (execution_type, message, tb) = sys.exc_info()
-
-    f = tb.tb_frame
-    lineno = tb.tb_lineno
-    fname = f.f_code.co_filename.split("\\")[-1]
-    linecache.checkcache(fname)
-    target = linecache.getline(fname, lineno, f.f_globals)
-
-    line_len = len(str(message)) + 10
-    log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
-    log_data += ("-" * line_len)
-
-    if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-        print("-" * 23)
-        print(exception_title)
-        print("-" * 23)
-
-    if ex_type == logging.DEBUG:
-        logger.debug(log_data)
-
-    elif ex_type == logging.INFO:
-        logger.info(log_data)
-
-    elif ex_type == logging.WARNING:
-        logger.warning(log_data)
-
-    elif ex_type == logging.ERROR:
-        logger.error(log_data)
-
-    elif ex_type == logging.CRITICAL:
-        logger.critical(log_data)
 
 
 class SkillsLibrary(Configuration):
@@ -206,7 +171,7 @@ class SkillsLibrary(Configuration):
 
                 except Exception:
                     pass
-                    displayException("Wolfram|Alpha Weather Report Error.")
+                    self.Log("Wolfram|Alpha Weather Report Error.")
 
                 return report
 
@@ -402,7 +367,7 @@ class SkillsLibrary(Configuration):
 
         except Exception:
             pass
-            displayException("Wolfram|Alpha Search Skill Error.")
+            self.Log("Wolfram|Alpha Search Skill Error.")
 
         # if no answers found return a blank response
         return response
@@ -418,7 +383,7 @@ class SkillsLibrary(Configuration):
                 return summary
 
             except wikipedia.exceptions.WikipediaException:
-                displayException(
+                self.Log(
                     "Wikipedia Search Skill (handled)", logging.INFO)
 
                 if ("who" or "who's") in voice_data.lower():
@@ -429,7 +394,7 @@ class SkillsLibrary(Configuration):
                 return f"{result} {self.google(wiki_keyword.strip())}"
 
             except Exception:
-                displayException("Wikipedia Search Skill Error.")
+                self.Log("Wikipedia Search Skill Error.")
 
         return result
 
@@ -515,7 +480,7 @@ class SkillsLibrary(Configuration):
                 except ZeroDivisionError:
                     return choice(["The answer is somwhere between infinity, negative infinity, and undefined.", "The answer is undefined."])
                 except Exception:
-                    displayException(
+                    self.Log(
                         "Calculator Skill Exception (handled).", logging.INFO)
                     return ""
 
@@ -541,7 +506,7 @@ class SkillsLibrary(Configuration):
                 return ""
 
         except Exception:
-            displayException("Calculator Skill Error.")
+            self.Log("Calculator Skill Error.")
 
     def open_application(self, voice_data):
         confirmation = ""
@@ -711,7 +676,7 @@ class SkillsLibrary(Configuration):
                 confirmation = choice(alternate_responses)
 
         except Exception:
-            displayException("Open Application Skill Error.", logging.DEBUG)
+            self.Log("Open Application Skill Error.", logging.DEBUG)
 
         return confirmation
 
@@ -768,7 +733,7 @@ class SkillsLibrary(Configuration):
                                         self.tts.speak("Searching...")
 
                         except KeyboardInterrupt as ex:
-                            displayException(
+                            self.Log(
                                 "Find File Skill Keyboard Interrupt (handled)", logging.INFO)
                             self.tts.speak("Search interrupted...")
 
@@ -782,7 +747,7 @@ class SkillsLibrary(Configuration):
                                 f"\n----- {found_file_count} files found -----\n")
                             response_message = f"I found {found_file_count} files. I'm showing you the directories where to see them.\n"
         except Exception:
-            displayException("Find File Skill Error.")
+            self.Log("Find File Skill Error.")
 
         return response_message
 
@@ -798,7 +763,7 @@ class SkillsLibrary(Configuration):
             return f"{choice(alternate_responses)} I set the brightness by {percentage}%"
 
         except Exception:
-            displayException("Screen Brightness Skill Error.")
+            self.Log("Screen Brightness Skill Error.")
 
     def control_wifi(self, voice_data):
         command = ""
@@ -821,7 +786,7 @@ class SkillsLibrary(Configuration):
                 return f"{choice(alternate_responses)} I {command} the Wi-Fi."
 
         except Exception:
-            displayException("Wi-Fi Skill Error.")
+            self.Log("Wi-Fi Skill Error.")
 
         return ""
 
@@ -848,7 +813,7 @@ class SkillsLibrary(Configuration):
                 # return f"{'Reboot' if '/r' in command else 'Shutdown'} is canceled."
 
         except Exception:
-            displayException("Shutdown/Restart System Skill Error.")
+            self.Log("Shutdown/Restart System Skill Error.")
 
         return ""
 
@@ -865,7 +830,7 @@ class SkillsLibrary(Configuration):
             return f"{choice(alternate_responses)} I changed your wallpaper..."
 
         except Exception:
-            displayException("Wallpaper Skill Error.")
+            self.Log("Wallpaper Skill Error.")
 
     def initiate_new_project(self, lang="Python", proj_name="NewPythonProject", mode="g"):
         # navigate to the ProjectGitInitAutomation directory - contains the libraries
@@ -953,7 +918,7 @@ class SkillsLibrary(Configuration):
             return response
 
         except Exception:
-            displayException("Play Music Skill Error.")
+            self.Log("Play Music Skill Error.")
 
     def music_volume(self, volume):
 
@@ -971,7 +936,7 @@ class SkillsLibrary(Configuration):
             os.chdir(self.ASSISTANT_DIR)
 
         except Exception:
-            displayException("Music Volume Skill Error.")
+            self.Log("Music Volume Skill Error.")
 
     def news_scraper(self):
 
@@ -994,7 +959,7 @@ class SkillsLibrary(Configuration):
             return news
 
         except Exception:
-            displayException("News Scraper Skill Error.")
+            self.Log("News Scraper Skill Error.")
             return None
 
     def toast_notification(self, title, message, duration=600):
@@ -1015,7 +980,7 @@ class SkillsLibrary(Configuration):
             os.chdir(self.ASSISTANT_DIR)
 
         except Exception:
-            displayException("Toast Notification Skill Error.")
+            self.Log("Toast Notification Skill Error.")
 
     def fun_holiday(self):
         try:
@@ -1040,7 +1005,7 @@ class SkillsLibrary(Configuration):
             os.chdir(self.ASSISTANT_DIR)
 
         except Exception:
-            displayException("Fun Holiday Skill Error.")
+            self.Log("Fun Holiday Skill Error.")
 
     def system_volume(self, vol):
         # get back to virtual assistant directory after command execution

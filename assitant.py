@@ -13,42 +13,8 @@ from helper import is_match, is_match_and_bare, get_commands, clean_voice_data, 
 from tts import SpeechAssistant
 from skills_library import SkillsLibrary
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
+# logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
 logger = logging.getLogger(__name__)
-
-
-def displayException(exception_title="", ex_type=logging.ERROR):
-    (execution_type, message, tb) = sys.exc_info()
-
-    f = tb.tb_frame
-    lineno = tb.tb_lineno
-    fname = f.f_code.co_filename.split("\\")[-1]
-    linecache.checkcache(fname)
-    target = linecache.getline(fname, lineno, f.f_globals)
-
-    line_len = len(str(message)) + 10
-    log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
-    log_data += ("-" * line_len)
-
-    if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-        print("-" * 23)
-        print(exception_title)
-        print("-" * 23)
-
-    if ex_type == logging.DEBUG:
-        logger.debug(log_data)
-
-    elif ex_type == logging.INFO:
-        logger.info(log_data)
-
-    elif ex_type == logging.WARNING:
-        logger.warning(log_data)
-
-    elif ex_type == logging.ERROR:
-        logger.error(log_data)
-
-    elif ex_type == logging.CRITICAL:
-        logger.critical(log_data)
 
 
 class VirtualAssistant(SpeechAssistant):
@@ -417,39 +383,33 @@ class VirtualAssistant(SpeechAssistant):
 
                 preposition_words = self._get_commands("prepositions")
                 # commands for news briefing
-                news_commands = self._get_commands(
-                    "news") + [f"news {news_preposition}" for news_preposition in preposition_words]
+                news_commands = self._get_commands("news") + [f"news {news_preposition}" for news_preposition in preposition_words]
                 if is_match(voice_data, news_commands):
-                    news_response = ""
+                    news_found = False
 
                     self.speak("I'm on it...")
                     self.print("\n Fetching information from news channels...\n")
 
-                    import sys
-                    sys.path.append(self.NEWS_DIR)
-
-                    # change the directory to location of NewsTicker Library
-                    os.chdir(self.NEWS_DIR)
+                    # get news information from sources
                     self.news.fetch_news()
-                    # get back to virtual assistant directory
-                    os.chdir(self.ASSISTANT_DIR)
 
                     # get meta data to use for news headline search
-                    news_meta_data = extract_metadata(
-                        voice_data, news_commands + preposition_words)
-                    about = f"on \"{news_meta_data}\"" if news_meta_data else ""
+                    news_meta_data = extract_metadata(voice_data, (news_commands + preposition_words))
+                    about = f" on \"{news_meta_data}\"" if news_meta_data else ""
 
                     # breaking news report
                     if is_match(voice_data, ["breaking news"]):
                         # if news.check_breaking_news() and self.can_listen:
-                        if self.news.check_breaking_news():
-                            news_response = _breaking_news_report(on_demand=True)
+                        news_response = _breaking_news_report(on_demand=True)
+                        if len(news_response) <= 0:
+                            self.speak("Sorry, no Breaking News available (at the moment).")
+                            return True
                         else:
-                            news_response = "Sorry, no Breaking News available (at the moment)."
+                            self.speak(news_response)
+                            news_found = True
 
                     # latest news
                     elif self.news.check_latest_news():
-                        source_urls = []
 
                         # top 3 latest news report
                         if is_match(voice_data, ["news briefing", "flash briefing", "news report", "top news", "top stories", "happening today"]):
@@ -461,56 +421,58 @@ class VirtualAssistant(SpeechAssistant):
                                 if number_of_results > 2:
                                     number_of_results = 3
 
-                                news_response += f"\n\nHere are your latest news briefing {about}.\n\n"
+                                news_found = True
+                                self.speak(f"Here are your latest news briefing{about}.")
                                 for i in range(0, number_of_results):
-                                    news_response += f"{news_briefing[i]['report']}\n\n"
-                                    source_urls.append(news_briefing[i]["source url"])
+                                    # let's get the redirected url (if possible) from link we have
+                                    redirect_url = requests.get(news_briefing[i]["source url"])
+                                    # open the source article in webbrowser.
+                                    execute_map("open browser", [redirect_url.url])
+                                    # send the link to bot
+                                    self.respond_to_bot(redirect_url.url)
+                                    self.speak(f"{news_briefing[i]['report']}")
 
                         # top 1 latest news report
                         elif is_match(voice_data, ["latest", "most", "recent", "flash news", "news flash"]):
                             news_deets = self.news.cast_latest_news(news_meta_data)
                             if len(news_deets) > 0:
+                                news_found = True
                                 # get the first index (latest) on the list of news
                                 top_news = news_deets[0]
-                                news_response = f"Here's the latest news {about}.\n {top_news['report']}\n\n"
-                                source_urls.append(top_news["source url"])
+                                self.speak(f"Here's the latest news{about}.")
+                                # let's get the redirected url (if possible) from link we have
+                                redirect_url = requests.get(top_news["source url"])
+                                # open the source article in webbrowser.
+                                execute_map("open browser", [redirect_url.url])
+                                # send the link to bot
+                                self.respond_to_bot(redirect_url.url)
+                                self.speak(f"{top_news['report']}")
 
                         # random news report for today
                         else:
                             latest_news = self.news.cast_latest_news(news_meta_data)
                             if len(latest_news) > 0:
                                 if news_meta_data:
-                                    news_response = f"Here's what I found {about}.\n\n"
+                                    self.speak(f"Here's what I found{about}.")
+
+                                news_found = True
                                 # choose random news from list of latest news today
                                 random_news_today = choice(latest_news)
-                                news_response += f"{random_news_today['report']}\n\n"
-                                source_urls.append(random_news_today["source url"])
-
-                        if len(source_urls) > 0:
-                            # convert the list of source_urls to set to remove duplicate.
-                            open_source_url_thread = Thread(target=execute_map, args=("open browser", set(source_urls),))
-                            open_source_url_thread.setDaemon(True)
-                            open_source_url_thread.start()
-
-                            for link in set(source_urls):
-                                # let get the redirected url (if possible) from link we have
-                                redirect_url = requests.get(link)
+                                # let's get the redirected url (if possible) from link we have
+                                redirect_url = requests.get(random_news_today["source url"])
+                                # open the source article in webbrowser.
+                                execute_map("open browser", [redirect_url.url])
                                 # send the link to bot
                                 self.respond_to_bot(redirect_url.url)
+                                self.speak(f"{random_news_today['report']}")
 
-                            news_response += "More details of this news in the source article. It should be in your web browser now."
+                        if news_found:
+                            self.speak("More details of this news in the source article. It should be in your web browser now.")
 
-                    if news_meta_data and not news_response:
-                        news_response = f"I couldn't find \"{news_meta_data}\" on your News Feed. Sorry about that."
+                    if news_meta_data and not news_found:
+                        self.speak(f"I couldn't find \"{news_meta_data}\" on your News Feed. Sorry about that.")
 
-                    if news_response:
-                        # cast the latest news
-                        response_message += news_response
-                        ask_google = False
-                        ask_wikipedia = False
-                        ask_wolfram = False
-                        not_confirmation = False
-                        use_calc = False
+                    return True
 
                 # commands for youtube
                 youtube_commands = self._get_commands("youtube")
@@ -631,13 +593,16 @@ class VirtualAssistant(SpeechAssistant):
                 return True
 
             except Exception:
-                displayException("Error forumulating response.")
+                self.Log("Error forumulating response.")
                 self.respond_to_bot("Error forumulating response.")
 
         def _happening_today():
             # Today's date and time
             date_today_response_from_wolfram = self.skills.wolfram_search("what day is it?")
             response_time = self.skills.ask_time("what time is it?")
+
+            # get updates from news channels
+            self.news.fetch_news()
 
             # breaking news, if there's any
             breaking_news_response = _breaking_news_report(on_demand=True)
@@ -675,6 +640,8 @@ class VirtualAssistant(SpeechAssistant):
                 for i in range(0, number_of_results):
                     # let's get the redirected url (if possible) from link we have
                     redirect_url = requests.get(news_briefing[i]["source url"])
+                    # open the source article in webbrowser.
+                    execute_map("open browser", [redirect_url.url])
                     # send the link to bot
                     self.respond_to_bot(redirect_url.url)
                     self.speak(f"{news_briefing[i]['report']}")
@@ -693,22 +660,39 @@ class VirtualAssistant(SpeechAssistant):
                 self.speak(f"{sunrise_response_from_wolfram} and {sunset_response_from_wolfram}")
 
             if dt.now().hour <= 10:
-                music_response = self.skills.play_music("morning music")
+                music_response = self.skills.play_music(choice(["post malone", "bazzi"]))
                 if music_response:
                     self.speak("Now playing your morning music...")
                     # mute and sleep assistant when playing music
                     self.sleep(True)
 
         def _heart_beat():
+            start_time = dt.now()
             time_ticker = 0
+
             while True:
-                t = dt.now()
-                hr = t.hour
-                mn = t.minute
-                sec = t.second
+                current_time = dt.now()
+                hr = current_time.hour
+                mn = current_time.minute
+                sec = current_time.second
+
+                total_time = current_time - start_time
+                active_hours = int((total_time.days * 24) + (total_time.seconds // 3600))
+
+                # restart the application every 8 hours to re-authenticate Telegram bot
+                if self.isSleeping() and active_hours >= 8 and sec == 30:
+                    # set a restart request
+                    self.bot_command = f"restart {self.assistant_name}"
+                    self.restart_request = True
+
+                    # log and send the restart request message to telegram bot
+                    message = "Restart requested to re-authenticate Telegram bot..."
+                    self.print(message)
+                    self.Log(message, logging.INFO)
+                    break
 
                 if time_ticker == 0 and (mn == 0 and sec == 0) and self.isSleeping():
-                    self.speak(f"The time now is {t.strftime('%I:%M %p')}.")
+                    self.speak(f"The time now is {current_time.strftime('%I:%M %p')}.")
                     time_ticker += 1
 
                     if self.isSleeping():
@@ -734,7 +718,7 @@ class VirtualAssistant(SpeechAssistant):
                         self.bot.last_command = None
 
                 # Restart request
-                if not self.polling or self.restart_request:
+                if self.restart_request:
                     self.bot_command = f"restart {self.assistant_name}"
 
                 if time_ticker >= 1:
@@ -744,6 +728,7 @@ class VirtualAssistant(SpeechAssistant):
 
         def _breaking_news_report(on_demand=False):
             response = ""
+            source_urls = []
 
             try:
                 if self.news.check_breaking_news() or on_demand:
@@ -752,22 +737,24 @@ class VirtualAssistant(SpeechAssistant):
 
                     news_briefing = []
                     for bn in breaking_news_update:
-                        if on_demand or not any(bn["headline"].lower() in breaking_news.lower() for breaking_news in self.breaking_news_reported):
+                        if not any(bn["headline"].lower() in breaking_news.lower() for breaking_news in self.breaking_news_reported):
                             news_briefing.append(bn["headline"])
                             new_breaking_news = True
 
-                    if new_breaking_news:
-                        self.breaking_news_reported = []
-                        self.breaking_news_reported.extend(news_briefing)
+                    if new_breaking_news or on_demand:
+                        if len(news_briefing) > 0:
+                            self.breaking_news_reported = []
+                            self.breaking_news_reported.extend(news_briefing)
 
                         # announce breaking news alert
-                        if on_demand:
-                            response += "Here's the BREAKING NEWS...\n\n"
-                        else:
-                            self.speak("Breaking News Alert!")
+                        response += "Here's the BREAKING NEWS...\n\n"
 
-                        source_urls = [source["source url"]
-                                       for source in breaking_news_update]
+                        # cast the breaking news
+                        for breaking_news in self.news.cast_breaking_news(on_demand):
+                            # response += f"{breaking_news}\n\n"
+                            response += f"{breaking_news['report']}\n\n"
+                            source_urls.append(breaking_news["source url"])
+
                         if len(source_urls) > 0:
                             # convert the list of source_urls to set to remove duplicate.
                             open_news_url_thread = Thread(target=execute_map, args=("open browser", set(source_urls),))
@@ -780,26 +767,14 @@ class VirtualAssistant(SpeechAssistant):
                                 # send the link to bot
                                 self.respond_to_bot(redirect_url.url)
 
-                        # cast the breaking news
-                        for breaking_news in self.news.cast_breaking_news():
-                            if on_demand:
-                                response += f"{breaking_news}\n\n"
-                            else:
-                                self.speak(breaking_news)
-
                         if len(source_urls) > 0:
-                            more_deets_message = "More details of this breaking news in the source article. It should open in your web browser now..."
-                            if not on_demand:
-                                self.speak(more_deets_message)
-                            response += more_deets_message
+                            response += "More details of this breaking news in the source article. It should open in your web browser now..."
 
             except Exception:
                 pass
-                displayException(
-                    "Error while reading the breaking news report.")
+                self.Log("Error while reading the breaking news report.")
 
-            if on_demand:
-                return response
+            return response
 
         def _breaking_news_notification(timeout=60):
             timeout_counter = 0
@@ -832,7 +807,7 @@ class VirtualAssistant(SpeechAssistant):
 
             except Exception:
                 pass
-                displayException("Error while sending Breaking News notification.")
+                self.Log("Error while sending Breaking News notification.")
 
         """
         Main handler of virtual assistant
@@ -954,7 +929,7 @@ class VirtualAssistant(SpeechAssistant):
                             self.skills.music_volume(70)
 
             except Exception as ex:
-                displayException(f"General Error while running virtual assistant.")
+                self.Log(f"General Error while running virtual assistant.")
 
         try:
             # check internet connectivity every second
@@ -965,6 +940,10 @@ class VirtualAssistant(SpeechAssistant):
                 self.news = self.skills.news_scraper()
 
                 while not _start_virtual_assistant():
+                    if self.restart_request:
+                        self.restart()
+                        break
+
                     time.sleep(5)
                     os.system("cls")
                     brenda = VirtualAssistant(masters_name=self.master_name, assistants_name=self.assistant_name, listen_timeout=self.listen_timeout)
@@ -972,12 +951,10 @@ class VirtualAssistant(SpeechAssistant):
                     brenda.activate()
 
         except Exception:
-            displayException("Error while starting virtual assistant.")
+            self.Log("Error while starting virtual assistant.")
             time.sleep(5)
-
-            # os.system("cls")
             self.bot_command = f"restart {self.assistant_name}"
-            self.skill.music_volume(20)
+            self.skill.music_volume(30)
             # set the restart flag to true
             self.restart_request = True
             self.restart()

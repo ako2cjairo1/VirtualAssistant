@@ -150,8 +150,9 @@
             "name": "acknowledge response",
             "commands": [
                 "Sure thing!",
+                "Sure!",
                 "Alright!",
-                "Ok! <boss_name>.",
+                "Ok! <boss_name>...",
                 "Right away <boss_name>..."
             ]
         },
@@ -161,6 +162,7 @@
                 "Ok",
                 "Alright",
                 "That's great!",
+                "Happy to help!",
                 "Your appreciation is noted.",
                 "Let me know if there's something else I can help you with."
             ]
@@ -382,6 +384,7 @@
                 "top stories",
                 "top news",
                 "the news",
+                "the news today",
                 "what is latest",
                 "what's latest",
                 "what's the latest",
@@ -561,6 +564,7 @@
         {
             "name": "time and day",
             "commands": [
+                "today",
                 "tomorrow",
                 "morning",
                 "afternoon",

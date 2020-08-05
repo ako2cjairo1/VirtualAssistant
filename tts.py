@@ -14,43 +14,10 @@ from settings import Configuration
 from skills_library import SkillsLibrary
 from telegram import TelegramBot
 from threading import Thread
+from datetime import datetime as dt
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
+logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
 logger = logging.getLogger(__name__)
-
-
-def displayException(exception_title="", ex_type=logging.ERROR):
-    (execution_type, message, tb) = sys.exc_info()
-
-    f = tb.tb_frame
-    lineno = tb.tb_lineno
-    fname = f.f_code.co_filename.split("\\")[-1]
-    linecache.checkcache(fname)
-    target = linecache.getline(fname, lineno, f.f_globals)
-
-    line_len = len(str(message)) + 10
-    log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
-    log_data += ("-" * line_len)
-
-    if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-        print("-" * 23)
-        print(exception_title)
-        print("-" * 23)
-
-    if ex_type == logging.DEBUG:
-        logger.debug(log_data)
-
-    elif ex_type == logging.INFO:
-        logger.info(log_data)
-
-    elif ex_type == logging.WARNING:
-        logger.warning(log_data)
-
-    elif ex_type == logging.ERROR:
-        logger.error(log_data)
-
-    elif ex_type == logging.CRITICAL:
-        logger.critical(log_data)
 
 
 class SpeechAssistant(Configuration):
@@ -68,20 +35,42 @@ class SpeechAssistant(Configuration):
         self.recognizer.energy_threshold = 4000
 
         self.skill = SkillsLibrary(self, self.master_name, self.assistant_name)
-        self.bot = TelegramBot()
-        self.bot_command = None
         self.speaker = None
         self.restart_request = False
-        self.polling = True
+        self.init_bot()
 
-        if check_connection():
-            poll_thread = Thread(target=self.poll_bot)
-            poll_thread.setDaemon(True)
-            poll_thread.start()
+    def Log(self, exception_title="", ex_type=logging.ERROR):
+        (execution_type, message, tb) = sys.exc_info()
 
-            bot_command_thread = Thread(target=self.handle_bot_commands)
-            bot_command_thread.setDaemon(True)
-            bot_command_thread.start()
+        f = tb.tb_frame
+        lineno = tb.tb_lineno
+        fname = f.f_code.co_filename.split("\\")[-1]
+        linecache.checkcache(fname)
+        target = linecache.getline(fname, lineno, f.f_globals)
+
+        line_len = len(str(message)) + 10
+        log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
+        log_data += ("-" * line_len)
+
+        if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+            print("-" * 23)
+            print(f"{self.RED} {exception_title} {self.COLOR_RESET}")
+            print("-" * 23)
+
+        if ex_type == logging.DEBUG:
+            logger.debug(log_data)
+
+        elif ex_type == logging.INFO:
+            logger.info(log_data)
+
+        elif ex_type == logging.WARNING:
+            logger.warning(log_data)
+
+        elif ex_type == logging.ERROR:
+            logger.error(log_data)
+
+        elif ex_type == logging.CRITICAL:
+            logger.critical(log_data)
 
     def listen_to_audio(self, ask=None):
         voice_text = ""
@@ -115,7 +104,7 @@ class SpeechAssistant(Configuration):
                 self.not_available_counter = 0
 
             except sr.UnknownValueError:
-                displayException(
+                self.Log(
                     f"{self.assistant_name} could not understand what you have said.", logging.WARNING)
 
                 if self.isSleeping() and self.not_available_counter >= 3:
@@ -130,7 +119,7 @@ class SpeechAssistant(Configuration):
                 self.not_available_counter += 1
                 if self.not_available_counter == 3:
                     message = f"\"{self.assistant_name}\" Not Available."
-                    displayException(message)
+                    self.Log(message)
                     self.respond_to_bot(message)
 
                 if self.isSleeping() and self.not_available_counter >= 3:
@@ -139,12 +128,12 @@ class SpeechAssistant(Configuration):
                     self.respond_to_bot(message)
 
             except gTTSError:
-                displayException("Exception occurred in speech service.")
+                self.Log("Exception occurred in speech service.")
 
             except Exception as ex:
                 if "listening timed out" not in str(ex):
                     # bypass the timed out exception, (timeout=3, if total silence for 3 secs.)
-                    displayException(
+                    self.Log(
                         "Exception occurred while analyzing audio.")
 
         if not self.isSleeping() and voice_text.strip():
@@ -165,6 +154,25 @@ class SpeechAssistant(Configuration):
     def isSleeping(self):
         return self.sleep_assistant
 
+    def init_bot(self):
+        try:
+            self.bot = TelegramBot()
+            self.bot_command = None
+
+            if check_connection():
+                poll_thread = Thread(target=self.poll_bot)
+                poll_thread.setDaemon(True)
+                poll_thread.start()
+
+                bot_command_thread = Thread(target=self.handle_bot_commands)
+                bot_command_thread.setDaemon(True)
+                bot_command_thread.start()
+        except Exception:
+            self.Log("Error while initiating telegram bot.")
+            time.sleep(5)
+            self.restart_request = True
+            self.init_bot()
+
     def respond_to_bot(self, audio_string):
         # don't send response to bot with audio_string containing "filler" p hrases.
         if not is_match(audio_string, ["I'm here...", "I'm listening...", "(in mute)", "listening..."]):
@@ -174,23 +182,23 @@ class SpeechAssistant(Configuration):
     def poll_bot(self):
         while True:
             try:
-                self.polling = True
                 self.bot.poll()
 
             except Exception:
-                # self.polling = False
-                # time.sleep(3)
-                # self.restart_request = True
-                displayException("Exception occurred while polling bot, trying to re-connect...")
+                self.Log("Exception occurred while polling bot, trying to re-connect...")
                 time.sleep(5)
                 continue
 
     def handle_bot_commands(self):
         while True:
+            t = dt.now()
+            hr = t.hour
+            mn = t.minute
+            sec = t.second
+
             try:
                 # get the latest command from bot
                 self.bot_command = self.bot.last_command
-                self.polling = True
 
                 # handles the RESTAR command sequece of virtual assistant application
                 if self.bot_command and "/restart" in self.bot_command:
@@ -213,9 +221,8 @@ class SpeechAssistant(Configuration):
                 time.sleep(0.5)
 
             except Exception:
-                displayException("Error while handling bot commands.")
+                self.Log("Error while handling bot commands.")
                 self.restart_request = True
-                self.polling = False
                 time.sleep(5)
                 continue
 
@@ -269,6 +276,6 @@ class SpeechAssistant(Configuration):
 
             except Exception as ex:
                 if not ("Cannot find the specified file." or "Permission denied:") in str(ex):
-                    displayException("Exception occurred while trying to speak.")
+                    self.Log("Exception occurred while trying to speak.")
                     message = f"\"{self.assistant_name}\" Not Available."
                     self.respond_to_bot(message)

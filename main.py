@@ -12,9 +12,8 @@ def create_instance():
         brenda.maximize_command_interface()
         brenda.activate()
 
-    except Exception:
-        error_message = "Critical Error occurred, trying to start a new instance..."
-        print(error_message)
+    except Exception as ex:
+        print(f"Critical Error occurred, trying to start a new instance... {str(ex)}")
         time.sleep(5)
         create_instance()
 

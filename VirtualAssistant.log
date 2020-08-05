@@ -1,18 +1,372 @@
-08-04-2020 11:56:21 AM | ERROR | assitant | Error forumulating response.
-File:    assitant.py
-Target:  self.speak(news_briefing)
-Message: 'list' object has no attribute 'strip'
-Line:    488
-------------------------------------------------
-08-04-2020 02:44:34 PM | ERROR | assitant | Error forumulating response.
-File:    assitant.py
-Target:  _happening_today()
-Message: name 'voice_data' is not defined
-Line:    456
-------------------------------------------
-08-04-2020 03:33:26 PM | ERROR | tts | Exception occurred while trying to speak.
+08-05-2020 07:34:46 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD313970>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:34:56 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD3131C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:35:06 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD3138E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:35:06 PM | ERROR | Error while handling bot commands.
 File:    tts.py
-Target:  os.remove(audio_file)
-Message: [WinError 2] The system cannot find the file specified: './text-to-speech-audio/assistants-audio-181.mp3'
-Line:    268
--------------------------------------------------------------------------------------------------------------------
+Target:  if check_connection():
+Message: Connection error, maximum retries already exhausted...
+Line:    162
+----------------------------------------------------------------
+08-05-2020 07:35:11 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD358250>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:35:21 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD3583A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:36:58 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001B6766181C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    243
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:36:58 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001B6766182E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    243
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:36:58 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:00 PM | ERROR | Error forumulating response.
+File:    assitant.py
+Target:  wolfram_response = self.skills.wolfram_search(voice_data)
+Message: 'SkillsLibrary' object has no attribute 'Log'
+Line:    519
+-------------------------------------------------------
+08-05-2020 07:37:00 PM | ERROR | General Error while running virtual assistant.
+File:    assitant.py
+Target:  _formulate_responses(voice_data)
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=Error+forumulating+response.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001B6766180D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    909
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:37:03 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:05 PM | ERROR | Error while starting virtual assistant.
+File:    assitant.py
+Target:  while not _start_virtual_assistant():
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%0A+Comencing+restart...&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001B6766A6670>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    951
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:37:08 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:13 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:15 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B676618BE0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:37:18 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:23 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:25 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B676618520>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:37:28 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:33 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:35 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B676618B50>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:37:35 PM | ERROR | Error while initiating telegram bot.
+File:    tts.py
+Target:  if check_connection():
+Message: Connection error, maximum retries already exhausted...
+Line:    162
+----------------------------------------------------------------
+08-05-2020 07:37:38 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:40 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B6766A6E20>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:37:43 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:37:48 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    185
+----------------------------------------------------
+08-05-2020 07:38:34 PM | ERROR | Exception occurred while trying to speak.
+File:    tts.py
+Target:  tts.save(audio_file)
+Message: Connection error during token calculation: HTTPSConnectionPool(host='translate.google.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C1309100>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    265
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:38:34 PM | ERROR | General Error while running virtual assistant.
+File:    assitant.py
+Target:  self.speak(
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%22Brenda%22+Not+Available.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C12E3430>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    884
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:38:39 PM | ERROR | Error while starting virtual assistant.
+File:    assitant.py
+Target:  while not _start_virtual_assistant():
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%0A+Comencing+restart...&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C13096A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    951
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:38:49 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C18E2F40>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:39:00 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C18E29A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:39:10 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C18E29D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:39:10 PM | ERROR | Error while initiating telegram bot.
+File:    tts.py
+Target:  if check_connection():
+Message: Connection error, maximum retries already exhausted...
+Line:    162
+----------------------------------------------------------------
+08-05-2020 07:39:15 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C18E2D90>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:39:21 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C18EC910>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    243
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:39:21 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C18EC640>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    243
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:39:25 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C026A1C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:40:30 PM | ERROR | "Brenda" Not Available.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: recognition connection failed: [Errno 11001] getaddrinfo failed
+Line:    102
+-------------------------------------------------------------------------
+08-05-2020 07:40:30 PM | ERROR | General Error while running virtual assistant.
+File:    assitant.py
+Target:  voice_data = self.listen_to_audio()
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%22Brenda%22+Not+Available.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7CE1D460>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    888
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:40:35 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE1D5E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:40:45 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE1D550>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:40:55 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE1D580>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:40:55 PM | ERROR | Error while initiating telegram bot.
+File:    tts.py
+Target:  if check_connection():
+Message: Connection error, maximum retries already exhausted...
+Line:    162
+----------------------------------------------------------------
+08-05-2020 07:41:00 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE3CDF0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:41:05 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7D4373A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    243
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:41:05 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7D4372B0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    243
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:41:10 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE3CDC0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:41:20 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE3C4C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:41:20 PM | ERROR | Error while initiating telegram bot.
+File:    tts.py
+Target:  if check_connection():
+Message: Connection error, maximum retries already exhausted...
+Line:    162
+----------------------------------------------------------------
+08-05-2020 07:41:26 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437310>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:41:36 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437250>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:41:46 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D4373A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:41:46 PM | ERROR | Error while initiating telegram bot.
+File:    tts.py
+Target:  if check_connection():
+Message: Connection error, maximum retries already exhausted...
+Line:    162
+----------------------------------------------------------------
+08-05-2020 07:41:51 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437D90>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:42:01 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437B50>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:42:05 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7D4576A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    243
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:42:05 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7D4575B0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    243
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:42:11 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437B80>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 07:42:11 PM | ERROR | Error while initiating telegram bot.
+File:    tts.py
+Target:  if check_connection():
+Message: Connection error, maximum retries already exhausted...
+Line:    162
+----------------------------------------------------------------
+08-05-2020 07:42:16 PM | ERROR | Connection Error. You are not connected to the Internet.
+File:    helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D4576D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    173
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-05-2020 10:01:03 PM | ERROR | Error forumulating response.
+File:    assitant.py
+Target:  execute_map("open browser", [redirect_url])
+Message: startfile: filepath should be string, bytes or os.PathLike, not Response
+Line:    464
+----------------------------------------------------------------------------------

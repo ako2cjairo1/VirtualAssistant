@@ -14,11 +14,11 @@ from settings import Configuration
 
 config = Configuration()
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
+logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
 logger = logging.getLogger(__name__)
 
 
-def displayException(exception_title="", ex_type=logging.ERROR):
+def Log(exception_title="", ex_type=logging.ERROR):
     (execution_type, message, tb) = sys.exc_info()
 
     f = tb.tb_frame
@@ -33,7 +33,7 @@ def displayException(exception_title="", ex_type=logging.ERROR):
 
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
         print("-" * 23)
-        print(exception_title)
+        print(f"{config.RED} {exception_title} {config.COLOR_RESET}")
         print("-" * 23)
 
     if ex_type == logging.DEBUG:
@@ -78,7 +78,7 @@ def get_commands_from_json():
 
     except Exception:
         pass
-        displayException("Get Commands Error.")
+        Log("Get Commands Error.")
 
 
 def get_commands(command_name, assistant_name="", master_name=""):
@@ -186,26 +186,28 @@ def check_connection():
                 retry_count = 0
 
         except requests.ConnectionError as e:
-            displayException("Connection Error. You are not connected to the Internet.")
+            Log("Connection Error. You are not connected to the Internet.")
+            if retry_count >= 3:
+                raise Exception("Connection error, maximum retries already exhausted...")
             print("\n **Trying to re-connect...", end="")
-            time.sleep(5)
+            time.sleep(10)
+            continue
         except requests.Timeout as e:
-            displayException("Timeout Error.")
+            Log("Timeout Error.")
+            if retry_count >= 3:
+                raise Exception("Timeout Error, maximum retries already exhausted...")
             print("\n **Trying to re-connect...", end="")
             time.sleep(5)
+            continue
         except requests.RequestException:
-            displayException("General Error")
+            Log("General Error")
+            if retry_count >= 3:
+                raise Exception("General Error, maximum retries already exhausted...")
             print("\n **Trying to re-connect...", end="")
             time.sleep(5)
             continue
 
         except Exception:
-            pass
-            if retry_count == 1:
-                os.system("cls")
-                displayException("Exception occurred while checking for internet connection.")
-                print("\n **Trying to re-connect...", end="")
-                time.sleep(5)
-                continue
+            raise Exception("Exception occurred while checking for internet connection.")
 
         time.sleep(1)
