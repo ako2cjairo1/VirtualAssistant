@@ -185,14 +185,14 @@ def check_connection():
             elif retry_count >= 10:
                 retry_count = 0
 
-        except requests.ConnectionError as e:
+        except requests.ConnectionError:
             Log("Connection Error. You are not connected to the Internet.")
             if retry_count >= 3:
                 raise Exception("Connection error, maximum retries already exhausted...")
             print("\n **Trying to re-connect...", end="")
             time.sleep(10)
             continue
-        except requests.Timeout as e:
+        except requests.Timeout:
             Log("Timeout Error.")
             if retry_count >= 3:
                 raise Exception("Timeout Error, maximum retries already exhausted...")

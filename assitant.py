@@ -13,9 +13,6 @@ from helper import is_match, is_match_and_bare, get_commands, clean_voice_data, 
 from tts import SpeechAssistant
 from skills_library import SkillsLibrary
 
-# logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
-logger = logging.getLogger(__name__)
-
 
 class VirtualAssistant(SpeechAssistant):
 
@@ -31,6 +28,7 @@ class VirtualAssistant(SpeechAssistant):
         self.skills = None
         # init news scraper (daemon)
         self.news = None
+        logger = logging.getLogger(__name__)
 
     def print(self, message):
         print(message)
@@ -51,14 +49,14 @@ class VirtualAssistant(SpeechAssistant):
         os.chdir(self.ASSISTANT_DIR)
         AUDIO_FOLDER = "./text-to-speech-audio"
 
-        self.print(" Cleaning up...")
+        print(" Cleaning up...")
         for aud_file in os.listdir(AUDIO_FOLDER):
             if "prompt.mp3" not in aud_file:
                 audio_file = f"{AUDIO_FOLDER}/{aud_file}"
                 # delete the audio file after announcing to save mem space
                 os.remove(audio_file)
 
-        self.print(" Initiating new instance...")
+        print(" Initiating new instance...")
         # execute batch file that will open a new instance of virtual assistant
         os.system(f'start cmd /k "start_brenda.bat"')
 
@@ -176,6 +174,7 @@ class VirtualAssistant(SpeechAssistant):
             ask_wolfram = True
             not_confirmation = True
             use_calc = True
+            adjust_system_volume = False
 
             try:
 
@@ -236,9 +235,17 @@ class VirtualAssistant(SpeechAssistant):
 
                 # commands for playing music
                 music_commands = self._get_commands("play_music")
-                if is_match(voice_data, music_commands):
-                    music_keyword = extract_metadata(
-                        voice_data, music_commands)
+                music_control_commands = self._get_commands("control_music")
+                if is_match(voice_data, music_commands + music_control_commands):
+
+                    if is_match(voice_data, music_control_commands):
+                        setting_response = self.skills.music_setting(voice_data)
+                        if setting_response:
+                            self.speak(setting_response)
+                            self.sleep(True)
+                            return True
+
+                    music_keyword = extract_metadata(voice_data, music_commands)
                     music_response = self.skills.play_music(music_keyword)
 
                     if music_response:
@@ -300,6 +307,7 @@ class VirtualAssistant(SpeechAssistant):
 
                     self.skills.system_volume(vol)
                     response_message += choice(self._get_commands("acknowledge response"))
+                    adjust_system_volume = True
                     ask_google = False
                     ask_wikipedia = False
                     ask_wolfram = False
@@ -516,7 +524,7 @@ class VirtualAssistant(SpeechAssistant):
                     wolfram_response = self.skills.wolfram_search(voice_data)
                     # fun holiday information from timeanddate.com
                     title, message, did_you_know = self.skills.fun_holiday()
-                    if wolfram_response and message and "today is" in message:
+                    if wolfram_response and message and "today is" in wolfram_response:
                         wolfram_response += f"\n\nAccording to TimeAndDate.com, {message}\n{did_you_know}"
 
                     if wolfram_response:
@@ -587,9 +595,13 @@ class VirtualAssistant(SpeechAssistant):
                     response_message = _unknown_responses()
 
                 # if not self.isSleeping():
-                # anounce all the respons(es) except "success" response result, those wrere already announced.
-                if response_message != "success":
-                    self.speak(response_message)
+                # anounce all the respons(es).
+                self.speak(response_message)
+
+                # mute/sleep assistant if volume is adjusted
+                if adjust_system_volume:
+                    self.sleep(True)
+
                 return True
 
             except Exception:
@@ -691,6 +703,7 @@ class VirtualAssistant(SpeechAssistant):
                     self.Log(message, logging.INFO)
                     break
 
+                # announce the hourly time
                 if time_ticker == 0 and (mn == 0 and sec == 0) and self.isSleeping():
                     self.speak(f"The time now is {current_time.strftime('%I:%M %p')}.")
                     time_ticker += 1
@@ -707,6 +720,9 @@ class VirtualAssistant(SpeechAssistant):
 
                 # Enable/Disable Notifications
                 if self.bot_command:
+                    # get the baseline time when to request for a restart for Telegram bot re-authentication
+                    start_time = dt.now()
+
                     if "/disable notification" in self.bot_command:
                         self.notification = False
                         self.print(" (Notification is Off)")
@@ -746,11 +762,13 @@ class VirtualAssistant(SpeechAssistant):
                             self.breaking_news_reported = []
                             self.breaking_news_reported.extend(news_briefing)
 
-                        # announce breaking news alert
-                        response += "Here's the BREAKING NEWS...\n\n"
+                        news_report = self.news.cast_breaking_news(on_demand)
+                        if len(news_report) > 0:
+                            # announce breaking news alert
+                            response += "Here's the BREAKING NEWS...\n\n"
 
                         # cast the breaking news
-                        for breaking_news in self.news.cast_breaking_news(on_demand):
+                        for breaking_news in news_report:
                             # response += f"{breaking_news}\n\n"
                             response += f"{breaking_news['report']}\n\n"
                             source_urls.append(breaking_news["source url"])

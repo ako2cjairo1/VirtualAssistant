@@ -218,6 +218,23 @@
             ]
         },
         {
+            "name": "control_music",
+            "commands": [
+                "play next",
+                "skip music",
+                "skip song",
+                "next music",
+                "next song",
+                "close music",
+                "stop music",
+                "stop playing",
+                "pause music",
+                "pause song",
+                "play music",
+                "play song"
+            ]
+        },
+        {
             "name": "system volume",
             "commands": [
                 "set volume to",

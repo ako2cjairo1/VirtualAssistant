@@ -732,7 +732,7 @@ class SkillsLibrary(Configuration):
                                             f"{self.assistant_name}: so far, I found {found_file_count} o/f {file_count}")
                                         self.tts.speak("Searching...")
 
-                        except KeyboardInterrupt as ex:
+                        except KeyboardInterrupt:
                             self.Log(
                                 "Find File Skill Keyboard Interrupt (handled)", logging.INFO)
                             self.tts.speak("Search interrupted...")
@@ -907,7 +907,7 @@ class SkillsLibrary(Configuration):
                     response = f"I couldn't find \"{meta_data.capitalize()}\" in your music."
 
             if songWasFound:
-                mp.terminate_player()
+                mp.player_status("close")
                 # batch file to play some music in new window
                 os.system(
                     f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
@@ -937,6 +937,40 @@ class SkillsLibrary(Configuration):
 
         except Exception:
             self.Log("Music Volume Skill Error.")
+
+    def music_setting(self, stat):
+        response = ""
+        try:
+            import sys
+            sys.path.append(self.UTILS_DIR)
+            from musicplayer import MusicPlayer
+            mp = MusicPlayer()
+
+            player_setting = mp.get_player_setting()["status"].strip().lower()
+
+            if player_setting != "close":
+                if "pause" in stat:
+                    stat = "pause"
+                    response = "Music is Paused..."
+                elif "skip" in stat or "next" in stat:
+                    stat = "skip"
+                    response = "Skipping..."
+                elif "play" in stat:
+                    stat = "play"
+                    response = "Now Playing..."
+                elif "close" in stat or "stop" in stat:
+                    stat = "close"
+                    response = "Closing Music Player..."
+                else:
+                    stat = ""
+
+                if stat:
+                    mp.player_status(stat)
+                    return f'{choice(self._get_commands("acknowledge response"))} {response}'
+
+        except Exception:
+            self.Log("Music Setting Error.")
+        return response
 
     def news_scraper(self):
 

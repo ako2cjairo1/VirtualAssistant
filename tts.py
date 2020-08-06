@@ -40,17 +40,23 @@ class SpeechAssistant(Configuration):
         self.init_bot()
 
     def Log(self, exception_title="", ex_type=logging.ERROR):
-        (execution_type, message, tb) = sys.exc_info()
+        log_data = ""
 
-        f = tb.tb_frame
-        lineno = tb.tb_lineno
-        fname = f.f_code.co_filename.split("\\")[-1]
-        linecache.checkcache(fname)
-        target = linecache.getline(fname, lineno, f.f_globals)
+        if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+            (execution_type, message, tb) = sys.exc_info()
 
-        line_len = len(str(message)) + 10
-        log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
-        log_data += ("-" * line_len)
+            f = tb.tb_frame
+            lineno = tb.tb_lineno
+            fname = f.f_code.co_filename.split("\\")[-1]
+            linecache.checkcache(fname)
+            target = linecache.getline(fname, lineno, f.f_globals)
+
+            line_len = len(str(message)) + 10
+            log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
+            log_data += ("-" * line_len)
+
+        else:
+            log_data = exception_title
 
         if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
             print("-" * 23)
@@ -94,7 +100,7 @@ class SpeechAssistant(Configuration):
 
                 if self.bot_command and "/" not in self.bot_command:
                     voice_text = self.bot_command
-                    # self.bot_command = None
+
                 else:
                     # listening
                     audio = self.recognizer.listen(source, timeout=listen_timeout, phrase_time_limit=phrase_limit)
@@ -167,6 +173,7 @@ class SpeechAssistant(Configuration):
                 bot_command_thread = Thread(target=self.handle_bot_commands)
                 bot_command_thread.setDaemon(True)
                 bot_command_thread.start()
+                
         except Exception:
             self.Log("Error while initiating telegram bot.")
             time.sleep(5)
@@ -191,11 +198,6 @@ class SpeechAssistant(Configuration):
 
     def handle_bot_commands(self):
         while True:
-            t = dt.now()
-            hr = t.hour
-            mn = t.minute
-            sec = t.second
-
             try:
                 # get the latest command from bot
                 self.bot_command = self.bot.last_command
@@ -205,7 +207,7 @@ class SpeechAssistant(Configuration):
                     self.bot_command = f"restart {self.assistant_name}"
                     # lower the volume of music player (if it's currently playing)
                     # so listening microphone will not block our bot_command request
-                    self.skill.music_volume(20)
+                    self.skill.music_volume(30)
                     # set the restart flag to true
                     self.restart_request = True
                     break
@@ -213,7 +215,7 @@ class SpeechAssistant(Configuration):
                 elif self.bot_command and "/" not in self.bot_command:
                     # lower the volume of music player (if it's currently playing)
                     # so listening microphone will not block our bot_command request
-                    self.skill.music_volume(20)
+                    self.skill.music_volume(30)
                     # let's use a wakeup command if she's sleeping.
                     if self.isSleeping():
                         self.bot_command = f"hey {self.assistant_name} {self.bot_command}"
