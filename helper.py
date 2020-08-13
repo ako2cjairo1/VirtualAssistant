@@ -32,6 +32,7 @@ def Log(exception_title="", ex_type=logging.ERROR):
     log_data += ("-" * line_len)
 
     if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+        print("\n")
         print("-" * 23)
         print(f"{config.RED} {exception_title} {config.COLOR_RESET}")
         print("-" * 23)

@@ -103,6 +103,22 @@
             ]
         },
         {
+            "name": "night mode",
+            "commands": [
+                "goodnight <assistant_name>",
+                "night mode",
+                "goodnight"
+            ]
+        },
+        {
+            "name": "day mode",
+            "commands": [
+                "goodmorning <assistant_name>",
+                "day mode",
+                "goodmorning"
+            ]
+        },
+        {
             "name": "terminate_response",
             "commands": [
                 "Happy to help. Goodbye...",
@@ -211,10 +227,9 @@
                 "play some songs",
                 "play songs by",
                 "play songs",
+                "play all songs",
                 "play some",
-                "play music by",
-                "play music",
-                "play"
+                "play music by"
             ]
         },
         {
@@ -231,7 +246,11 @@
                 "pause music",
                 "pause song",
                 "play music",
-                "play song"
+                "play song",
+                "stop",
+                "pause",
+                "next",
+                "skip"
             ]
         },
         {

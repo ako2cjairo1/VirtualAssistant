@@ -16,8 +16,16 @@ from telegram import TelegramBot
 from threading import Thread
 from datetime import datetime as dt
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
+# logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
+formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s", "%m-%d-%Y %I:%M:%S %p")
+
+file_handler = logging.FileHandler("VirtualAssistant.log", mode="a")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 
 class SpeechAssistant(Configuration):
@@ -37,6 +45,8 @@ class SpeechAssistant(Configuration):
         self.skill = SkillsLibrary(self, self.master_name, self.assistant_name)
         self.speaker = None
         self.restart_request = False
+        self.bot = None
+        self.bot_command = None
         self.init_bot()
 
     def Log(self, exception_title="", ex_type=logging.ERROR):
@@ -173,7 +183,7 @@ class SpeechAssistant(Configuration):
                 bot_command_thread = Thread(target=self.handle_bot_commands)
                 bot_command_thread.setDaemon(True)
                 bot_command_thread.start()
-                
+
         except Exception:
             self.Log("Error while initiating telegram bot.")
             time.sleep(5)
@@ -212,7 +222,7 @@ class SpeechAssistant(Configuration):
                     self.restart_request = True
                     break
 
-                elif self.bot_command and "/" not in self.bot_command:
+                elif self.bot_command:
                     # lower the volume of music player (if it's currently playing)
                     # so listening microphone will not block our bot_command request
                     self.skill.music_volume(30)

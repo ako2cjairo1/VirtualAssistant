@@ -67,13 +67,6 @@ class TelegramBot(Configuration):
 
             self.get_url(url)
 
-            # # let's pull the latest update in chat
-            # updates = self.get_updates(self.last_update_id)
-            # # if successul update and must have result count
-            # if updates["ok"] and len(updates["result"]) > 0:
-            #     # increment update_id based from the last update index
-            #     self.last_update_id = self.get_last_update_id(updates) + 1
-
         except Exception as ex:
             raise Exception(f"Error while sending message. {str(ex)}")
 

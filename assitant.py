@@ -67,8 +67,8 @@ class VirtualAssistant(SpeechAssistant):
 
     def deactivate(self, voice_data):
         # commands to terminate virtual assistant
-        if is_match(voice_data, self._get_commands("terminate")):
-            if self.isSleeping():
+        if is_match(voice_data, self._get_commands("terminate")) or self.restart_request:
+            if self.isSleeping() and voice_data:
                 self.print(
                     f"{self.BLACK_GREEN}{self.master_name}:{self.GREEN} {voice_data}")
 
@@ -114,6 +114,47 @@ class VirtualAssistant(SpeechAssistant):
             return True
 
         return False
+
+    def night_mode(self):
+        master_aliases = [self.master_name, "Boss", "Sir"]
+        self.speak(f"Goodnight, {choice(master_aliases)}!")
+
+        # lower the system volume
+        self.skills.system_volume("20")
+        # lower the screen brightness
+        self.skills.screen_brightness("15%")
+
+        if dt.now().hour >= 18:
+            music_response = self.skills.play_music(choice(["jazz", "FesliyanStudios"]))
+            if music_response:
+                self.toggle_notification(False)
+                self.print("Now playing relaxing music...")
+                # mute and sleep assistant when playing music
+                self.sleep(True)
+
+    def day_mode(self):
+        # lower the system volume
+        self.skills.system_volume("55")
+        # lower the screen brightness
+        self.skills.screen_brightness("70%")
+
+        master_aliases = [self.master_name, "Boss", "Sir"]
+        self.speak(f"Goodmorning, {choice(master_aliases)}!")
+
+        if 2 < dt.now().hour <= 10:
+            music_response = self.skills.play_music(choice(["post malone", "bazzi"]))
+            if music_response:
+                # notification is on
+                self.toggle_notification(True)
+                # mute and sleep assistant when playing music
+                self.sleep(True)
+
+    def toggle_notification(self, value):
+        if value == True:
+            self.print(" (Notification is On)")
+        else:
+            self.print(" (Notification is Off)")
+        self.notification = value
 
     def _get_commands(self, command_name):
         return get_commands(command_name, self.assistant_name, self.master_name)
@@ -164,9 +205,6 @@ class VirtualAssistant(SpeechAssistant):
 
             return False
 
-        def _unknown_responses():
-            return choice(self._get_commands("unknown_responses"))
-
         def _formulate_responses(voice_data):
             response_message = ""
             ask_google = True
@@ -188,6 +226,16 @@ class VirtualAssistant(SpeechAssistant):
                 # respond to deactivation commands
                 if self.deactivate(voice_data):
                     sys.exit()
+
+                # night mode
+                if is_match(voice_data, self._get_commands("night mode")):
+                    self.night_mode()
+                    return
+
+                # day mode
+                if is_match(voice_data, self._get_commands("day mode")):
+                    self.day_mode()
+                    return
 
                 # commands for greeting
                 greeting_commands = self._get_commands("greeting")
@@ -238,7 +286,7 @@ class VirtualAssistant(SpeechAssistant):
                 music_control_commands = self._get_commands("control_music")
                 if is_match(voice_data, music_commands + music_control_commands):
 
-                    if is_match(voice_data, music_control_commands):
+                    if is_match(voice_data, music_control_commands) and not is_match(voice_data, music_commands):
                         setting_response = self.skills.music_setting(voice_data)
                         if setting_response:
                             self.speak(setting_response)
@@ -435,7 +483,9 @@ class VirtualAssistant(SpeechAssistant):
                                     # let's get the redirected url (if possible) from link we have
                                     redirect_url = requests.get(news_briefing[i]["source url"])
                                     # open the source article in webbrowser.
-                                    execute_map("open browser", [redirect_url.url])
+                                    open_news_url_thread = Thread(target=execute_map, args=("open browser", [redirect_url.url],))
+                                    open_news_url_thread.setDaemon(True)
+                                    open_news_url_thread.start()
                                     # send the link to bot
                                     self.respond_to_bot(redirect_url.url)
                                     self.speak(f"{news_briefing[i]['report']}")
@@ -451,7 +501,9 @@ class VirtualAssistant(SpeechAssistant):
                                 # let's get the redirected url (if possible) from link we have
                                 redirect_url = requests.get(top_news["source url"])
                                 # open the source article in webbrowser.
-                                execute_map("open browser", [redirect_url.url])
+                                open_news_url_thread = Thread(target=execute_map, args=("open browser", [redirect_url.url],))
+                                open_news_url_thread.setDaemon(True)
+                                open_news_url_thread.start()
                                 # send the link to bot
                                 self.respond_to_bot(redirect_url.url)
                                 self.speak(f"{top_news['report']}")
@@ -469,7 +521,9 @@ class VirtualAssistant(SpeechAssistant):
                                 # let's get the redirected url (if possible) from link we have
                                 redirect_url = requests.get(random_news_today["source url"])
                                 # open the source article in webbrowser.
-                                execute_map("open browser", [redirect_url.url])
+                                open_news_url_thread = Thread(target=execute_map, args=("open browser", [redirect_url.url],))
+                                open_news_url_thread.setDaemon(True)
+                                open_news_url_thread.start()
                                 # send the link to bot
                                 self.respond_to_bot(redirect_url.url)
                                 self.speak(f"{random_news_today['report']}")
@@ -581,8 +635,6 @@ class VirtualAssistant(SpeechAssistant):
                     # metadata have matched with confirmation commands.
                     if not confimation_keyword or is_match(confimation_keyword, confirmation_commands):
                         self.speak(choice(self._get_commands("confirmation_responses")))
-                        # # play end prompt sound effect and go to sleep
-                        # self.mute_assistant(f"stop {self.assistant_name}")
                         # mute and sleep assistant when playing music
                         self.sleep(True)
                         # return immediately, it is a confirmation command,
@@ -592,9 +644,8 @@ class VirtualAssistant(SpeechAssistant):
                 # we did not found any response
                 if not response_message:
                     # set the unknown response
-                    response_message = _unknown_responses()
+                    response_message = choice(self._get_commands("unknown_responses"))
 
-                # if not self.isSleeping():
                 # anounce all the respons(es).
                 self.speak(response_message)
 
@@ -609,41 +660,25 @@ class VirtualAssistant(SpeechAssistant):
                 self.respond_to_bot("Error forumulating response.")
 
         def _happening_today():
-            # Today's date and time
-            date_today_response_from_wolfram = self.skills.wolfram_search("what day is it?")
-            response_time = self.skills.ask_time("what time is it?")
-
             # get updates from news channels
             self.news.fetch_news()
 
-            # breaking news, if there's any
-            breaking_news_response = _breaking_news_report(on_demand=True)
-
-            # top latest news today
-            news_briefing = self.news.cast_latest_news()
-            number_of_results = len(news_briefing)
-
-            # what happend today in history from Wolfram|Alpha
-            response_from_wolfram = self.skills.wolfram_search("this day in history")
-
-            # fun holiday information from timeanddate.com
-            title, fun_holiday_info, did_you_know = self.skills.fun_holiday()
-
-            # what's weather forecast today from Wolfram|Alpha
-            weather_response_from_wolfram = self.skills.wolfram_search("what's the weather like?")
-
-            # sunrise/sunset forecast today from Wolfram|Alpha
-            sunrise_response_from_wolfram = self.skills.wolfram_search("when is the sunrise?").split("(")[0]
-            sunset_response_from_wolfram = self.skills.wolfram_search("when is the sunset?").split("(")[0]
-
+            # Today's date and time
+            date_today_response_from_wolfram = self.skills.wolfram_search("what day is it?")
+            response_time = self.skills.ask_time("what time is it?")
             if date_today_response_from_wolfram and response_time:
                 self.speak(f"{date_today_response_from_wolfram} {response_time}")
 
             self.speak("Here's what's happening today.")
 
+            # breaking news, if there's any
+            breaking_news_response = _breaking_news_report(on_demand=True)
             if breaking_news_response:
                 self.speak(breaking_news_response.replace("Here's the ", ""))
 
+            # top latest news today
+            news_briefing = self.news.cast_latest_news()
+            number_of_results = len(news_briefing)
             if number_of_results > 0:
                 if number_of_results > 2:
                     number_of_results = 3
@@ -653,21 +688,32 @@ class VirtualAssistant(SpeechAssistant):
                     # let's get the redirected url (if possible) from link we have
                     redirect_url = requests.get(news_briefing[i]["source url"])
                     # open the source article in webbrowser.
-                    execute_map("open browser", [redirect_url.url])
+                    open_news_url_thread = Thread(target=execute_map, args=("open browser", [redirect_url.url],))
+                    open_news_url_thread.setDaemon(True)
+                    open_news_url_thread.start()
                     # send the link to bot
                     self.respond_to_bot(redirect_url.url)
                     self.speak(f"{news_briefing[i]['report']}")
 
+            # what happend today in history from Wolfram|Alpha
+            response_from_wolfram = self.skills.wolfram_search("this day in history")
             if response_from_wolfram:
                 self.speak("From this day in history.")
                 self.speak(response_from_wolfram)
 
+            # fun holiday information from timeanddate.com
+            title, fun_holiday_info, did_you_know = self.skills.fun_holiday()
             if fun_holiday_info:
                 self.speak(f"From timeanddate.com, {title}\n{fun_holiday_info}\n{did_you_know}")
 
+            # what's weather forecast today from Wolfram|Alpha
+            weather_response_from_wolfram = self.skills.wolfram_search("what's the weather like?")
             if weather_response_from_wolfram:
                 self.speak(weather_response_from_wolfram)
 
+            # sunrise/sunset forecast today from Wolfram|Alpha
+            sunrise_response_from_wolfram = self.skills.wolfram_search("when is the sunrise?").split("(")[0]
+            sunset_response_from_wolfram = self.skills.wolfram_search("when is the sunset?").split("(")[0]
             if sunrise_response_from_wolfram and sunset_response_from_wolfram:
                 self.speak(f"{sunrise_response_from_wolfram} and {sunset_response_from_wolfram}")
 
@@ -692,15 +738,12 @@ class VirtualAssistant(SpeechAssistant):
                 active_hours = int((total_time.days * 24) + (total_time.seconds // 3600))
 
                 # restart the application every 8 hours to re-authenticate Telegram bot
-                if self.isSleeping() and active_hours >= 8 and sec == 30:
-                    # set a restart request
-                    self.bot_command = f"restart {self.assistant_name}"
+                if self.isSleeping() and active_hours >= 6 and sec == 30:
                     self.restart_request = True
-
                     # log and send the restart request message to telegram bot
                     message = "Restart requested to re-authenticate Telegram bot..."
                     self.print(message)
-                    self.Log(message, logging.INFO)
+                    self.deactivate()
                     break
 
                 # announce the hourly time
@@ -724,13 +767,11 @@ class VirtualAssistant(SpeechAssistant):
                     start_time = dt.now()
 
                     if "/disable notification" in self.bot_command:
-                        self.notification = False
-                        self.print(" (Notification is Off)")
+                        self.toggle_notification(False)
                         self.bot.last_command = None
 
                     elif "/enable notification" in self.bot_command:
-                        self.notification = True
-                        self.print(" (Notification is On)")
+                        self.toggle_notification(True)
                         self.bot.last_command = None
 
                 # Restart request
@@ -959,7 +1000,7 @@ class VirtualAssistant(SpeechAssistant):
 
                 while not _start_virtual_assistant():
                     if self.restart_request:
-                        self.restart()
+                        self.deactivate()
                         break
 
                     time.sleep(5)
@@ -975,4 +1016,4 @@ class VirtualAssistant(SpeechAssistant):
             self.skill.music_volume(30)
             # set the restart flag to true
             self.restart_request = True
-            self.restart()
+            self.deactivate()

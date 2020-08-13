@@ -1,534 +1,994 @@
-08-05-2020 07:34:46 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD313970>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:34:56 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD3131C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:35:06 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD3138E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:35:06 PM | ERROR | Error while handling bot commands.
+08-08-2020 07:57:13 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
 File:    tts.py
-Target:  if check_connection():
-Message: Connection error, maximum retries already exhausted...
-Line:    162
-----------------------------------------------------------------
-08-05-2020 07:35:11 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD358250>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:35:21 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000018FCD3583A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:36:58 PM | ERROR | Error occurred while parsing html.
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-08-2020 07:57:13 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 11:52:15 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 11:52:15 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 12:32:34 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 12:32:34 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 12:33:39 PM | ERROR | Error occurred while parsing html.
 File:    NewsScraper.py
 Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001B6766181C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001D4E54887F0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    240
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:36:58 PM | ERROR | Error occurred while parsing html.
+08-09-2020 12:33:59 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 12:33:59 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 12:34:41 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 12:34:41 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 12:35:54 PM | ERROR | Error occurred while parsing html.
 File:    NewsScraper.py
 Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001B6766182E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:36:58 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(10054, 'WSAECONNRESET')")))
+Line:    240
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-09-2020 12:36:42 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
 File:    tts.py
 Target:  self.bot.poll()
 Message: Error polling bot, trying to poll again...
-Line:    185
+Line:    200
 ----------------------------------------------------
-08-05-2020 07:37:00 PM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  wolfram_response = self.skills.wolfram_search(voice_data)
-Message: 'SkillsLibrary' object has no attribute 'Log'
-Line:    519
--------------------------------------------------------
-08-05-2020 07:37:00 PM | ERROR | General Error while running virtual assistant.
-File:    assitant.py
-Target:  _formulate_responses(voice_data)
-Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=Error+forumulating+response.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001B6766180D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    909
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:37:03 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+08-09-2020 12:36:42 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
 File:    tts.py
 Target:  self.bot.poll()
 Message: Error polling bot, trying to poll again...
-Line:    185
+Line:    200
 ----------------------------------------------------
-08-05-2020 07:37:05 PM | ERROR | Error while starting virtual assistant.
-File:    assitant.py
-Target:  while not _start_virtual_assistant():
-Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%0A+Comencing+restart...&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001B6766A6670>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    951
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:37:08 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+08-09-2020 12:55:09 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
 File:    tts.py
 Target:  self.bot.poll()
 Message: Error polling bot, trying to poll again...
-Line:    185
+Line:    200
 ----------------------------------------------------
-08-05-2020 07:37:13 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+08-09-2020 12:55:09 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
 File:    tts.py
 Target:  self.bot.poll()
 Message: Error polling bot, trying to poll again...
-Line:    185
+Line:    200
 ----------------------------------------------------
-08-05-2020 07:37:15 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B676618BE0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:37:18 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
-File:    tts.py
-Target:  self.bot.poll()
-Message: Error polling bot, trying to poll again...
-Line:    185
-----------------------------------------------------
-08-05-2020 07:37:23 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
-File:    tts.py
-Target:  self.bot.poll()
-Message: Error polling bot, trying to poll again...
-Line:    185
-----------------------------------------------------
-08-05-2020 07:37:25 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B676618520>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:37:28 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
-File:    tts.py
-Target:  self.bot.poll()
-Message: Error polling bot, trying to poll again...
-Line:    185
-----------------------------------------------------
-08-05-2020 07:37:33 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
-File:    tts.py
-Target:  self.bot.poll()
-Message: Error polling bot, trying to poll again...
-Line:    185
-----------------------------------------------------
-08-05-2020 07:37:35 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B676618B50>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:37:35 PM | ERROR | Error while initiating telegram bot.
-File:    tts.py
-Target:  if check_connection():
-Message: Connection error, maximum retries already exhausted...
-Line:    162
-----------------------------------------------------------------
-08-05-2020 07:37:38 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
-File:    tts.py
-Target:  self.bot.poll()
-Message: Error polling bot, trying to poll again...
-Line:    185
-----------------------------------------------------
-08-05-2020 07:37:40 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001B6766A6E20>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:37:43 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
-File:    tts.py
-Target:  self.bot.poll()
-Message: Error polling bot, trying to poll again...
-Line:    185
-----------------------------------------------------
-08-05-2020 07:37:48 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
-File:    tts.py
-Target:  self.bot.poll()
-Message: Error polling bot, trying to poll again...
-Line:    185
-----------------------------------------------------
-08-05-2020 07:38:34 PM | ERROR | Exception occurred while trying to speak.
+08-09-2020 01:00:01 PM | ERROR | Exception occurred while trying to speak.
 File:    tts.py
 Target:  tts.save(audio_file)
-Message: Connection error during token calculation: HTTPSConnectionPool(host='translate.google.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C1309100>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    265
+Message: Connection error during token calculation: HTTPSConnectionPool(host='translate.google.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001D4E3930640>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    275
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:38:34 PM | ERROR | General Error while running virtual assistant.
-File:    assitant.py
-Target:  self.speak(
-Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%22Brenda%22+Not+Available.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C12E3430>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    884
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:38:39 PM | ERROR | Error while starting virtual assistant.
-File:    assitant.py
-Target:  while not _start_virtual_assistant():
-Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%0A+Comencing+restart...&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C13096A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    951
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:38:49 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C18E2F40>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:39:00 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C18E29A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:39:10 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C18E29D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:39:10 PM | ERROR | Error while initiating telegram bot.
+08-09-2020 01:00:01 PM | ERROR | Exception occurred while trying to speak.
 File:    tts.py
-Target:  if check_connection():
-Message: Connection error, maximum retries already exhausted...
-Line:    162
-----------------------------------------------------------------
-08-05-2020 07:39:15 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C18E2D90>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:39:21 PM | ERROR | Error occurred while parsing html.
-File:    NewsScraper.py
-Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C18EC910>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:39:21 PM | ERROR | Error occurred while parsing html.
-File:    NewsScraper.py
-Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000284C18EC640>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:39:25 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000284C026A1C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:40:30 PM | ERROR | "Brenda" Not Available.
+Target:  tts.save(audio_file)
+Message: Connection error during token calculation: HTTPSConnectionPool(host='translate.google.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001D4E3930640>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    275
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-09-2020 01:00:07 PM | ERROR | Exception occurred while analyzing audio.
 File:    tts.py
 Target:  voice_text = self.recognizer.recognize_google(audio)
-Message: recognition connection failed: [Errno 11001] getaddrinfo failed
-Line:    102
--------------------------------------------------------------------------
-08-05-2020 07:40:30 PM | ERROR | General Error while running virtual assistant.
-File:    assitant.py
-Target:  voice_data = self.listen_to_audio()
-Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%22Brenda%22+Not+Available.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7CE1D460>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    888
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:40:35 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE1D5E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:40:45 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE1D550>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:40:55 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE1D580>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:40:55 PM | ERROR | Error while initiating telegram bot.
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:00:07 PM | ERROR | Exception occurred while analyzing audio.
 File:    tts.py
-Target:  if check_connection():
-Message: Connection error, maximum retries already exhausted...
-Line:    162
-----------------------------------------------------------------
-08-05-2020 07:41:00 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE3CDF0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:41:05 PM | ERROR | Error occurred while parsing html.
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:01:35 PM | ERROR | Error occurred while parsing html.
 File:    NewsScraper.py
 Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7D4373A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:41:05 PM | ERROR | Error occurred while parsing html.
-File:    NewsScraper.py
-Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7D4372B0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:41:10 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE3CDC0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:41:20 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7CE3C4C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:41:20 PM | ERROR | Error while initiating telegram bot.
-File:    tts.py
-Target:  if check_connection():
-Message: Connection error, maximum retries already exhausted...
-Line:    162
-----------------------------------------------------------------
-08-05-2020 07:41:26 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437310>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:41:36 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437250>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:41:46 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D4373A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:41:46 PM | ERROR | Error while initiating telegram bot.
-File:    tts.py
-Target:  if check_connection():
-Message: Connection error, maximum retries already exhausted...
-Line:    162
-----------------------------------------------------------------
-08-05-2020 07:41:51 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437D90>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:42:01 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437B50>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:42:05 PM | ERROR | Error occurred while parsing html.
-File:    NewsScraper.py
-Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7D4576A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:42:05 PM | ERROR | Error occurred while parsing html.
-File:    NewsScraper.py
-Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000029C7D4575B0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:42:11 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D437B80>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 07:42:11 PM | ERROR | Error while initiating telegram bot.
-File:    tts.py
-Target:  if check_connection():
-Message: Connection error, maximum retries already exhausted...
-Line:    162
-----------------------------------------------------------------
-08-05-2020 07:42:16 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000029C7D4576D0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-05-2020 10:01:03 PM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  execute_map("open browser", [redirect_url])
-Message: startfile: filepath should be string, bytes or os.PathLike, not Response
-Line:    464
-----------------------------------------------------------------------------------
-08-06-2020 07:56:55 AM | ERROR | Error occurred while parsing html.
-File:    NewsScraper.py
-Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000021089985880>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:56:56 AM | ERROR | Error occurred while parsing html.
-File:    NewsScraper.py
-Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000021089672430>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 11:26:10 AM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  if is_match(voice_data, music_commands + control_music):
-Message: name 'control_music' is not defined
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001D4E28498E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
 Line:    240
----------------------------------------------
-08-06-2020 11:27:21 AM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  if self.skills.music_setting(music_keyword):
-Message: local variable 'music_keyword' referenced before assignment
-Line:    241
----------------------------------------------------------------------
-08-06-2020 11:28:37 AM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  if self.skills.music_setting(voice_data):
-Message: name 'player_status' is not defined
-Line:    241
----------------------------------------------
-08-06-2020 11:31:39 AM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  if self.skills.music_setting(voice_data):
-Message: name 'player_status' is not defined
-Line:    241
----------------------------------------------
-08-06-2020 11:35:50 AM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  if self.skills.music_setting(voice_data):
-Message: name 'player_status' is not defined
-Line:    241
----------------------------------------------
-08-06-2020 11:39:02 AM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  if self.skills.music_setting(voice_data):
-Message: name 'player_status' is not defined
-Line:    241
----------------------------------------------
-08-06-2020 12:32:32 PM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  calc_response = self.skills.calculator(voice_data)
-Message: 'SkillsLibrary' object has no attribute 'Log'
-Line:    350
--------------------------------------------------------
-08-06-2020 12:34:57 PM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  calc_response = self.skills.calculator(voice_data)
-Message: 'SkillsLibrary' object has no attribute 'Log'
-Line:    350
--------------------------------------------------------
-08-06-2020 06:28:18 PM | ERROR | Error forumulating response.
-File:    assitant.py
-Target:  calc_response = self.skills.calculator(voice_data)
-Message: 'SkillsLibrary' object has no attribute 'Log'
-Line:    354
--------------------------------------------------------
-08-06-2020 07:56:25 PM | ERROR | Error occurred while parsing html.
-File:    NewsScraper.py
-Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000002995D6EB3A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:56:25 PM | ERROR | Error occurred while parsing html.
-File:    NewsScraper.py
-Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000002995D6EB640>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:56:25 PM | ERROR | "Brenda" Not Available.
+08-09-2020 01:01:40 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 01:01:40 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 01:01:41 PM | ERROR | Exception occurred while analyzing audio.
 File:    tts.py
 Target:  voice_text = self.recognizer.recognize_google(audio)
-Message: recognition connection failed: [Errno 11001] getaddrinfo failed
-Line:    108
--------------------------------------------------------------------------
-08-06-2020 07:56:25 PM | ERROR | General Error while running virtual assistant.
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:01:41 PM | ERROR | Exception occurred while analyzing audio.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:07:05 PM | ERROR | Exception occurred while analyzing audio.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:07:05 PM | ERROR | Exception occurred while analyzing audio.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:23:54 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(10054, 'WSAECONNRESET')")))
+Line:    240
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-09-2020 01:24:36 PM | ERROR | Exception occurred while analyzing audio.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:24:36 PM | ERROR | Exception occurred while analyzing audio.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:30:34 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 01:30:34 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 01:30:34 PM | ERROR | Exception occurred while analyzing audio.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:30:34 PM | ERROR | Exception occurred while analyzing audio.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10054] An existing connection was forcibly closed by the remote host
+Line:    116
+----------------------------------------------------------------------------------------
+08-09-2020 01:33:03 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 01:33:03 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    200
+----------------------------------------------------
+08-09-2020 02:53:33 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-09-2020 02:53:33 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-09-2020 02:53:45 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-09-2020 02:53:45 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-09-2020 03:10:22 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000002353BF475E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    240
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-09-2020 03:10:29 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-09-2020 03:10:29 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-09-2020 05:46:27 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000002353AF28790>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+Line:    240
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-09-2020 07:57:19 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(10054, 'WSAECONNRESET')")))
+Line:    240
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-10-2020 07:57:22 AM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=breakingnalerts&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(10054, 'WSAECONNRESET')")))
+Line:    430
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-10-2020 09:28:16 AM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: ('Connection aborted.', OSError("(10053, 'WSAECONNABORTED')"))
+Line:    240
+------------------------------------------------------------------------
+08-10-2020 09:28:16 AM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=BBCBreaking&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-10-2020 09:28:17 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-10-2020 09:30:24 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-10-2020 09:30:24 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-10-2020 04:57:01 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-10-2020 04:57:01 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-10-2020 09:44:43 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=cnnbrk&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(10054, 'WSAECONNRESET')")))
+Line:    430
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-10-2020 09:46:57 PM | ERROR | Exception occurred while analyzing audio.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond
+Line:    118
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-10-2020 09:46:57 PM | ERROR | Exception occurred while analyzing audio.
+File:    tts.py
+Target:  voice_text = self.recognizer.recognize_google(audio)
+Message: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond
+Line:    118
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-10-2020 09:47:08 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+Line:    430
+------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 03:20:04 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+LError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 03:20:04 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 03:20:04 AM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=breakingnews&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 03:20:48 AM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+Line:    240
+------------------------------------------------------------------------------------------------------
+08-11-2020 03:20:48 AM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: ('Connection aborted.', OSError("(10053, 'WSAECONNABORTED')"))
+Line:    240
+------------------------------------------------------------------------
+08-11-2020 03:22:18 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 03:22:18 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 07:57:29 AM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=BBCBreaking&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(10054, 'WSAECONNRESET')")))
+Line:    430
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 09:04:22 AM | ERROR | Exception occurred while trying to speak.
+File:    tts.py
+Target:  self.respond_to_bot(audio_string)
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=sunrise+today+is+5%3A42+am+PST%0A+and+sunset+today+is+6%3A22+pm+PST%0A&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000023E6BD70C10>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    280
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 09:04:22 AM | ERROR | Exception occurred while trying to speak.
+File:    tts.py
+Target:  self.respond_to_bot(audio_string)
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=sunrise+today+is+5%3A42+am+PST%0A+and+sunset+today+is+6%3A22+pm+PST%0A&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000023E6BD70C10>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    280
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 09:04:43 AM | ERROR | Error forumulating response.
+File:    assitant.py
+Target:  _happening_today()
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%22Brenda%22+Not+Available.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000023E6DA6C220>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    280
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 09:04:43 AM | ERROR | Error forumulating response.
+File:    assitant.py
+Target:  _happening_today()
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%22Brenda%22+Not+Available.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000023E6DA6C220>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    280
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 09:05:04 AM | ERROR | General Error while running virtual assistant.
 File:    assitant.py
 Target:  elif sleep_counter > 0 and _wake_assistant(listen_time):
-Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%22Brenda%22+Not+Available.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000002995D6EB070>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    877
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:56:30 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002995D6D5A60>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:56:40 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002995D6D59A0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:56:50 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002995D6D5970>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:56:50 PM | ERROR | Error while initiating telegram bot.
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=Error+forumulating+response.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000023E6DA46970>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    924
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 09:05:04 AM | ERROR | General Error while running virtual assistant.
+File:    assitant.py
+Target:  elif sleep_counter > 0 and _wake_assistant(listen_time):
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=Error+forumulating+response.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000023E6DA46970>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    924
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 09:05:23 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
 File:    tts.py
-Target:  if check_connection():
-Message: Connection error, maximum retries already exhausted...
-Line:    168
-----------------------------------------------------------------
-08-06-2020 07:56:55 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002995CC1F4C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:57:05 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002995CC1F8E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:57:15 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002995CC1F760>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:57:15 PM | ERROR | Error while initiating telegram bot.
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:05:23 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
 File:    tts.py
-Target:  if check_connection():
-Message: Connection error, maximum retries already exhausted...
-Line:    168
-----------------------------------------------------------------
-08-06-2020 07:57:21 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002995D6D6820>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:57:25 PM | ERROR | Error occurred while parsing html.
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:05:40 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:05:40 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:05:46 AM | ERROR | Error while starting virtual assistant.
+File:    assitant.py
+Target:  while not _start_virtual_assistant():
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%0A%0A%22Brenda%22+is+active...&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000023E6D85A760>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    1007
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 09:05:46 AM | ERROR | Error while starting virtual assistant.
+File:    assitant.py
+Target:  while not _start_virtual_assistant():
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=%0A%0A%22Brenda%22+is+active...&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000023E6D85A760>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    1007
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-11-2020 09:05:49 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:05:49 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:05:51 AM | ERROR | Error while starting virtual assistant.
+File:    assitant.py
+Target:  brenda.activate()
+Message: deactivate() missing 1 required positional argument: 'voice_data'
+Line:    1016
+---------------------------------------------------------------------------
+08-11-2020 09:05:51 AM | ERROR | Error while starting virtual assistant.
+File:    assitant.py
+Target:  brenda.activate()
+Message: deactivate() missing 1 required positional argument: 'voice_data'
+Line:    1016
+---------------------------------------------------------------------------
+08-11-2020 09:06:12 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:06:12 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:06:55 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:07:16 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:09:32 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:11:02 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:11:58 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:14:40 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:15:11 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:15:23 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:15:31 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:15:38 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:16:13 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:16:37 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:17:23 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:17:25 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:17:34 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:17:35 AM | ERROR | Music Volume Skill Error.
+File:    skills_library.py
+Target:  mp.music_player_volume(volume)
+Message: Expecting value: line 1 column 1 (char 0)
+Line:    974
+---------------------------------------------------
+08-11-2020 09:37:35 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:37:35 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 01:11:13 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 01:11:13 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-11-2020 09:39:35 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=breakingnews&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 05:16:22 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 05:16:22 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 08:08:48 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 08:08:48 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 09:31:13 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 09:31:13 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 05:45:11 PM | ERROR | Error occurred while parsing html.
 File:    NewsScraper.py
 Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000002995D6CB580>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:57:25 PM | ERROR | Error occurred while parsing html.
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 05:45:12 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 05:45:12 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 05:48:28 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 05:48:28 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 08:03:07 PM | ERROR | Error occurred while parsing html.
 File:    NewsScraper.py
 Target:  response = requests.get(self.url)
-Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000002995D6CB700>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    243
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-08-06-2020 07:57:31 PM | ERROR | Connection Error. You are not connected to the Internet.
-File:    helper.py
-Target:  response = requests.get("http://google.com", timeout=300)
-Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002995D6D6730>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
-Line:    173
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 08:03:07 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 08:08:43 PM | ERROR | Exception occurred while trying to speak.
+File:    tts.py
+Target:  tts.save(audio_file)
+Message: Connection error during token calculation: HTTPSConnectionPool(host='translate.google.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    277
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 08:08:43 PM | ERROR | Exception occurred while trying to speak.
+File:    tts.py
+Target:  tts.save(audio_file)
+Message: Connection error during token calculation: HTTPSConnectionPool(host='translate.google.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    277
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 08:09:30 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=BBCBreaking&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 08:09:30 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=BBCBreaking&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 08:09:30 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=BBCBreaking&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 10:53:35 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+-------------------------------------
+08-12-2020 10:53:35 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:01:40 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:01:40 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:02:17 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+Line:    240
+------------------------------------------------------------------------------------------------------
+08-12-2020 11:05:20 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:05:20 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:09:23 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=breakingnews&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:09:19 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=breakingnalerts&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:09:43 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:10:20 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=breakingnalerts&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:10:20 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:10:20 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:10:46 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:10:46 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:10:46 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=breakingnalerts&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:20:10 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:19:51 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:20:10 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:21:44 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:23:06 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:41:32 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:41:32 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:41:37 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:41:37 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:49:05 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:49:05 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=breakingnalerts&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:49:05 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:49:06 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:49:06 PM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:49:06 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:49:06 PM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: HTTPSConnectionPool(host='api.twitter.com', port=443): Max retries exceeded with url: /1.1/statuses/user_timeline.json?id=breakingnalerts&count=10&tweet_mode=extended (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    430
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-12-2020 11:49:06 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:54:53 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-12-2020 11:54:53 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-13-2020 06:06:14 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-13-2020 06:06:14 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-13-2020 08:10:17 AM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-13-2020 08:10:28 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-13-2020 08:10:28 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+08-13-2020 08:11:05 AM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-13-2020 08:11:22 AM | ERROR | Error occurred while parsing html.
+File:    NewsScraper.py
+Target:  response = requests.get(self.url)
+Message: HTTPSConnectionPool(host='cnnphilippines.com', port=443): Max retries exceeded with url: / (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+Line:    240
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+08-13-2020 08:12:54 AM | ERROR | Error occurred while scraping Twitter Breaking News.
+File:    NewsScraper.py
+Target:  result = api.user_timeline(id=source, count=10, tweet_mode="extended")
+Message: Failed to send request: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+Line:    430
+------------------------------------------------------------------------------------------------------------------------------

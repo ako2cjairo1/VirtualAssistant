@@ -33,6 +33,45 @@ class SkillsLibrary(Configuration):
         print(message)
         self.tts.respond_to_bot(message)
 
+    def Log(self, exception_title="", ex_type=logging.ERROR):
+        log_data = ""
+
+        if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+            (execution_type, message, tb) = sys.exc_info()
+
+            f = tb.tb_frame
+            lineno = tb.tb_lineno
+            fname = f.f_code.co_filename.split("\\")[-1]
+            linecache.checkcache(fname)
+            target = linecache.getline(fname, lineno, f.f_globals)
+
+            line_len = len(str(message)) + 10
+            log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
+            log_data += ("-" * line_len)
+
+        else:
+            log_data = exception_title
+
+        if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+            print("-" * 23)
+            print(f"{self.RED} {exception_title} {self.COLOR_RESET}")
+            print("-" * 23)
+
+        if ex_type == logging.DEBUG:
+            logger.debug(log_data)
+
+        elif ex_type == logging.INFO:
+            logger.info(log_data)
+
+        elif ex_type == logging.WARNING:
+            logger.warning(log_data)
+
+        elif ex_type == logging.ERROR:
+            logger.error(log_data)
+
+        elif ex_type == logging.CRITICAL:
+            logger.critical(log_data)
+
     def _get_commands(self, command_name):
         return get_commands(command_name, self.assistant_name, self.master_name)
 
@@ -405,11 +444,11 @@ class SkillsLibrary(Configuration):
         answer = None
         equation = ""
 
-        # evaluate if there are square root or cube root questions, replace with single word
-        evaluated_voice_data = voice_data.replace(",", "").replace("power of", "power#of").replace(
-            "square root", "square#root").replace("cube root", "cube#root").split(" ")
-
         try:
+            # evaluate if there are square root or cube root questions, replace with single word
+            evaluated_voice_data = voice_data.replace(",", "").replace("power of", "power#of").replace(
+                "square root", "square#root").replace("cube root", "cube#root").split(" ")
+
             for word in evaluated_voice_data:
                 if is_match(word, ["+", "plus", "add"]):
                     operator = " + " if not word.replace("+",
@@ -507,6 +546,7 @@ class SkillsLibrary(Configuration):
 
         except Exception:
             self.Log("Calculator Skill Error.")
+            return ""
 
     def open_application(self, voice_data):
         confirmation = ""
@@ -516,7 +556,7 @@ class SkillsLibrary(Configuration):
 
         def modified_app_names():
             clean_app_names = voice_data
-            special_app_names = ["vs code", "sublime text", "wi-fi manager", "wi-fi monitoring", "ms code", "ms vc", "microsoft excel", "spread sheet", "ms excel", "microsoft word", "ms word", "microsoft powerpoint", "ms powerpoint", "task scheduler",
+            special_app_names = ["vs code", "sublime text", "wi-fi manager", "wifi manager", "wi-fi monitoring", "ms code", "ms vc", "microsoft excel", "spread sheet", "ms excel", "microsoft word", "ms word", "microsoft powerpoint", "ms powerpoint", "task scheduler",
                                  "visual studio code", "pse ticker", "command console", "command prompt", "control panel", "task manager", "resource monitor", "resource manager", "device manager", "windows services", "remove programs", "add remove"]
             for name in special_app_names:
                 if name in voice_data:
@@ -608,7 +648,7 @@ class SkillsLibrary(Configuration):
                     # get back to virtual assistant directory after command execution
                     os.chdir(self.ASSISTANT_DIR)
 
-                elif is_match(app, ["wi-fi-monitoring", "wi-fi-manager"]):
+                elif is_match(app, ["wi-fi-monitoring", "wi-fi-manager", "wifi-manager"]):
                     app_names.append("Wi-Fi Manager")
                     # change directory to Wi-Fi manager library
                     os.chdir(self.UTILS_DIR)
@@ -764,6 +804,7 @@ class SkillsLibrary(Configuration):
 
         except Exception:
             self.Log("Screen Brightness Skill Error.")
+            return ""
 
     def control_wifi(self, voice_data):
         command = ""
@@ -955,8 +996,8 @@ class SkillsLibrary(Configuration):
                 elif "skip" in stat or "next" in stat:
                     stat = "skip"
                     response = "Skipping..."
-                elif "play" in stat:
-                    stat = "play"
+                elif "play" in stat and "stop" not in stat:
+                    stat = "Playing"
                     response = "Now Playing..."
                 elif "close" in stat or "stop" in stat:
                     stat = "close"
