@@ -244,7 +244,7 @@ class SkillsLibrary(Configuration):
             wolframAlpha = client.query(voice_data)
 
             # check if we have a successful result
-            if wolframAlpha["@success"] == "true":
+            if wolframAlpha["@success"] == True:
                 # may contain extracted question or query meta data
                 pod0 = wolframAlpha["pod"][0]
 
@@ -258,7 +258,7 @@ class SkillsLibrary(Configuration):
                 question = _removeBrackets(question).strip()
 
                 # checking if pod1 has primary=true or title=result|definition
-                if (("definition" in pod1["@title"].lower()) or ("result" in pod1["@title"].lower()) or (pod1.get("@primary", "false") == "true")):
+                if (("definition" in pod1["@title"].lower()) or ("result" in pod1["@title"].lower()) or (pod1.get("@primary", "false") == True)):
 
                     # extract result from pod1
                     wolfram_response = _resolveListOrDict(pod1["subpod"])
@@ -1075,6 +1075,8 @@ class SkillsLibrary(Configuration):
                 did_you_know = f'Did you know. {holiday["did you know"]}'
 
                 return title, message, did_you_know
+            else:
+                return "", "", ""
 
             # get back to virtual assistant directory
             os.chdir(self.ASSISTANT_DIR)

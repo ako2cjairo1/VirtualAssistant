@@ -8,7 +8,7 @@ def create_instance():
     brenda = None
 
     try:
-        brenda = VirtualAssistant(masters_name="Dave", assistants_name="Brenda", listen_timeout=10)
+        brenda = VirtualAssistant(masters_name="Dave", assistants_name="Alexa", listen_timeout=10)
         brenda.maximize_command_interface()
         brenda.activate()
 

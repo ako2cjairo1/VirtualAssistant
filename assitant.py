@@ -37,10 +37,10 @@ class VirtualAssistant(SpeechAssistant):
     def maximize_command_interface(self, maximize=True):
         if maximize:
             os.system(
-                "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 900 400 /siz 491 336 /TOP")
+                "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 973 600 /siz 491 336 /TOP")
         else:
             os.system(
-                "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 1174 533 /siz 217 203 /NOT")
+                "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 1250 733 /siz 217 203 /NOT")
 
     def restart(self):
         self.print("\n Comencing restart...")
@@ -65,7 +65,7 @@ class VirtualAssistant(SpeechAssistant):
         sys.exit()
         exit()
 
-    def deactivate(self, voice_data):
+    def deactivate(self, voice_data=""):
         # commands to terminate virtual assistant
         if is_match(voice_data, self._get_commands("terminate")) or self.restart_request:
             if self.isSleeping() and voice_data:
@@ -743,7 +743,8 @@ class VirtualAssistant(SpeechAssistant):
                     # log and send the restart request message to telegram bot
                     message = "Restart requested to re-authenticate Telegram bot..."
                     self.print(message)
-                    self.deactivate()
+                    # terminate virtual assistant
+                    self.deactivate(self._get_commands("terminate")[0])
                     break
 
                 # announce the hourly time
@@ -1000,7 +1001,8 @@ class VirtualAssistant(SpeechAssistant):
 
                 while not _start_virtual_assistant():
                     if self.restart_request:
-                        self.deactivate()
+                        # terminate virtual assistant
+                        self.deactivate(self._get_commands("terminate")[0])
                         break
 
                     time.sleep(5)
@@ -1016,4 +1018,5 @@ class VirtualAssistant(SpeechAssistant):
             self.skill.music_volume(30)
             # set the restart flag to true
             self.restart_request = True
-            self.deactivate()
+            # terminate virtual assistant
+            self.deactivate(self._get_commands("terminate")[0])

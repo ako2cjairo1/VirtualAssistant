@@ -125,8 +125,8 @@ class SpeechAssistant(Configuration):
 
                 if self.isSleeping() and self.not_available_counter >= 3:
                     message = f"\"{self.assistant_name}\" is active again."
-                    print(message)
-                    self.respond_to_bot(message)
+                    # print(message)
+                    # self.respond_to_bot(message)
                     self.not_available_counter = 0
 
                 return voice_text
@@ -136,7 +136,7 @@ class SpeechAssistant(Configuration):
                 if self.not_available_counter == 3:
                     message = f"\"{self.assistant_name}\" Not Available."
                     self.Log(message)
-                    self.respond_to_bot(message)
+                    # self.respond_to_bot(message)
 
                 if self.isSleeping() and self.not_available_counter >= 3:
                     message = f"{self.assistant_name}: reconnecting..."
@@ -245,7 +245,7 @@ class SpeechAssistant(Configuration):
                 self.skill.music_volume(30)
                 force_delete = False
                 # init google's text-to-speech module
-                tts = gTTS(text=audio_string, lang="en-us", slow=False)
+                tts = gTTS(text=audio_string, lang="en", tld="com", lang_check=False, slow=False)
 
                 # make sure we're in the correct directory of batch file to execute
                 os.chdir(self.ASSISTANT_DIR)
@@ -290,4 +290,4 @@ class SpeechAssistant(Configuration):
                 if not ("Cannot find the specified file." or "Permission denied:") in str(ex):
                     self.Log("Exception occurred while trying to speak.")
                     message = f"\"{self.assistant_name}\" Not Available."
-                    self.respond_to_bot(message)
+                    # self.respond_to_bot(message)

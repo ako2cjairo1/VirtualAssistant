@@ -4,5 +4,12 @@ playsound
 wikipedia
 wolframalpha
 word2number
-PyAudio
 colorama
+python-decouple
+pycaw
+python-vlc
+feedparser
+tweepy
+python-dateutil
+keyboard
+plyer

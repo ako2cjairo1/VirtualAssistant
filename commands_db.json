@@ -105,17 +105,19 @@
         {
             "name": "night mode",
             "commands": [
-                "goodnight <assistant_name>",
+                "good night <assistant_name>",
                 "night mode",
-                "goodnight"
+                "goodnight",
+                "good night"
             ]
         },
         {
             "name": "day mode",
             "commands": [
-                "goodmorning <assistant_name>",
+                "good morning <assistant_name>",
                 "day mode",
-                "goodmorning"
+                "goodmorning",
+                "good morning"
             ]
         },
         {
