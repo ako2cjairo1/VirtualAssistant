@@ -1,0 +1,72 @@
+04-14-2021 01:49:44 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+04-14-2021 01:49:44 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+04-14-2021 01:54:44 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+04-14-2021 01:54:44 PM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+04-19-2021 09:04:56 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+04-19-2021 09:04:56 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+04-19-2021 09:05:42 AM | ERROR | Exception occurred while trying to speak.
+File:    tts.py
+Target:  tts.save(audio_file)
+Message: Failed to connect. Probable cause: Unknown
+Line:    277
+----------------------------------------------------
+04-19-2021 09:05:42 AM | ERROR | Exception occurred while trying to speak.
+File:    tts.py
+Target:  tts.save(audio_file)
+Message: Failed to connect. Probable cause: Unknown
+Line:    277
+----------------------------------------------------
+04-19-2021 09:06:07 AM | ERROR | Exception occurred while trying to speak.
+File:    tts.py
+Target:  self.respond_to_bot(audio_string)
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=From+this+day+in+history.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000298DCFAC5B0>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    280
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+04-19-2021 09:06:07 AM | ERROR | Exception occurred while trying to speak.
+File:    tts.py
+Target:  self.respond_to_bot(audio_string)
+Message: Error while sending message. Error while parsing URL. HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot1310031608:AAHkuLvXb_3M-PTCuVl0lbVE4ST3Gi38ceI/sendMessage?text=From+this+day+in+history.&chat_id=355113305&parse_mode=Markdown (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x00000298DCFAC5B0>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond'))
+Line:    280
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+04-19-2021 09:06:08 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
+04-19-2021 09:06:08 AM | ERROR | Exception occurred while polling bot, trying to re-connect...
+File:    tts.py
+Target:  self.bot.poll()
+Message: Error polling bot, trying to poll again...
+Line:    202
+----------------------------------------------------
