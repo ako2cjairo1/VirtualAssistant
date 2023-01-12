@@ -4,12 +4,13 @@ from assitant import VirtualAssistant
 
 
 def create_instance():
-    os.system("cls")
+    os.system("clear")
     brenda = None
 
     try:
+        os.system('pip3 install -r Requirements.txt')
         brenda = VirtualAssistant(masters_name="Dave", assistants_name="Alexa", listen_timeout=10)
-        brenda.maximize_command_interface()
+        # brenda.maximize_command_interface()
         brenda.activate()
 
     except Exception as ex:
@@ -19,5 +20,5 @@ def create_instance():
 
 
 if __name__ == "__main__":
-    os.system("cls")
+    os.system("clear")
     create_instance()

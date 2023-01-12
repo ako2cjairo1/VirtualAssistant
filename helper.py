@@ -168,7 +168,7 @@ def check_connection():
 
     while True:
         try:
-            os.system("cls")
+            os.system("clear")
             print("\n Checking internet connectivity...", end="")
             retry_count += 1
             response = requests.get("http://google.com", timeout=300)

@@ -3,6 +3,7 @@ gTTS
 playsound
 wikipedia
 wolframalpha
+openai
 word2number
 colorama
 python-decouple

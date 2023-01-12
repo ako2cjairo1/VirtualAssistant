@@ -6,10 +6,11 @@ import webbrowser
 import wikipedia
 import wolframalpha
 import time
-import wmi  # (screen brightness) Windows Management Instrumentation module
+# import wmi  # (screen brightness) Windows Management Instrumentation module
 import linecache
 import logging
 import concurrent.futures as task
+import openai
 from threading import Thread
 from helper import is_match, get_commands, clean_voice_data, extract_metadata, execute_map
 from urllib.parse import quote
@@ -88,7 +89,8 @@ class SkillsLibrary(Configuration):
         if search_keyword:
             link = f"https://google.com/search?q={quote(search_keyword.strip())}"
 
-            open_browser_thread = Thread(target=execute_map, args=("open browser", [link],))
+            open_browser_thread = Thread(
+                target=execute_map, args=("open browser", [link],))
             open_browser_thread.setDaemon(True)
             open_browser_thread.start()
             result = f"Here's what I found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
@@ -106,7 +108,8 @@ class SkillsLibrary(Configuration):
         if search_keyword:
             link = f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"
 
-            open_browser_thread = Thread(target=execute_map, args=("open browser", [link],))
+            open_browser_thread = Thread(
+                target=execute_map, args=("open browser", [link],))
             open_browser_thread.setDaemon(True)
             open_browser_thread.start()
             result = f"I found something on Youtube for \"{search_keyword}\"."
@@ -121,7 +124,8 @@ class SkillsLibrary(Configuration):
         if location:
             link = f"https://google.nl/maps/place/{quote(location.strip())}/&amp;"
             # open a web browser and map
-            open_browser_thread = Thread(target=execute_map, args=("open browser", [link],))
+            open_browser_thread = Thread(
+                target=execute_map, args=("open browser", [link],))
             open_browser_thread.setDaemon(True)
             open_browser_thread.start()
             result = f"Here\'s the map location of \"{location.strip()}\". Opening your browser..."
@@ -411,6 +415,24 @@ class SkillsLibrary(Configuration):
         # if no answers found return a blank response
         return response
 
+    def openai(self, voice_data):
+        response = ''
+        openai.api_key = self.OPENAI_TOKEN
+        # fetch response from openai api
+        try:
+            response = openai.Completion.create(
+                engine='text-davinci-003',
+                prompt=voice_data,
+                max_tokens=100
+            )
+            response = response['choices'][0]['text'].replace('\n', '')
+
+        except Exception as e:
+            pass
+            self.Log("OpenAI Search Skill Error.")
+
+        return response
+
     def wikipedia_search(self, wiki_keyword, voice_data):
         result = ""
         if wiki_keyword:
@@ -430,7 +452,7 @@ class SkillsLibrary(Configuration):
                 else:
                     result = "I don't know what that is but,"
 
-                return f"{result} {self.google(wiki_keyword.strip())}"
+                return f"{result} {self.openai(wiki_keyword.strip())}"
 
             except Exception:
                 self.Log("Wikipedia Search Skill Error.")
@@ -451,12 +473,12 @@ class SkillsLibrary(Configuration):
 
             for word in evaluated_voice_data:
                 if is_match(word, ["+", "plus", "add"]):
-                    operator = " + " if not word.replace("+",
-                                                         "").isdigit() else word
+                    operator = " + " if not word.replace(
+                        "+", "").isdigit() else word
                     equation += operator
                 elif is_match(word, ["-", "minus", "subtract"]):
-                    operator = " - " if not word.replace("-",
-                                                         "").isdigit() else word
+                    operator = " - " if not word.replace(
+                        "-", "").isdigit() else word
                     equation += operator
                 elif is_match(word, ["x", "times", "multiply", "multiplied"]):
                     operator = " * "
@@ -517,7 +539,7 @@ class SkillsLibrary(Configuration):
                     # evaluate the equation made
                     answer = eval(equation.replace(",", ""))
                 except ZeroDivisionError:
-                    return choice(["The answer is somwhere between infinity, negative infinity, and undefined.", "The answer is undefined."])
+                    return choice(["The answer is somewhere between infinity, negative infinity, and undefined.", "The answer is undefined."])
                 except Exception:
                     self.Log(
                         "Calculator Skill Exception (handled).", logging.INFO)
@@ -643,7 +665,7 @@ class SkillsLibrary(Configuration):
                     app_names.append("Newsfeed Ticker")
                     # change directory to NewsTicker library
                     os.chdir(self.NEWS_DIR)
-                    # execute batch file that will open Newsfeed on a newo console window
+                    # execute batch file that will open Newsfeed on a new console window
                     os.system('start cmd /k \"start News Ticker.bat\"')
                     # get back to virtual assistant directory after command execution
                     os.chdir(self.ASSISTANT_DIR)
@@ -652,7 +674,7 @@ class SkillsLibrary(Configuration):
                     app_names.append("Wi-Fi Manager")
                     # change directory to Wi-Fi manager library
                     os.chdir(self.UTILS_DIR)
-                    # execute batch file that will open Wi-Fi manager on a newo console window
+                    # execute batch file that will open Wi-Fi manager on a new console window
                     os.system('start cmd /k \"wifi manager.bat\"')
                     # get back to virtual assistant directory after command execution
                     os.chdir(self.ASSISTANT_DIR)
@@ -710,7 +732,8 @@ class SkillsLibrary(Configuration):
                     exec.map(self.tts.respond_to_bot, urls)
 
             if len(app_names) > 0:
-                alternate_responses = self._get_commands("acknowledge response")
+                alternate_responses = self._get_commands(
+                    "acknowledge response")
                 confirmation = f"Ok! opening {' and '.join(app_names)}..."
                 alternate_responses.append(confirmation)
                 confirmation = choice(alternate_responses)
@@ -729,8 +752,8 @@ class SkillsLibrary(Configuration):
                 if using_explorer:
                     # open windows explorer and look for files using queries
                     explorer = f'explorer /root,"search-ms:query=name:{file_name}&crumb=location:{self.FILE_DIR}&"'
-                    subprocess.Popen(explorer, shell=False, stdin=None,
-                                     stdout=None, stderr=None, close_fds=False)
+                    subprocess.Popen(
+                        explorer, shell=False, stdin=None, stdout=None, stderr=None, close_fds=False)
                     response_message = f"Here's what I found for files with \"{file_name}\". I'm showing you the folder...\n"
 
                 # find files using command console
@@ -796,8 +819,8 @@ class SkillsLibrary(Configuration):
             percentage = int([val for val in voice_data.replace(
                 '%', '').split(' ') if val.isdigit()][0]) if True else 50
             # set the screen brightness (in percentage)
-            wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
-                0].WmiSetBrightness(percentage, 0)
+            # wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
+            #     0].WmiSetBrightness(percentage, 0)
 
             alternate_responses = self._get_commands("acknowledge response")
             return f"{choice(alternate_responses)} I set the brightness by {percentage}%"
@@ -821,9 +844,11 @@ class SkillsLibrary(Configuration):
 
                 if "disabled" in command:
                     # announce before going off-line
-                    self.print(f"\033[1;33;41m {self.assistant_name} is Offline...")
+                    self.print(
+                        f"\033[1;33;41m {self.assistant_name} is Offline...")
 
-                alternate_responses = self._get_commands("acknowledge response")
+                alternate_responses = self._get_commands(
+                    "acknowledge response")
                 return f"{choice(alternate_responses)} I {command} the Wi-Fi."
 
         except Exception:
@@ -909,7 +934,8 @@ class SkillsLibrary(Configuration):
 
             if meta_data == "":
                 # mode = "compact"
-                alternate_responses = self._get_commands("acknowledge response")
+                alternate_responses = self._get_commands(
+                    "acknowledge response")
                 response = f"{choice(alternate_responses)} Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
                 songWasFound = True
 
@@ -925,7 +951,8 @@ class SkillsLibrary(Configuration):
                     artist = f'"{artist}"'
                     genre = title
 
-                    alternate_responses = self._get_commands("acknowledge response")
+                    alternate_responses = self._get_commands(
+                        "acknowledge response")
                     response = f"{choice(alternate_responses)} Playing \"{title}\" by {artist}..."
                 else:
                     response = f"I couldn't find \"{title}\" in your music."
@@ -942,7 +969,8 @@ class SkillsLibrary(Configuration):
 
                 if mp.search_song_by(meta_data, meta_data, meta_data):
                     songWasFound = True
-                    alternate_responses = self._get_commands("acknowledge response")
+                    alternate_responses = self._get_commands(
+                        "acknowledge response")
                     response = f"{choice(alternate_responses)} Now playing \"{meta_data.capitalize()}\" {'music...' if music_word_found else '...'}"
                 else:
                     response = f"I couldn't find \"{meta_data.capitalize()}\" in your music."
@@ -1075,8 +1103,6 @@ class SkillsLibrary(Configuration):
                 did_you_know = f'Did you know. {holiday["did you know"]}'
 
                 return title, message, did_you_know
-            else:
-                return "", "", ""
 
             # get back to virtual assistant directory
             os.chdir(self.ASSISTANT_DIR)
@@ -1087,5 +1113,5 @@ class SkillsLibrary(Configuration):
     def system_volume(self, vol):
         # get back to virtual assistant directory after command execution
         os.chdir(self.ASSISTANT_DIR)
-        # execute batch file that will open Newsfeed on a newo console window
+        # execute batch file that will open Newsfeed on a new console window
         os.system(f'start cmd /k "set_system_volume.bat {vol}"')

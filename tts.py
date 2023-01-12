@@ -20,7 +20,8 @@ from datetime import datetime as dt
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s", "%m-%d-%Y %I:%M:%S %p")
+formatter = logging.Formatter(
+    "%(asctime)s | %(levelname)s | %(message)s", "%m-%d-%Y %I:%M:%S %p")
 
 file_handler = logging.FileHandler("VirtualAssistant.log", mode="a")
 file_handler.setFormatter(formatter)
@@ -113,7 +114,8 @@ class SpeechAssistant(Configuration):
 
                 else:
                     # listening
-                    audio = self.recognizer.listen(source, timeout=listen_timeout, phrase_time_limit=phrase_limit)
+                    audio = self.recognizer.listen(
+                        source, timeout=listen_timeout, phrase_time_limit=phrase_limit)
                     # try convert audio to text/string data
                     voice_text = self.recognizer.recognize_google(audio)
 
@@ -149,12 +151,10 @@ class SpeechAssistant(Configuration):
             except Exception as ex:
                 if "listening timed out" not in str(ex):
                     # bypass the timed out exception, (timeout=3, if total silence for 3 secs.)
-                    self.Log(
-                        "Exception occurred while analyzing audio.")
+                    self.Log("Exception occurred while analyzing audio.")
 
         if not self.isSleeping() and voice_text.strip():
-            print(
-                f"{self.BLACK_GREEN}{self.master_name}:{self.GREEN} {voice_text}")
+            print(f"{self.BLACK_GREEN}{self.master_name}:{self.GREEN} {voice_text}")
 
         if not self.isSleeping() and not self.bot_command and voice_text.strip():
             self.respond_to_bot(f"(I heared) YOU: \"{voice_text}\"")
@@ -202,7 +202,8 @@ class SpeechAssistant(Configuration):
                 self.bot.poll()
 
             except Exception:
-                self.Log("Exception occurred while polling bot, trying to re-connect...")
+                self.Log(
+                    "Exception occurred while polling bot, trying to re-connect...")
                 time.sleep(5)
                 continue
 
@@ -245,7 +246,8 @@ class SpeechAssistant(Configuration):
                 self.skill.music_volume(30)
                 force_delete = False
                 # init google's text-to-speech module
-                tts = gTTS(text=audio_string, lang="en", tld="com", lang_check=False, slow=False)
+                tts = gTTS(text=audio_string, lang="en",
+                           tld="com", lang_check=False, slow=False)
 
                 # make sure we're in the correct directory of batch file to execute
                 os.chdir(self.ASSISTANT_DIR)
@@ -262,7 +264,8 @@ class SpeechAssistant(Configuration):
                 elif start_prompt and audio_string:
                     tts.save(audio_file)
                     sound.playsound(f"{self.AUDIO_FOLDER}/start prompt.mp3")
-                    print(f"{self.BLACK_CYAN}{self.assistant_name}:{self.CYAN} {audio_string}")
+                    print(
+                        f"{self.BLACK_CYAN}{self.assistant_name}:{self.CYAN} {audio_string}")
                     # respond to bot as well
                     self.respond_to_bot(audio_string)
                     force_delete = True
@@ -275,7 +278,8 @@ class SpeechAssistant(Configuration):
 
                 else:
                     tts.save(audio_file)
-                    print(f"{self.BLACK_CYAN}{self.assistant_name}:{self.CYAN} {audio_string}")
+                    print(
+                        f"{self.BLACK_CYAN}{self.assistant_name}:{self.CYAN} {audio_string}")
                     # respond to bot as well
                     self.respond_to_bot(audio_string)
 

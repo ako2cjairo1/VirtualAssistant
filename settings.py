@@ -30,3 +30,5 @@ class Configuration:
         self.TELEGRAM_TOKEN = config("TELEGRAM_TOKEN")
         self.TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID")
         self.TELEGRAM_URL = config("TELEGRAM_URL")
+
+        self.OPENAI_TOKEN = config("OPENAI_TOKEN")
