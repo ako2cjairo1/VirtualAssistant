@@ -1,24 +1,25 @@
 import os
 import time
 from assitant import VirtualAssistant
+import platform
 
 
 def create_instance():
-    os.system("clear")
     brenda = None
+    os.system("clear" if platform.uname().system == "Darwin" else "cls")
 
     try:
-        os.system('pip3 install -r Requirements.txt')
-        brenda = VirtualAssistant(masters_name="Dave", assistants_name="Alexa", listen_timeout=10)
-        # brenda.maximize_command_interface()
+        brenda = VirtualAssistant(
+            masters_name="Dave", assistants_name="Alexa", listen_timeout=10)
         brenda.activate()
 
     except Exception as ex:
-        print(f"Critical Error occurred, trying to start a new instance... {str(ex)}")
+        print(f"Something went wrong when creating new instance! {ex}")
+        time.sleep(2)
+        os.system('pip3 install -r Requirements.txt clear;python main.py')
         time.sleep(5)
         create_instance()
 
 
 if __name__ == "__main__":
-    os.system("clear")
     create_instance()

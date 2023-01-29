@@ -2,8 +2,9 @@ import json
 import requests
 import time
 import urllib
-from threading import Thread
+from threading import Event, Thread
 from settings import Configuration
+from datetime import datetime
 
 
 class TelegramBot(Configuration):
@@ -13,6 +14,7 @@ class TelegramBot(Configuration):
         self.url = f"{self.TELEGRAM_URL}{self.TELEGRAM_TOKEN}/"
         self.last_update_id = None
         self.last_command = None
+        self.botId = datetime.now()
 
     def get_url(self, url):
         try:
@@ -28,7 +30,8 @@ class TelegramBot(Configuration):
             return json.loads(content)
 
         except Exception as ex:
-            raise Exception(f"Error while parsing JSON from response. {str(ex)}")
+            raise Exception(
+                f"Error while parsing JSON from response. {str(ex)}")
 
     def get_updates(self, offset=None):
         try:
@@ -46,7 +49,8 @@ class TelegramBot(Configuration):
                 update_ids.append(int(update["update_id"]))
             return max(update_ids)
         except Exception as ex:
-            raise Exception(f"Error while pulling the last update id. {str(ex)}")
+            raise Exception(
+                f"Error while pulling the last update id. {str(ex)}")
 
     def get_last_chat_text(self, updates):
         try:
@@ -55,12 +59,14 @@ class TelegramBot(Configuration):
             return updates["result"][last_update]["message"]["text"]
 
         except Exception as ex:
-            raise Exception(f"Error while pulling the last chat message. {str(ex)}")
+            raise Exception(
+                f"Error while pulling the last chat message. {str(ex)}")
 
     def send_message(self, text, reply_markup=None):
         try:
             text = urllib.parse.quote_plus(text)
-            url = self.url + f"sendMessage?text={text}&chat_id={self.TELEGRAM_CHAT_ID}&parse_mode=Markdown"
+            url = self.url + \
+                f"sendMessage?text={text}&chat_id={self.TELEGRAM_CHAT_ID}"  # &parse_mode=Markdown"
 
             if reply_markup:
                 url += f"&reply_markup={reply_markup}"
@@ -71,24 +77,31 @@ class TelegramBot(Configuration):
             raise Exception(f"Error while sending message. {str(ex)}")
 
     def poll(self):
+        evt = Event()
+
         try:
             # let continue this polling every half a second
-            while True:
+            while not evt.is_set():
+                if self.last_command == "/restart":
+                    evt.set()
                 # let's pull the latest update in chat
                 updates = self.get_updates(self.last_update_id)
 
-                # if successul update and must have result count
+                # if successful update and must have result count
                 if updates["ok"] and len(updates["result"]) > 0:
                     # increment update_id based from the last update index
                     self.last_update_id = self.get_last_update_id(updates) + 1
 
                     command = self.get_last_chat_text(updates)
                     if command == "/start":
-                        self.send_message("Welcome to your personal Virtual Assistant on Telegram. Send some questions/commands to me and I'll try my best to respond.")
+                        self.send_message(
+                            "Welcome to your personal Virtual Assistant on Telegram. Send some questions/commands to me and I'll try my best to respond.")
 
                     self.last_command = command.strip().lower()
 
-                time.sleep(0.5)
+                time.sleep(0.3)
 
-        except Exception:
+        except Exception as ex:
+            self.last_command == "/restart"
+            evt.set()
             raise Exception(f"Error polling bot, trying to poll again...")

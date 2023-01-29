@@ -1,4 +1,9 @@
+from pygments.lexers import get_all_lexers, guess_lexer
+from pygments import highlight
+from pygments.formatters import TerminalFormatter
+from pygments.lexers import get_lexer_by_name, guess_lexer
 import os
+import subprocess
 import sys
 import requests
 import subprocess
@@ -18,6 +23,7 @@ from random import choice
 from datetime import datetime as dt
 from word2number import w2n
 from settings import Configuration
+import platform
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +32,11 @@ class SkillsLibrary(Configuration):
 
     def __init__(self, tts, masters_name, assistants_name):
         super().__init__()
+        self.platform = platform.uname().system
         self.master_name = masters_name
         self.assistant_name = assistants_name
         self.tts = tts
-
-    def print(self, message):
-        print(message)
-        self.tts.respond_to_bot(message)
+        self.context = ""
 
     def Log(self, exception_title="", ex_type=logging.ERROR):
         log_data = ""
@@ -69,9 +73,11 @@ class SkillsLibrary(Configuration):
 
         elif ex_type == logging.ERROR:
             logger.error(log_data)
+            raise Exception(exception_title)
 
         elif ex_type == logging.CRITICAL:
             logger.critical(log_data)
+            raise Exception(exception_title)
 
     def _get_commands(self, command_name):
         return get_commands(command_name, self.assistant_name, self.master_name)
@@ -85,15 +91,13 @@ class SkillsLibrary(Configuration):
 
     def google(self, search_keyword):
         result = ""
-        # open google iste in web browser and show results
+        # open google in web browser and show results
         if search_keyword:
             link = f"https://google.com/search?q={quote(search_keyword.strip())}"
 
-            open_browser_thread = Thread(
-                target=execute_map, args=("open browser", [link],))
-            open_browser_thread.setDaemon(True)
-            open_browser_thread.start()
-            result = f"Here's what I found on the web for \"{search_keyword.strip()}\". Opening your web browser...\n"
+            Thread(target=execute_map, args=(
+                "open browser", [link],), daemon=True).start()
+            result = f"\nHere's what I found on the web. Check your browser..."
 
             # let get the redirected url (if possible) from link we have
             redirect_url = requests.get(link)
@@ -108,11 +112,9 @@ class SkillsLibrary(Configuration):
         if search_keyword:
             link = f"https://www.youtube.com/results?search_query={quote(search_keyword.strip())}"
 
-            open_browser_thread = Thread(
-                target=execute_map, args=("open browser", [link],))
-            open_browser_thread.setDaemon(True)
-            open_browser_thread.start()
-            result = f"I found something on Youtube for \"{search_keyword}\"."
+            Thread(
+                target=execute_map, args=("open browser", [link],), daemon=True).start()
+            result = f"\nI found something on Youtube for \"{search_keyword}\"."
 
             # send the link to bot
             self.tts.respond_to_bot(link)
@@ -124,11 +126,9 @@ class SkillsLibrary(Configuration):
         if location:
             link = f"https://google.nl/maps/place/{quote(location.strip())}/&amp;"
             # open a web browser and map
-            open_browser_thread = Thread(
-                target=execute_map, args=("open browser", [link],))
-            open_browser_thread.setDaemon(True)
-            open_browser_thread.start()
-            result = f"Here\'s the map location of \"{location.strip()}\". Opening your browser..."
+            Thread(
+                target=execute_map, args=("open browser", [link],), daemon=True).start()
+            result = f"\nHere\'s the map location of \"{location.strip()}\". Check your browser..."
 
             # let get the redirected url (if possible) from link we have
             redirect_url = requests.get(link)
@@ -317,7 +317,7 @@ class SkillsLibrary(Configuration):
                     elif wolfram_response.count("|") > 2:
                         if is_match(wolfram_response, parts_of_speech):
                             # responding to definition of terms, and using the first answer in the list as definition
-                            response = f"\"{question}\" \n. ({wolfram_meta[1]}) . \nIt means... {wolfram_meta[-1].strip().capitalize()}."
+                            response = f"\nDefinition of \"{question}\" ({wolfram_meta[1]}) \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                         else:
                             # respond by showing list of information
                             for deet in wolfram_response.split(" | "):
@@ -413,25 +413,61 @@ class SkillsLibrary(Configuration):
             self.Log("Wolfram|Alpha Search Skill Error.")
 
         # if no answers found return a blank response
-        return response
+        return response.strip()
+
+    def highlight_code_snippets(self, text):
+        import re
+
+        from pygments import highlight
+        code_snippets = re.findall(
+            r'(```[\s\S]+?```|```[\s\S]+|[\s\S]+?```)', text)
+        for code in code_snippets:
+            code = re.sub(r'```', '', code)
+            lexer = None
+            for lexer_name, _, _ in get_all_lexers():
+                try:
+                    lexer = get_lexer_by_name(lexer_name, stripall=True)
+                    lexer.analyse_text(code)
+                    break
+                except:
+                    pass
+            if lexer:
+                print(highlight(code, lexer, TerminalFormatter()))
+            else:
+                print(code)
+
+        print(text)
 
     def openai(self, voice_data):
-        response = ''
-        openai.api_key = self.OPENAI_TOKEN
-        # fetch response from openai api
+        result = ""
+
         try:
+            self.context += f"\n{voice_data}"
+
+            openai.api_key = self.OPENAI_TOKEN
             response = openai.Completion.create(
-                engine='text-davinci-003',
-                prompt=voice_data,
-                max_tokens=100
+                engine="text-davinci-003",
+                temperature=0.7,
+                max_tokens=256,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0,
+                prompt=self.context
             )
-            response = response['choices'][0]['text'].replace('\n', '')
+
+            if len(response['choices']) == 1:
+                result = response['choices'][0]['text']
+            else:
+                for res in response['choices']:
+                    result += res['text']
 
         except Exception as e:
             pass
-            self.Log("OpenAI Search Skill Error.")
+            self.Log(f"OpenAI Search Skill Error. {str(e)}")
 
-        return response
+        self.context += f"\n{result}"
+
+        return result
 
     def wikipedia_search(self, wiki_keyword, voice_data):
         result = ""
@@ -447,12 +483,12 @@ class SkillsLibrary(Configuration):
                 self.Log(
                     "Wikipedia Search Skill (handled)", logging.INFO)
 
-                if ("who" or "who's") in voice_data.lower():
-                    result = "I don't know who that is but,"
-                else:
-                    result = "I don't know what that is but,"
+                # if ("who" or "who's") in voice_data.lower():
+                #     result = "I don't know who that is but,"
+                # else:
+                #     result = "I don't know what that is but,"
 
-                return f"{result} {self.openai(wiki_keyword.strip())}"
+                # return self.openai(wiki_keyword.strip())
 
             except Exception:
                 self.Log("Wikipedia Search Skill Error.")
@@ -460,115 +496,115 @@ class SkillsLibrary(Configuration):
         return result
 
     def calculator(self, voice_data):
-        operator = ""
-        number1 = 0
-        percentage = 0
-        answer = None
-        equation = ""
+        # operator = ""
+        # number1 = 0
+        # percentage = 0
+        # answer = None
+        # equation = ""
 
-        try:
-            # evaluate if there are square root or cube root questions, replace with single word
-            evaluated_voice_data = voice_data.replace(",", "").replace("power of", "power#of").replace(
-                "square root", "square#root").replace("cube root", "cube#root").split(" ")
+        # try:
+        #     # evaluate if there are square root or cube root questions, replace with single word
+        #     evaluated_voice_data = voice_data.replace(",", "").replace("power of", "power#of").replace(
+        #         "square root", "square#root").replace("cube root", "cube#root").split(" ")
 
-            for word in evaluated_voice_data:
-                if is_match(word, ["+", "plus", "add"]):
-                    operator = " + " if not word.replace(
-                        "+", "").isdigit() else word
-                    equation += operator
-                elif is_match(word, ["-", "minus", "subtract"]):
-                    operator = " - " if not word.replace(
-                        "-", "").isdigit() else word
-                    equation += operator
-                elif is_match(word, ["x", "times", "multiply", "multiplied"]):
-                    operator = " * "
-                    equation += operator
-                elif is_match(word, ["/", "divide", "divided"]):
-                    operator = " / "
-                    equation += operator
-                elif is_match(word, ["^", "power#of"]):
-                    operator = " ^ "
-                    equation += operator
-                elif is_match(word, ["square#root"]):
-                    equation += "x2"
-                elif is_match(word, ["cube#root"]):
-                    equation += "x3"
-                elif is_match(word, ["percent", "%"]):
-                    operator = "%"
-                    if not word.isdigit() and "%" in word:
-                        equation += f"{word} of "
-                        percentage = w2n.word_to_num(word.replace("%", ""))
-                    else:
-                        equation += "% of "
-                        percentage = number1
-                    number1 = 0
-                elif is_match(word, ["dot", "point", "."]):
-                    equation += word
+        #     for word in evaluated_voice_data:
+        #         if is_match(word, ["+", "plus", "add"]):
+        #             operator = " + " if not word.replace(
+        #                 "+", "").isdigit() else word
+        #             equation += operator
+        #         elif is_match(word, ["-", "minus", "subtract"]):
+        #             operator = " - " if not word.replace(
+        #                 "-", "").isdigit() else word
+        #             equation += operator
+        #         elif is_match(word, ["x", "times", "multiply", "multiplied"]):
+        #             operator = " * "
+        #             equation += operator
+        #         elif is_match(word, ["/", "divide", "divided"]):
+        #             operator = " / "
+        #             equation += operator
+        #         elif is_match(word, ["^", "power#of"]):
+        #             operator = " ^ "
+        #             equation += operator
+        #         elif is_match(word, ["square#root"]):
+        #             equation += "x2"
+        #         elif is_match(word, ["cube#root"]):
+        #             equation += "x3"
+        #         elif is_match(word, ["percent", "%"]):
+        #             operator = "%"
+        #             if not word.isdigit() and "%" in word:
+        #                 equation += f"{word} of "
+        #                 percentage = w2n.word_to_num(word.replace("%", ""))
+        #             else:
+        #                 equation += "% of "
+        #                 percentage = number1
+        #             number1 = 0
+        #         elif is_match(word, ["dot", "point", "."]):
+        #             equation += word
 
-                # try to convert words to numbers
-                elif word.isdigit() or is_match(word, ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "zero"]):
-                    # build the equation
-                    equation += str(w2n.word_to_num(word)).replace(" ", "")
+        #         # try to convert words to numbers
+        #         elif word.isdigit() or is_match(word, ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "zero"]):
+        #             # build the equation
+        #             equation += str(w2n.word_to_num(word)).replace(" ", "")
 
-                    # store number value for special equations (percentage, square root, cube root)
-                    if percentage or ("x2" in equation) or ("x3" in equation):
-                        number1 = word
+        #             # store number value for special equations (percentage, square root, cube root)
+        #             if percentage or ("x2" in equation) or ("x3" in equation):
+        #                 number1 = word
 
-            if percentage and int(number1) > 0:
-                equation = f"{percentage}*.01*{number1}"
-                # evaluate percentage equation
-                answer = float(eval(equation))
-                # create a readable equation
-                equation = f"{percentage}% of {number1}"
+        #     if percentage and int(number1) > 0:
+        #         equation = f"{percentage}*.01*{number1}"
+        #         # evaluate percentage equation
+        #         answer = float(eval(equation))
+        #         # create a readable equation
+        #         equation = f"{percentage}% of {number1}"
 
-            # no percentage computation was made,
-            # just return equivalent value of percent
-            if (answer is None) and percentage:
-                return f"{percentage}% is {percentage * .01}"
+        #     # no percentage computation was made,
+        #     # just return equivalent value of percent
+        #     if (answer is None) and percentage:
+        #         return f"{percentage}% is {percentage * .01}"
 
-            if "x2" in equation:
-                equation = f"{number1}**(1./2.)"
-            elif "x3" in equation:
-                equation = f"{number1}**(1./3.)"
-            elif "^" in equation:
-                # can't evaluate
-                return ""
+        #     if "x2" in equation:
+        #         equation = f"{number1}**(1./2.)"
+        #     elif "x3" in equation:
+        #         equation = f"{number1}**(1./3.)"
+        #     elif "^" in equation:
+        #         # can't evaluate
+        #         return ""
 
-            if (answer is None) and equation:
-                try:
-                    # evaluate the equation made
-                    answer = eval(equation.replace(",", ""))
-                except ZeroDivisionError:
-                    return choice(["The answer is somewhere between infinity, negative infinity, and undefined.", "The answer is undefined."])
-                except Exception:
-                    self.Log(
-                        "Calculator Skill Exception (handled).", logging.INFO)
-                    return ""
+        #     if (answer is None) and equation:
+        #         try:
+        #             # evaluate the equation made
+        #             answer = eval(equation.replace(",", ""))
+        #         except ZeroDivisionError:
+        #             return choice(["The answer is somewhere between infinity, negative infinity, and undefined.", "The answer is undefined."])
+        #         except Exception:
+        #             self.Log(
+        #                 "Calculator Skill Exception (handled).", logging.INFO)
+        #             return ""
 
-            if answer is not None:
-                with_decimal_point = float('{:.02f}'.format(answer))
+        #     if answer is not None:
+        #         with_decimal_point = float('{:.02f}'.format(answer))
 
-                # check answer for decimal places,
-                # convert to whole number if decimal point value is ".00"
-                positive_float = int(
-                    (str(with_decimal_point).split('.'))[1]) > 0
+        #         # check answer for decimal places,
+        #         # convert to whole number if decimal point value is ".00"
+        #         positive_float = int(
+        #             (str(with_decimal_point).split('.'))[1]) > 0
 
-                format_answer = with_decimal_point if positive_float else int(
-                    answer)
+        #         format_answer = with_decimal_point if positive_float else int(
+        #             answer)
 
-                # bring back the readable format of square root and cube root
-                equation = equation.replace(f"{number1}**(1./2.)", f"square root of {number1}").replace(
-                    f"{number1}**(1./3.)", f"cube root of {number1}")
+        #         # bring back the readable format of square root and cube root
+        #         equation = equation.replace(f"{number1}**(1./2.)", f"square root of {number1}").replace(
+        #             f"{number1}**(1./3.)", f"cube root of {number1}")
 
-                equation = [equation, "The answer"]
+        #         equation = [equation, "The answer"]
 
-                return f"{choice(equation)} is {'approximately ' if positive_float else ''}{format_answer}"
-            else:
-                return ""
+        #         return f"{choice(equation)} is {'approximately ' if positive_float else ''}{format_answer}"
+        #     else:
+        #         return ""
 
-        except Exception:
-            self.Log("Calculator Skill Error.")
-            return ""
+        # except Exception:
+        # self.Log("Calculator Skill Error.")
+        return ""
 
     def open_application(self, voice_data):
         confirmation = ""
@@ -591,14 +627,14 @@ class SkillsLibrary(Configuration):
 
         try:
             for app in modified_app_names():
-                if is_match(app, ["explorer", "folder"]):
+                if is_match(app, ["explorer", "folder", "finder"]):
                     app_commands.append(
-                        "start explorer C:\\Users\\Dave\\DEVENV\\Python")
-                    app_names.append("Windows Explorer")
+                        f"open {self.FILE_DIR}")
+                    app_names.append("Finder")
 
-                elif is_match(app, ["control-panel"]):
-                    app_commands.append("start control")
-                    app_names.append("Control Panel")
+                elif is_match(app, ["system settings", "settings"]):
+                    app_commands.append(f"open x-apple.systempreferences:")
+                    app_names.append("System Settings")
 
                 elif is_match(app, ["device-manager", "device"]):
                     app_commands.append("start devmgmt.msc")
@@ -633,7 +669,7 @@ class SkillsLibrary(Configuration):
                     app_names.append("Calculator")
 
                 elif is_match(app, ["command-console", "command-prompt", "terminal", "command"]):
-                    app_commands.append("start cmd")
+                    app_commands.append("open -a iTerm .")
                     app_names.append("Command Console")
 
                 elif is_match(app, ["microsoft-excel", "ms-excel", "excel", "spread-sheet"]):
@@ -649,12 +685,11 @@ class SkillsLibrary(Configuration):
                     app_names.append("Microsoft Powerpoint")
 
                 elif is_match(app, ["spotify"]):
-                    app_commands.append(
-                        "C:\\Users\\Dave\\AppData\\Roaming\\Spotify\\Spotify.exe")
+                    app_commands.append("open /Applications/Spotify.app")
                     app_names.append("Spotify")
 
                 elif is_match(app, ["vscode", "vs-code", "ms-code", "ms-vc", "visual-studio-code"]):
-                    app_commands.append("start code -n")
+                    app_commands.append("code -n")
                     app_names.append("Visual Studio Code")
 
                 elif is_match(app, ["sublime", "sublime-text"]):
@@ -662,31 +697,37 @@ class SkillsLibrary(Configuration):
                     app_names.append("Sublime Text 3")
 
                 elif is_match(app, ["newsfeed", "news"]):
-                    app_names.append("Newsfeed Ticker")
                     # change directory to NewsTicker library
                     os.chdir(self.NEWS_DIR)
                     # execute batch file that will open Newsfeed on a new console window
                     os.system('start cmd /k \"start News Ticker.bat\"')
                     # get back to virtual assistant directory after command execution
                     os.chdir(self.ASSISTANT_DIR)
+                    app_names.append("Newsfeed Ticker")
 
                 elif is_match(app, ["wi-fi-monitoring", "wi-fi-manager", "wifi-manager"]):
-                    app_names.append("Wi-Fi Manager")
                     # change directory to Wi-Fi manager library
                     os.chdir(self.UTILS_DIR)
                     # execute batch file that will open Wi-Fi manager on a new console window
                     os.system('start cmd /k \"wifi manager.bat\"')
                     # get back to virtual assistant directory after command execution
                     os.chdir(self.ASSISTANT_DIR)
+                    app_names.append("Wi-Fi Manager")
 
                 elif is_match(app, ["pse-ticker", "pse"]):
+                    if self.platform == "Darwin":
+                        opensrcipt = f"""osascript -e 'tell application "iTerm" to set newWindow to (create window with default profile)' -e 'tell application "iTerm" to tell newWindow to set newSession to (current session of last tab)' -e 'tell application "iTerm" to tell newSession to write text "cd {self.PSE_DIR};clear;python main.py"'"""
+
+                        os.system(opensrcipt)
+                    else:
+                        # change directory to PSE library resides
+                        os.chdir(self.PSE_DIR)
+                        # open PSE ticker in new window
+                        # os.system('start cmd /k \"start_PSE.bat\"')
+                        # get back to virtual assistant directory after command execution
+                        os.chdir(self.ASSISTANT_DIR)
+
                     app_names.append("Philippine Stock Exchange Ticker")
-                    # change directory to PSE library resides
-                    os.chdir(self.PSE_DIR)
-                    # open PSE ticker in new window
-                    os.system('start cmd /k \"start_PSE.bat\"')
-                    # get back to virtual assistant directory after command execution
-                    os.chdir(self.ASSISTANT_DIR)
 
                 elif is_match(app, ["youtube", "google", "netflix", "github", "facebook", "twitter", "instagram", "wikipedia"]):
                     if app == "youtube":
@@ -716,17 +757,13 @@ class SkillsLibrary(Configuration):
 
             # launch local applications using python's os.system class
             if len(app_commands) > 0:
-                open_app_thread = Thread(
-                    target=execute_map, args=("open system", app_commands,))
-                open_app_thread.setDaemon(True)
-                open_app_thread.start()
+                Thread(target=execute_map, args=(
+                    "open system", app_commands,), daemon=True).start()
 
             # open the webapp in web browser
             if len(urls) > 0:
-                open_browser_thread = Thread(
-                    target=execute_map, args=("open browser", urls,))
-                open_browser_thread.setDaemon(True)
-                open_browser_thread.start()
+                Thread(target=execute_map, args=(
+                    "open browser", urls,), daemon=True).start()
                 # send the links to bot
                 with task.ThreadPoolExecutor() as exec:
                     exec.map(self.tts.respond_to_bot, urls)
@@ -815,71 +852,71 @@ class SkillsLibrary(Configuration):
         return response_message
 
     def screen_brightness(self, voice_data):
-        try:
-            percentage = int([val for val in voice_data.replace(
-                '%', '').split(' ') if val.isdigit()][0]) if True else 50
-            # set the screen brightness (in percentage)
-            # wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
-            #     0].WmiSetBrightness(percentage, 0)
+        # try:
+        #     percentage = int([val for val in voice_data.replace(
+        #         '%', '').split(' ') if val.isdigit()][0]) if True else 50
+        #     # set the screen brightness (in percentage)
+        #     # wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
+        #     #     0].WmiSetBrightness(percentage, 0)
 
-            alternate_responses = self._get_commands("acknowledge response")
-            return f"{choice(alternate_responses)} I set the brightness by {percentage}%"
+        #     alternate_responses = self._get_commands("acknowledge response")
+        #     return f"{choice(alternate_responses)} I set the brightness by {percentage}%"
 
-        except Exception:
-            self.Log("Screen Brightness Skill Error.")
-            return ""
+        # except Exception:
+        self.Log("Screen Brightness Skill Error.")
+        return ""
 
     def control_wifi(self, voice_data):
-        command = ""
-        try:
-            if is_match(voice_data, ["on", "open", "enable"]):
-                # if "on" in voice_data or "open" in voice_data:
-                command = "enabled"
-            if is_match(voice_data, ["off", "close", "disable"]):
-                # elif "off" in voice_data or "close" in voice_data:
-                command = "disabled"
+        # command = ""
+        # try:
+        #     if is_match(voice_data, ["on", "open", "enable"]):
+        #         # if "on" in voice_data or "open" in voice_data:
+        #         command = "enabled"
+        #     if is_match(voice_data, ["off", "close", "disable"]):
+        #         # elif "off" in voice_data or "close" in voice_data:
+        #         command = "disabled"
 
-            if command:
-                os.system(f"netsh interface set interface \"Wi-Fi\" {command}")
+        #     if command:
+        #         os.system(f"netsh interface set interface \"Wi-Fi\" {command}")
 
-                if "disabled" in command:
-                    # announce before going off-line
-                    self.print(
-                        f"\033[1;33;41m {self.assistant_name} is Offline...")
+        #         if "disabled" in command:
+        #             # announce before going off-line
+        #             self.print(
+        #                 f"\033[1;33;41m {self.assistant_name} is Offline...")
 
-                alternate_responses = self._get_commands(
-                    "acknowledge response")
-                return f"{choice(alternate_responses)} I {command} the Wi-Fi."
+        #         alternate_responses = self._get_commands(
+        #             "acknowledge response")
+        #         return f"{choice(alternate_responses)} I {command} the Wi-Fi."
 
-        except Exception:
-            self.Log("Wi-Fi Skill Error.")
+        # except Exception:
+        self.Log("Wi-Fi Skill Error.")
 
         return ""
 
     def control_system(self, voice_data):
-        command = ""
-        confirmation = "no"
+        # command = ""
+        # confirmation = "no"
 
-        try:
-            if "shutdown" in voice_data:
-                # shudown command sequence for 15 seconds
-                command = "shutdown /s /t 15"
+        # try:
+        #     if "shutdown" in voice_data:
+        #         # shudown command sequence for 15 seconds
+        #         command = "shutdown /s /t 15"
 
-            elif is_match(voice_data, ["restart", "reboot"]):
-                # restart command sequence for 15 seconds
-                command = "shutdown /r /t 15"
+        #     elif is_match(voice_data, ["restart", "reboot"]):
+        #         # restart command sequence for 15 seconds
+        #         command = "shutdown /r /t 15"
 
-            if command:
-                # confirmation = self.tts.listen_to_audio(f"\033[1;33;41m Are you sure to \"{'Restart' if '/r' in command else 'Shutdown'}\" your computer? (yes/no): ")
+        #     if command:
+        #         # confirmation = self.tts.listen_to_audio(f"\033[1;33;41m Are you sure to \"{'Restart' if '/r' in command else 'Shutdown'}\" your computer? (yes/no): ")
 
-                # execute the shutdown/restart command if confirmed by user
-                # if "yes" in confirmation.lower().strip():
-                os.system(command)
-                return f"Ok! {'Reboot' if '/r' in command else 'Shutdown'} sequence will commence in approximately 10 seconds..."
-                # return f"{'Reboot' if '/r' in command else 'Shutdown'} is canceled."
+        #         # execute the shutdown/restart command if confirmed by user
+        #         # if "yes" in confirmation.lower().strip():
+        #         os.system(command)
+        #         return f"Ok! {'Reboot' if '/r' in command else 'Shutdown'} sequence will commence in approximately 10 seconds..."
+        #         # return f"{'Reboot' if '/r' in command else 'Shutdown'} is canceled."
 
-        except Exception:
-            self.Log("Shutdown/Restart System Skill Error.")
+        # except Exception:
+        self.Log("Shutdown/Restart System Skill Error.")
 
         return ""
 
@@ -919,70 +956,79 @@ class SkillsLibrary(Configuration):
         response = ""
 
         try:
-            import sys
-            sys.path.append(self.UTILS_DIR)
-            from musicplayer import MusicPlayer
-            mp = MusicPlayer()
-
-            # change the directory to location of batch file to execute
-            os.chdir(self.UTILS_DIR)
-
             music_word_found = True if is_match(
                 voice_data, ["music", "songs"]) else False
             meta_data = voice_data.lower().replace("&", "and").replace(
                 "music", "").replace("songs", "").strip()
 
-            if meta_data == "":
-                # mode = "compact"
-                alternate_responses = self._get_commands(
-                    "acknowledge response")
-                response = f"{choice(alternate_responses)} Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
-                songWasFound = True
+            alternate_responses = self._get_commands("acknowledge response")
 
-            elif meta_data and "by" in meta_data.split(" ") and meta_data.find("by") > 0 and len(meta_data.split()) >= 3:
-                option = '"play by"'
+            if self.platform == "Darwin":
+                try:
+                    subprocess.run(
+                        ["osascript", "-e", f'tell application "Music" to play (every track whose artist is "{voice_data}")'])
 
-                by_idx = meta_data.find("by")
-                title = meta_data[:(by_idx - 1)].strip().capitalize()
-                artist = meta_data[(by_idx + 3):].strip().capitalize()
+                    response = f"{choice(alternate_responses)} Playing all songs by {voice_data}..."
+                except Exception as ex:
+                    response = f"I couldn't find \"{voice_data}\" in your music. {ex}"
+            else:
+                import sys
+                sys.path.append(self.UTILS_DIR)
+                from musicplayer import MusicPlayer
+                mp = MusicPlayer()
 
-                if mp.search_song_by(title, artist, title):
+                # change the directory to location of batch file to execute
+                os.chdir(self.UTILS_DIR)
+
+                if meta_data == "":
+                    # mode = "compact"
+                    response = f"{choice(alternate_responses)} Playing all songs{', shuffled' if shuffle == 'True' else '...'}"
                     songWasFound = True
-                    artist = f'"{artist}"'
-                    genre = title
 
-                    alternate_responses = self._get_commands(
-                        "acknowledge response")
-                    response = f"{choice(alternate_responses)} Playing \"{title}\" by {artist}..."
-                else:
-                    response = f"I couldn't find \"{title}\" in your music."
+                elif meta_data and "by" in meta_data.split(" ") and meta_data.find("by") > 0 and len(meta_data.split()) >= 3:
+                    option = '"play by"'
 
-            elif meta_data:
-                option = '"play by"'
-                title = f'"{meta_data}"'
-                artist = f'"{meta_data}"'
-                genre = f'"{meta_data}"'
+                    by_idx = meta_data.find("by")
+                    title = meta_data[:(by_idx - 1)].strip().capitalize()
+                    artist = meta_data[(by_idx + 3):].strip().capitalize()
 
-                mp.title = meta_data
-                mp.artist = meta_data
-                mp.genre = meta_data
+                    if mp.search_song_by(title, artist, title):
+                        songWasFound = True
+                        artist = f'"{artist}"'
+                        genre = title
 
-                if mp.search_song_by(meta_data, meta_data, meta_data):
-                    songWasFound = True
-                    alternate_responses = self._get_commands(
-                        "acknowledge response")
-                    response = f"{choice(alternate_responses)} Now playing \"{meta_data.capitalize()}\" {'music...' if music_word_found else '...'}"
-                else:
-                    response = f"I couldn't find \"{meta_data.capitalize()}\" in your music."
+                        alternate_responses = self._get_commands(
+                            "acknowledge response")
+                        response = f"{choice(alternate_responses)} Playing \"{title}\" by {artist}..."
+                    else:
+                        response = f"I couldn't find \"{title}\" in your music."
 
-            if songWasFound:
-                mp.player_status("close")
-                # batch file to play some music in new window
-                os.system(
-                    f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
+                elif meta_data:
+                    option = '"play by"'
+                    title = f'"{meta_data}"'
+                    artist = f'"{meta_data}"'
+                    genre = f'"{meta_data}"'
 
-            # get back to virtual assistant directory
-            os.chdir(self.ASSISTANT_DIR)
+                    mp.title = meta_data
+                    mp.artist = meta_data
+                    mp.genre = meta_data
+
+                    if mp.search_song_by(meta_data, meta_data, meta_data):
+                        songWasFound = True
+                        alternate_responses = self._get_commands(
+                            "acknowledge response")
+                        response = f"{choice(alternate_responses)} Now playing \"{meta_data.capitalize()}\" {'music...' if music_word_found else '...'}"
+                    # else:
+                    #     response = f"I couldn't find \"{meta_data.capitalize()}\" in your music."
+
+                if songWasFound:
+                    mp.player_status("close")
+                    # batch file to play some music in new window
+                    os.system(
+                        f'start cmd /k "play_some_music.bat {option} {shuffle} {mode} {title} {artist} {genre}"')
+
+                # get back to virtual assistant directory
+                os.chdir(self.ASSISTANT_DIR)
 
             return response
 
@@ -992,17 +1038,24 @@ class SkillsLibrary(Configuration):
     def music_volume(self, volume):
 
         try:
-            import sys
-            sys.path.append(self.UTILS_DIR)
-            from musicplayer import MusicPlayer
-            mp = MusicPlayer()
-            # change the directory to location of batch file to execute
-            os.chdir(self.UTILS_DIR)
+            if self.platform == "Darwin":
+                # subprocess.run(
+                #     ["osascript", "-e", f'tell application "Music" to set sound volume to {volume}'])
+                subprocess.run(
+                    ["osascript", "-e", f'tell application "Spotify" to set sound volume to {volume}'])
+            else:
 
-            mp.music_player_volume(volume)
+                import sys
+                sys.path.append(self.UTILS_DIR)
+                from musicplayer import MusicPlayer
+                mp = MusicPlayer()
+                # change the directory to location of batch file to execute
+                os.chdir(self.UTILS_DIR)
 
-            # get back to virtual assistant directory
-            os.chdir(self.ASSISTANT_DIR)
+                # mp.music_player_volume(volume)
+
+                # get back to virtual assistant directory
+                os.chdir(self.ASSISTANT_DIR)
 
         except Exception:
             self.Log("Music Volume Skill Error.")
@@ -1010,6 +1063,7 @@ class SkillsLibrary(Configuration):
     def music_setting(self, stat):
         response = ""
         try:
+            # TODO: implement for "Darwin" platform
             import sys
             sys.path.append(self.UTILS_DIR)
             from musicplayer import MusicPlayer
@@ -1042,14 +1096,13 @@ class SkillsLibrary(Configuration):
         return response
 
     def news_scraper(self):
-
         try:
             import sys
             sys.path.append(self.NEWS_DIR)
+            os.chdir(self.NEWS_DIR)
             from NewsScraper import NewsTicker
 
             # change the directory to location of batch file to execute
-            os.chdir(self.NEWS_DIR)
             news = NewsTicker()
 
             # execute daemon to fetch breaking news in background
@@ -1057,6 +1110,7 @@ class SkillsLibrary(Configuration):
             news.run_breaking_news_daemon()
 
             # get back to virtual assistant directory
+            sys.path.append(self.ASSISTANT_DIR)
             os.chdir(self.ASSISTANT_DIR)
 
             return news
@@ -1066,21 +1120,11 @@ class SkillsLibrary(Configuration):
             return None
 
     def toast_notification(self, title, message, duration=600):
-
         try:
-            import sys
-            sys.path.append(self.UTILS_DIR)
-            from send_toast import ToastMessage
-            notification = ToastMessage()
-            # change the directory to location of batch file to execute
-            os.chdir(self.UTILS_DIR)
-
-            notification.send_toast(title, message, duration=duration)
-            self.tts.respond_to_bot(f"‼️ {title} ‼️")
-            self.tts.respond_to_bot(message)
-
-            # get back to virtual assistant directory
-            os.chdir(self.ASSISTANT_DIR)
+            self.tts.respond_to_bot(f"‼️ {title} ‼️ \n{message}")
+            if self.platform == "Darwin":
+                subprocess.run(
+                    ['osascript', '-e', f'display notification "{message}" with title "{title}"'])
 
         except Exception:
             self.Log("Toast Notification Skill Error.")
@@ -1111,7 +1155,11 @@ class SkillsLibrary(Configuration):
             self.Log("Fun Holiday Skill Error.")
 
     def system_volume(self, vol):
-        # get back to virtual assistant directory after command execution
-        os.chdir(self.ASSISTANT_DIR)
-        # execute batch file that will open Newsfeed on a new console window
-        os.system(f'start cmd /k "set_system_volume.bat {vol}"')
+        if self.platform == "Darwin":
+            subprocess.run(
+                ["osascript", "-e", f"set volume output volume {vol}"])
+        else:
+            # get back to virtual assistant directory after command execution
+            os.chdir(self.ASSISTANT_DIR)
+            # execute batch file that will open Newsfeed on a new console window
+            os.system(f'start cmd /k "set_system_volume.bat {vol}"')

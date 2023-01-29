@@ -31,4 +31,6 @@ class Configuration:
         self.TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID")
         self.TELEGRAM_URL = config("TELEGRAM_URL")
 
+        self.BREAKING_NEWS_TIMEOUT = config("BREAKING_NEWS_TIMEOUT")
+
         self.OPENAI_TOKEN = config("OPENAI_TOKEN")

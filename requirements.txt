@@ -12,5 +12,8 @@ python-vlc
 feedparser
 tweepy
 python-dateutil
+pyAudio
 keyboard
 plyer
+pygments
+pyobjus

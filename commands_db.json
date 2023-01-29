@@ -1,622 +1,581 @@
 {
-    "command_db": [
-        {
-            "name": "start_greeting",
-            "commands": [
-                "Hi, <boss_name> how can I help you?",
-                "Hi, I'm <assistant_name>, how can I help you?",
-                "What can I help you <boss_name>.",
-                "What's up!",
-                "My systems are online and fully operational.",
-                "My computing software is fully operational and ready for work."
-            ]
-        },
-        {
-            "name": "wakeup",
-            "commands": [
-                "hey <assistant_name>",
-                "ok <assistant_name>"
-            ]
-        },
-        {
-            "name": "wakeup_responses",
-            "commands": [
-                "I'm listening...",
-                "I'm here...",
-                "How can I help you <boss_name>?"
-            ]
-        },
-        {
-            "name": "mute",
-            "commands": [
-                "<assistant_name> stop listening",
-                "stop listening <assistant_name>",
-                "<assistant_name> stop",
-                "stop <assistant_name>",
-                "shut up <assistant_name>",
-                "<assistant_name> quiet please",
-                "quiet please <assistant_name>",
-                "<assistant_name> shut up",
-                "don't listen <assistant_name>",
-                "<assistant_name> don't listen",
-                "go to sleep <assistant_name>",
-                "<assistant_name> go to sleep",
-                "nevermind <assistant_name>"
-            ]
-        },
-        {
-            "name": "unknown_responses",
-            "commands": [
-                "I'm not sure I understand.",
-                "Hmmm... I didn't understand.",
-                "Pardon me, what's that again?",
-                "Can you restate the question?",
-                "I don't understand, what can I help you?",
-                "Is there something else I can help you with?",
-                "Sorry, I didn't get that. Can you restate the question?",
-                "Sorry, I didn't catch that. Could you say it again?",
-                "Hmmm... I don't have an answer for that. Is there something else I can help you with?"
-            ]
-        },
-        {
-            "name": "greeting",
-            "commands": [
-                "what is up",
-                "what's up",
-                "how are you",
-                "hey",
-                "hi",
-                "hello",
-                "that is good",
-                "that's good",
-                "I am fine thank you",
-                "I am fine thanks",
-                "I'm fine thank you",
-                "I'm fine thanks",
-                "I am good thank you",
-                "I am good thanks",
-                "I'm good thank you",
-                "I'm good thanks"
-            ]
-        },
-        {
-            "name": "greeting_responses",
-            "commands": [
-                "Very well, thanks",
-                "I'm fine",
-                "I'm great!",
-                "Hi",
-                "Hello"
-            ]
-        },
-        {
-            "name": "terminate",
-            "commands": [
-                "turn off <assistant_name>",
-                "<assistant_name> turn off",
-                "restart <assistant_name>",
-                "<assistant_name> restart",
-                "deactivate <assistant_name>",
-                "<assistant_name> deactivate",
-                "goodbye <assistant_name>",
-                "<assistant_name> goodbye"
-            ]
-        },
-        {
-            "name": "night mode",
-            "commands": [
-                "good night <assistant_name>",
-                "night mode",
-                "goodnight",
-                "good night"
-            ]
-        },
-        {
-            "name": "day mode",
-            "commands": [
-                "good morning <assistant_name>",
-                "day mode",
-                "goodmorning",
-                "good morning"
-            ]
-        },
-        {
-            "name": "terminate_response",
-            "commands": [
-                "Happy to help. Goodbye...",
-                "Talk to you soon, goodbye...",
-                "Nice talking with you, goodbye!",
-                "It's been a pleasure. Goodbye!",
-                "Ok, talk to you soon..."
-            ]
-        },
-        {
-            "name": "ask_assistant_name",
-            "commands": [
-                "what is your name",
-                "what's your name",
-                "who are you"
-            ]
-        },
-        {
-            "name": "ask_assistant_name_response",
-            "commands": [
-                "My name is <assistant_name>",
-                "My name is <assistant_name>. I'm here to help.",
-                "My name is <assistant_name>. That's my whole name.",
-                "My name is <assistant_name>, but you knew that already.",
-                "I'm <assistant_name>",
-                "I'm <assistant_name>. Pleased to meet you.",
-                "I'm <assistant_name>. But enough about me... how can I help you?"
-            ]
-        },
-        {
-            "name": "confirmation",
-            "commands": [
-                "thank you <assistant_name>",
-                "thanks <assistant_name>",
-                "thanks a lot",
-                "thank you very much",
-                "ok <assistant_name>",
-                "ok",
-                "thank you",
-                "thanks",
-                "Alright"
-            ]
-        },
-        {
-            "name": "acknowledge response",
-            "commands": [
-                "Sure thing!",
-                "Sure!",
-                "Alright!",
-                "Ok! <boss_name>...",
-                "Right away <boss_name>..."
-            ]
-        },
-        {
-            "name": "confirmation_responses",
-            "commands": [
-                "Ok",
-                "Alright",
-                "That's great!",
-                "Happy to help!",
-                "Your appreciation is noted.",
-                "Let me know if there's something else I can help you with."
-            ]
-        },
-        {
-            "name": "wallpaper",
-            "commands": [
-                "find a new wallpaper",
-                "find a wallpaper",
-                "find new wallpaper",
-                "change my wallpaper",
-                "change the wallpaper",
-                "change to new wallpaper",
-                "change new wallpaper",
-                "change wallpaper"
-            ]
-        },
-        {
-            "name": "create_project",
-            "commands": [
-                "create a new",
-                "create new",
-                "create a new project",
-                "create new project",
-                "create project",
-                "initiate a new",
-                "initiate new",
-                "initiate a new project",
-                "initiate a project",
-                "initiate project",
-                "start new",
-                "start a new",
-                "start a new project",
-                "start a project",
-                "start project"
-            ]
-        },
-        {
-            "name": "play_music",
-            "commands": [
-                "play something by",
-                "play something",
-                "play some music by",
-                "play some music",
-                "play some songs by",
-                "play some songs",
-                "play songs by",
-                "play songs",
-                "play all songs",
-                "play some",
-                "play music by"
-            ]
-        },
-        {
-            "name": "control_music",
-            "commands": [
-                "play next",
-                "skip music",
-                "skip song",
-                "next music",
-                "next song",
-                "close music",
-                "stop music",
-                "stop playing",
-                "pause music",
-                "pause song",
-                "play music",
-                "play song",
-                "stop",
-                "pause",
-                "next",
-                "skip"
-            ]
-        },
-        {
-            "name": "system volume",
-            "commands": [
-                "set volume to",
-                "set volume by",
-                "set the volume to",
-                "set the volume by",
-                "increase volume",
-                "increase the volume",
-                "increase volume by",
-                "increase volume to",
-                "increase the volume by",
-                "decrease volume",
-                "decrease the volume",
-                "decrease the volume to",
-                "decrease volume by",
-                "decrease volume to",
-                "decrease the volume by",
-                "decrease the volume to",
-                "turn up volume",
-                "turn up the volume",
-                "turn down volume",
-                "turn down the volume",
-                "volume up",
-                "volume down",
-                "volume by",
-                "volume to"
-            ]
-        },
-        {
-            "name": "brightness",
-            "commands": [
-                "set the brightness to",
-                "set brightness to",
-                "set the brightness by",
-                "set brightness by",
-                "dim the screen to",
-                "bring up the brightness to",
-                "bring up brightness to",
-                "bring brightness to",
-                "turn up the brightness to",
-                "turn up brightness to",
-                "turn up brightness",
-                "change brightness to",
-                "change brightness",
-                "increase brightness by",
-                "decrease brightness by",
-                "brightness by",
-                "brightness to",
-                "brightness",
-                "make the screen bright",
-                "make the screen dark"
-            ]
-        },
-        {
-            "name": "math_calculation",
-            "commands": [
-                "+",
-                "plus",
-                "add",
-                "-",
-                "minus",
-                "subtract",
-                "x",
-                "times",
-                "multiplied by",
-                "multiply by",
-                "multiply",
-                "/",
-                "divided by",
-                "divided to",
-                "divide with",
-                "divide by",
-                "divide",
-                "square root",
-                "cube root",
-                "%",
-                "percentage",
-                "percent"
-            ]
-        },
-        {
-            "name": "passwords",
-            "commands": [
-                "show my passwords",
-                "what is my <app_name> password"
-            ]
-        },
-        {
-            "name": "my_photos",
-            "commands": [
-                "show me my photos",
-                "show me my",
-                "find my photos",
-                "my photos"
-            ]
-        },
-        {
-            "name": "wifi",
-            "commands": [
-                "turn on the wi-fi",
-                "turn on wi-fi",
-                "turn off the wi-fi",
-                "turn off wi-fi",
-                "turn wi-fi on",
-                "turn wi-fi off",
-                "enable the wi-if",
-                "disable the wi-fi",
-                "enable wi-fi",
-                "disable wi-fi",
-                "close wi-fi"
-            ]
-        },
-        {
-            "name": "system_shutdown_restart",
-            "commands": [
-                "shutdown system",
-                "shutdown laptop",
-                "system shutdown",
-                "shutdown computer",
-                "restart system",
-                "reboot system",
-                "reboot laptop",
-                "system restart",
-                "reboot computer",
-                "restart laptop",
-                "restart computer"
-            ]
-        },
-        {
-            "name": "time",
-            "commands": [
-                "what time is it",
-                "what's the time",
-                "what is the time"
-            ]
-        },
-        {
-            "name": "open_apps",
-            "commands": [
-                "open",
-                "run",
-                "launch"
-            ]
-        },
-        {
-            "name": "find_file",
-            "commands": [
-                "find files of",
-                "find file of",
-                "files for",
-                "files",
-                "documents"
-            ]
-        },
-        {
-            "name": "news",
-            "commands": [
-                "happening today",
-                "any news",
-                "on news",
-                "in news",
-                "recent news",
-                "breaking news",
-                "top stories",
-                "top news",
-                "the news",
-                "the news today",
-                "what is latest",
-                "what's latest",
-                "what's the latest",
-                "what is the latest",
-                "latest news",
-                "flash news",
-                "newsflash",
-                "news flash",
-                "news report",
-                "flash briefing",
-                "news briefing"
-            ]
-        },
-        {
-            "name": "weather",
-            "commands": [
-                "weather forecast",
-                "forecast weather",
-                "weather today",
-                "weather like",
-                "forecast weather",
-                "forecast today",
-                "forecast for today",
-                "the weather",
-                "weather in",
-                "weather on",
-                "weather for",
-                "temperature",
-                "rain",
-                "precipitation"
-            ]
-        },
-        {
-            "name": "wikipedia",
-            "commands": [
-                "what is the",
-                "who is the",
-                "what's the",
-                "who's the",
-                "what is",
-                "what's",
-                "what are the",
-                "what are",
-                "define",
-                "who is",
-                "who's",
-                "do you know",
-                "tell me about the",
-                "tell me facts about",
-                "tell me a fact about",
-                "tell me more about",
-                "tell me about"
-            ]
-        },
-        {
-            "name": "youtube",
-            "commands": [
-                "youtube video of",
-                "youtube videos of",
-                "youtube video",
-                "youtube videos",
-                "find youtube",
-                "videos of",
-                "video of",
-                "videos about",
-                "video about",
-                "play a song on youtube"
-            ]
-        },
-        {
-            "name": "google_maps",
-            "commands": [
-                "where is",
-                "where's",
-                "show me the map of",
-                "show me map of",
-                "show me a map of",
-                "map of",
-                "location of the",
-                "location of",
-                "location"
-            ]
-        },
-        {
-            "name": "google",
-            "commands": [
-                "find",
-                "look for",
-                "search for",
-                "search the web for",
-                "search into google",
-                "search google for",
-                "search google",
-                "search",
-                "google the",
-                "google for",
-                "google about",
-                "find pictures of",
-                "find images of",
-                "what is the",
-                "who is the",
-                "what's the",
-                "who's the",
-                "what is",
-                "what's",
-                "what are the",
-                "what are",
-                "what",
-                "is it",
-                "define",
-                "who is",
-                "who's",
-                "where is the",
-                "where's the",
-                "where is",
-                "where's",
-                "when is the",
-                "when's the",
-                "when is",
-                "when's",
-                "when does",
-                "when was",
-                "was that",
-                "where there any",
-                "how to",
-                "how is",
-                "how many",
-                "how do you",
-                "how do",
-                "how much",
-                "how",
-                "does",
-                "show me the",
-                "show me"
-            ]
-        },
-        {
-            "name": "prepositions",
-            "commands": [
-                "of",
-                "with",
-                "at",
-                "from",
-                "into",
-                "during",
-                "including",
-                "until",
-                "against",
-                "among",
-                "throughout",
-                "despite",
-                "towards",
-                "regards",
-                "upon",
-                "concerning",
-                "to",
-                "in",
-                "for",
-                "on",
-                "by",
-                "about"
-            ]
-        },
-        {
-            "name": "parts of speech",
-            "commands": [
-                "noun",
-                "pronoun",
-                "verb",
-                "adjective",
-                "adverb",
-                "preposition",
-                "conjunction",
-                "interjection"
-            ]
-        },
-        {
-            "name": "time and day",
-            "commands": [
-                "today",
-                "tomorrow",
-                "morning",
-                "afternoon",
-                "evening",
-                "night",
-                "noon",
-                "monday",
-                "tuesday",
-                "wednesday",
-                "thursday",
-                "friday",
-                "saturday",
-                "sunday"
-            ]
-        }
-    ]
+	"command_db": [
+		{
+			"name": "start_greeting",
+			"commands": [
+				"Hi, <boss_name> how can I help you?",
+				"Hi, I'm <assistant_name>, how can I help you?",
+				"What can I help you <boss_name>.",
+				"What's up!",
+				"My systems are online and fully operational.",
+				"My computing software is fully operational and ready for work."
+			]
+		},
+		{
+			"name": "wakeup",
+			"commands": ["hey <assistant_name>", "ok <assistant_name>"]
+		},
+		{
+			"name": "wakeup_responses",
+			"commands": ["I'm listening...", "I'm here...", "How can I help you <boss_name>?"]
+		},
+		{
+			"name": "mute",
+			"commands": [
+				"<assistant_name> stop listening",
+				"stop listening <assistant_name>",
+				"<assistant_name> stop",
+				"stop <assistant_name>",
+				"shut up <assistant_name>",
+				"<assistant_name> quiet please",
+				"quiet please <assistant_name>",
+				"<assistant_name> shut up",
+				"don't listen <assistant_name>",
+				"<assistant_name> don't listen",
+				"go to sleep <assistant_name>",
+				"<assistant_name> go to sleep",
+				"nevermind <assistant_name>"
+			]
+		},
+		{
+			"name": "unknown_responses",
+			"commands": [
+				"I'm not sure I understand.",
+				"Hmmm... I didn't understand.",
+				"Pardon me, what's that again?",
+				"Can you restate the question?",
+				"I don't understand, what can I help you?",
+				"Is there something else I can help you with?",
+				"Sorry, I didn't get that. Can you restate the question?",
+				"Sorry, I didn't catch that. Could you say it again?",
+				"Hmmm... I don't have an answer for that. Is there something else I can help you with?"
+			]
+		},
+		{
+			"name": "greeting",
+			"commands": [
+				"what is up",
+				"what's up",
+				"how are you",
+				"hey",
+				"hi",
+				"hello",
+				"that is good",
+				"that's good",
+				"I am fine thank you",
+				"I am fine thanks",
+				"I'm fine thank you",
+				"I'm fine thanks",
+				"I am good thank you",
+				"I am good thanks",
+				"I'm good thank you",
+				"I'm good thanks"
+			]
+		},
+		{
+			"name": "greeting_responses",
+			"commands": ["Very well, thanks", "I'm fine", "I'm great!", "Hi", "Hello"]
+		},
+		{
+			"name": "terminate",
+			"commands": [
+				"turn off <assistant_name>",
+				"<assistant_name> turn off",
+				"deactivate <assistant_name>",
+				"<assistant_name> deactivate",
+				"goodbye <assistant_name>",
+				"<assistant_name> goodbye",
+				"<assistant_name> restart"
+			]
+		},
+		{
+			"name": "night mode",
+			"commands": ["good night <assistant_name>", "night mode", "goodnight", "good night"]
+		},
+		{
+			"name": "day mode",
+			"commands": [
+				"good morning <assistant_name>",
+				"day mode",
+				"goodmorning",
+				"good morning",
+				"good day"
+			]
+		},
+		{
+			"name": "terminate_response",
+			"commands": [
+				"Happy to help. Goodbye...",
+				"Talk to you soon, goodbye...",
+				"Nice talking with you, goodbye!",
+				"It's been a pleasure. Goodbye!",
+				"Ok, talk to you soon..."
+			]
+		},
+		{
+			"name": "ask_assistant_name",
+			"commands": ["what is your name", "what's your name", "who are you"]
+		},
+		{
+			"name": "ask_assistant_name_response",
+			"commands": [
+				"My name is <assistant_name>",
+				"My name is <assistant_name>. I'm here to help.",
+				"My name is <assistant_name>. That's my whole name.",
+				"My name is <assistant_name>, but you knew that already.",
+				"I'm <assistant_name>",
+				"I'm <assistant_name>. Pleased to meet you.",
+				"I'm <assistant_name>. But enough about me... how can I help you?"
+			]
+		},
+		{
+			"name": "confirmation",
+			"commands": [
+				"thank you <assistant_name>",
+				"thanks <assistant_name>",
+				"thanks a lot",
+				"thank you very much",
+				"ok <assistant_name>",
+				"ok",
+				"thank you",
+				"that's all",
+				"that's all thanks",
+				"thanks",
+				"Alright"
+			]
+		},
+		{
+			"name": "acknowledge response",
+			"commands": [
+				"Sure thing!",
+				"Sure!",
+				"Alright!",
+				"Ok! <boss_name>...",
+				"Right away <boss_name>..."
+			]
+		},
+		{
+			"name": "confirmation_responses",
+			"commands": [
+				"Ok",
+				"Alright",
+				"That's great!",
+				"Happy to help!",
+				"Your appreciation is noted.",
+				"Let me know if there's something else I can help you with."
+			]
+		},
+		{
+			"name": "wallpaper",
+			"commands": [
+				"find a new wallpaper",
+				"find a wallpaper",
+				"find new wallpaper",
+				"change my wallpaper",
+				"change the wallpaper",
+				"change to new wallpaper",
+				"change new wallpaper",
+				"change wallpaper"
+			]
+		},
+		{
+			"name": "create_project",
+			"commands": [
+				"create a new",
+				"create new",
+				"create a new project",
+				"create new project",
+				"create project",
+				"initiate a new",
+				"initiate new",
+				"initiate a new project",
+				"initiate a project",
+				"initiate project",
+				"start new",
+				"start a new",
+				"start a new project",
+				"start a project",
+				"start project"
+			]
+		},
+		{
+			"name": "play_music",
+			"commands": [
+				"play something by",
+				"play something",
+				"play some music by",
+				"play some music",
+				"play some songs by",
+				"play some songs",
+				"play songs by",
+				"play songs",
+				"play all songs",
+				"play some",
+				"play music by"
+			]
+		},
+		{
+			"name": "control_music",
+			"commands": [
+				"play next",
+				"skip music",
+				"skip song",
+				"next music",
+				"next song",
+				"close music",
+				"stop music",
+				"stop playing",
+				"pause music",
+				"pause song",
+				"play music",
+				"play song",
+				"stop",
+				"pause",
+				"next",
+				"skip"
+			]
+		},
+		{
+			"name": "system volume",
+			"commands": [
+				"set volume to",
+				"set volume by",
+				"set the volume to",
+				"set the volume by",
+				"increase volume",
+				"increase the volume",
+				"increase volume by",
+				"increase volume to",
+				"increase the volume by",
+				"decrease volume",
+				"decrease the volume",
+				"decrease the volume to",
+				"decrease volume by",
+				"decrease volume to",
+				"decrease the volume by",
+				"decrease the volume to",
+				"turn up volume",
+				"turn up the volume",
+				"turn down volume",
+				"turn down the volume",
+				"volume up",
+				"volume down",
+				"volume by",
+				"volume to"
+			]
+		},
+		{
+			"name": "brightness",
+			"commands": [
+				"set the brightness to",
+				"set brightness to",
+				"set the brightness by",
+				"set brightness by",
+				"dim the screen to",
+				"bring up the brightness to",
+				"bring up brightness to",
+				"bring brightness to",
+				"turn up the brightness to",
+				"turn up brightness to",
+				"turn up brightness",
+				"change brightness to",
+				"change brightness",
+				"increase brightness by",
+				"decrease brightness by",
+				"brightness by",
+				"brightness to",
+				"brightness",
+				"make the screen bright",
+				"make the screen dark"
+			]
+		},
+		{
+			"name": "math_calculation",
+			"commands": [
+				"+",
+				"plus",
+				"add",
+				"-",
+				"minus",
+				"subtract",
+				"x",
+				"times",
+				"multiplied by",
+				"multiply by",
+				"multiply",
+				"/",
+				"divided by",
+				"divided to",
+				"divide with",
+				"divide by",
+				"divide",
+				"square root",
+				"cube root",
+				"%",
+				"percentage",
+				"percent"
+			]
+		},
+		{
+			"name": "passwords",
+			"commands": ["show my passwords", "what is my <app_name> password"]
+		},
+		{
+			"name": "my_photos",
+			"commands": ["show me my photos", "show me my", "find my photos", "my photos"]
+		},
+		{
+			"name": "wifi",
+			"commands": [
+				"turn on the wi-fi",
+				"turn on wi-fi",
+				"turn off the wi-fi",
+				"turn off wi-fi",
+				"turn wi-fi on",
+				"turn wi-fi off",
+				"enable the wi-if",
+				"disable the wi-fi",
+				"enable wi-fi",
+				"disable wi-fi",
+				"close wi-fi"
+			]
+		},
+		{
+			"name": "system_shutdown_restart",
+			"commands": [
+				"shutdown system",
+				"shutdown laptop",
+				"system shutdown",
+				"shutdown computer",
+				"restart system",
+				"reboot system",
+				"reboot laptop",
+				"system restart",
+				"reboot computer",
+				"restart laptop",
+				"restart computer"
+			]
+		},
+		{
+			"name": "time",
+			"commands": ["what time is it", "what's the time", "what is the time"]
+		},
+		{
+			"name": "open_apps",
+			"commands": ["open", "run", "launch"]
+		},
+		{
+			"name": "find_file",
+			"commands": ["find files of", "find file of", "files for", "files", "documents"]
+		},
+		{
+			"name": "news",
+			"commands": [
+				"happening today",
+				"any news",
+				"on news",
+				"in news",
+				"recent news",
+				"breaking news",
+				"top stories",
+				"top news",
+				"the news",
+				"the news today",
+				"what is latest",
+				"what's latest",
+				"what's the latest",
+				"what is the latest",
+				"latest news",
+				"flash news",
+				"newsflash",
+				"news flash",
+				"news report",
+				"news on",
+				"news about",
+				"news regarding",
+				"flash briefing",
+				"news briefing"
+			]
+		},
+		{
+			"name": "weather",
+			"commands": [
+				"weather forecast",
+				"forecast weather",
+				"weather today",
+				"weather like",
+				"forecast weather",
+				"forecast today",
+				"forecast for today",
+				"the weather",
+				"weather in",
+				"weather on",
+				"weather for",
+				"temperature",
+				"rain",
+				"precipitation"
+			]
+		},
+		{
+			"name": "wikipedia",
+			"commands": [
+				"what is the",
+				"who is the",
+				"what's the",
+				"who's the",
+				"what is",
+				"what's",
+				"what are the",
+				"what are",
+				"define",
+				"who is",
+				"who's",
+				"do you know",
+				"tell me about the",
+				"tell me facts about",
+				"tell me a fact about",
+				"tell me more about",
+				"tell me about"
+			]
+		},
+		{
+			"name": "youtube",
+			"commands": [
+				"youtube video of",
+				"youtube videos of",
+				"youtube video",
+				"youtube videos",
+				"find youtube",
+				"videos of",
+				"video of",
+				"videos about",
+				"video about",
+				"play a song on youtube"
+			]
+		},
+		{
+			"name": "google_maps",
+			"commands": [
+				"where is",
+				"where's",
+				"show me the map of",
+				"show me map of",
+				"show me a map of",
+				"map of",
+				"location of the",
+				"location of"
+			]
+		},
+		{
+			"name": "google",
+			"commands": [
+				"find",
+				"look for",
+				"search for",
+				"search the web for",
+				"search into google",
+				"search google for",
+				"search google",
+				"search",
+				"google the",
+				"google for",
+				"google about",
+				"what is the",
+				"who is the",
+				"what's the",
+				"who's the",
+				"what is",
+				"what's",
+				"what are the",
+				"what are",
+				"what",
+				"is it",
+				"define",
+				"who is",
+				"who's",
+				"where is the",
+				"where's the",
+				"where is",
+				"where's",
+				"when is the",
+				"when's the",
+				"when is",
+				"when's",
+				"when does",
+				"when was",
+				"was that",
+				"where there any",
+				"how to",
+				"how is",
+				"how many",
+				"how do you",
+				"how do",
+				"how much",
+				"how",
+				"does",
+				"show me the",
+				"show me"
+			]
+		},
+		{
+			"name": "prepositions",
+			"commands": [
+				"of",
+				"with",
+				"at",
+				"from",
+				"into",
+				"during",
+				"including",
+				"until",
+				"against",
+				"among",
+				"throughout",
+				"despite",
+				"towards",
+				"regards",
+				"regarding",
+				"upon",
+				"concerning",
+				"to",
+				"in",
+				"for",
+				"on",
+				"by",
+				"about"
+			]
+		},
+		{
+			"name": "parts of speech",
+			"commands": [
+				"noun",
+				"pronoun",
+				"verb",
+				"adjective",
+				"adverb",
+				"preposition",
+				"conjunction",
+				"interjection"
+			]
+		},
+		{
+			"name": "time and day",
+			"commands": [
+				"today",
+				"tomorrow",
+				"morning",
+				"afternoon",
+				"evening",
+				"night",
+				"noon",
+				"monday",
+				"tuesday",
+				"wednesday",
+				"thursday",
+				"friday",
+				"saturday",
+				"sunday"
+			]
+		}
+	]
 }

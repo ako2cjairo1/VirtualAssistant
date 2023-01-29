@@ -10,12 +10,15 @@ import time
 import concurrent.futures as executor
 from random import choice
 from settings import Configuration
+import platform
 
 
 config = Configuration()
 
-logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR, format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
+logging.basicConfig(filename="VirtualAssistant.log", filemode="a", level=logging.ERROR,
+                    format="%(asctime)s | %(levelname)s | %(message)s", datefmt='%m-%d-%Y %I:%M:%S %p')
 logger = logging.getLogger(__name__)
+clearScreenCmd = "clear" if platform.uname().system == "Darwin" else "cls"
 
 
 def Log(exception_title="", ex_type=logging.ERROR):
@@ -59,17 +62,6 @@ def is_match(voice_data, keywords):
         return True
     return False
 
-# def is_match(voice_data, keywords):
-#     lowercase_keywords = [keyword.lower().strip() for keyword in keywords]
-
-#     if len(voice_data.split(" ")) > 1:
-#         if voice_data.lower() in " ".join(lowercase_keywords):
-#             return True
-#     else:
-#         if (any(map(lambda word: word == voice_data.lower(), lowercase_keywords))):
-#             return True
-#     return False
-
 
 def get_commands_from_json():
     try:
@@ -98,7 +90,8 @@ def clean_voice_data(voice_data, assistant_name):
 
 def is_match_and_bare(voice_data, commands, assistant_name):
     meta_data = extract_metadata(voice_data, commands)
-    clean_commands = [clean_voice_data(command, assistant_name) for command in commands]
+    clean_commands = [clean_voice_data(
+        command, assistant_name) for command in commands]
     return extract_metadata(meta_data, clean_commands) == ""
 
 
@@ -131,7 +124,7 @@ def extract_metadata(voice_data, commands):
     voice_data_list = meta_keyword.lower().split(" ")
 
     for command in (com.lower() for com in commands):
-        # remove the first occurance of command from voice data
+        # remove the first occurrence of command from voice data
         if command in voice_data_list:
             extracted = False
             extraction_success = True
@@ -142,7 +135,7 @@ def extract_metadata(voice_data, commands):
             return extract_metadata(meta_keyword, commands)
 
     if extracted and extraction_success:
-        # set to original voice_data if no meta_keword was found
+        # set to original voice_data if no meta_keyword was found
         # else, use meta_keyword and make it as one string
         return (voice_data.strip().lower() if not meta_keyword else meta_keyword.strip().lower())
 
@@ -163,20 +156,21 @@ def execute_map(func, *argv):
     return task
 
 
-def check_connection():
+def check_connection(app_name=""):
     retry_count = 0
 
     while True:
         try:
-            os.system("clear")
-            print("\n Checking internet connectivity...", end="")
+            os.system(clearScreenCmd)
+            print("\nChecking connectivity...", end="")
             retry_count += 1
             response = requests.get("http://google.com", timeout=300)
 
             # 200 means we got connection to web
             if response.status_code == 200:
-                print(" Connected!")
+                print(f" {app_name} is Connected!")
                 time.sleep(2)
+                os.system(clearScreenCmd)
                 # we got a connection, end the check process and proceed to remaining function
                 return True
 
@@ -189,26 +183,28 @@ def check_connection():
         except requests.ConnectionError:
             Log("Connection Error. You are not connected to the Internet.")
             if retry_count >= 3:
-                raise Exception("Connection error, maximum retries already exhausted...")
+                raise Exception(
+                    "Connection error, maximum retries already exhausted...")
             print("\n **Trying to re-connect...", end="")
             time.sleep(10)
             continue
         except requests.Timeout:
             Log("Timeout Error.")
             if retry_count >= 3:
-                raise Exception("Timeout Error, maximum retries already exhausted...")
+                raise Exception(
+                    "Timeout Error, maximum retries already exhausted...")
             print("\n **Trying to re-connect...", end="")
             time.sleep(5)
             continue
         except requests.RequestException:
             Log("General Error")
             if retry_count >= 3:
-                raise Exception("General Error, maximum retries already exhausted...")
+                raise Exception(
+                    "General Error, maximum retries already exhausted...")
             print("\n **Trying to re-connect...", end="")
             time.sleep(5)
             continue
 
         except Exception:
-            raise Exception("Exception occurred while checking for internet connection.")
-
-        time.sleep(1)
+            raise Exception(
+                "Exception occurred while checking for internet connection.")

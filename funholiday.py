@@ -8,10 +8,10 @@ def toast_notification(title, message, duration=600):
     try:
         import sys
         sys.path.append(settings.UTILS_DIR)
+        os.chdir(settings.UTILS_DIR)
         from send_toast import ToastMessage
         notification = ToastMessage()
         # change the directory to location of batch file to execute
-        os.chdir(settings.UTILS_DIR)
 
         notification.send_toast(title, message, duration=duration)
         # self.tts.respond_to_bot(f"‼️ {title} ‼️")
@@ -40,7 +40,7 @@ try:
         message = holiday["did you know"]
 
         print(message)
-        # toast_notification(title, message, duration=300)
+        toast_notification(title, message, duration=300)
         # print(f'Date: {holiday["date"]}\nTitle: {holiday["title"]}\nHeading: {holiday["heading"]}\nDid You Know? {holiday["did you know"]}\nURL: {holiday["source url"]}')
     else:
         print(result["message"])
