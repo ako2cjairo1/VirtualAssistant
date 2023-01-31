@@ -1150,6 +1150,7 @@ class SkillsLibrary(Configuration):
 
             # get back to virtual assistant directory
             os.chdir(self.ASSISTANT_DIR)
+            return "", "", ""
 
         except Exception:
             self.Log("Fun Holiday Skill Error.")

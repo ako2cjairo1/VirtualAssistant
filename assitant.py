@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 import time
 import logging
@@ -842,7 +843,11 @@ class VirtualAssistant(SpeechAssistant):
                 # send "Fun Holiday" notification every 10:00:30 AM
                 if self.notification and time_ticker == 0 and ((hr == 10) and mn == 00 and sec == 30):
                     title, message, _ = self.skills.fun_holiday()
-                    self.skills.toast_notification(title, message)
+                    title = f"⚠️ {title} 👍 "
+                    self.respond_to_bot(f"{title}\n{message}")
+                    if self.platform == "Darwin":
+                        subprocess.run(
+                            ['osascript', '-e', f'display notification "{message}" with title "{title}"'])
 
                 # Enable/Disable Notifications
                 if self.bot_command:
