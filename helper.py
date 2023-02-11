@@ -162,7 +162,7 @@ def check_connection(app_name=""):
     while True:
         try:
             os.system(clearScreenCmd)
-            print("\nChecking connectivity...", end="")
+            print("\nChecking web connection...", end="")
             retry_count += 1
             response = requests.get("http://google.com", timeout=300)
 
@@ -181,28 +181,28 @@ def check_connection(app_name=""):
                 retry_count = 0
 
         except requests.ConnectionError:
-            Log("Connection Error. You are not connected to the Internet.")
             if retry_count >= 3:
                 raise Exception(
                     "Connection error, maximum retries already exhausted...")
-            print("\n **Trying to re-connect...", end="")
-            time.sleep(10)
+            print(" Reconnecting...", end="")
+            Log("Internet Connection Error. You are not connected to the Internet.")
+            time.sleep(3)
             continue
         except requests.Timeout:
-            Log("Timeout Error.")
             if retry_count >= 3:
                 raise Exception(
                     "Timeout Error, maximum retries already exhausted...")
-            print("\n **Trying to re-connect...", end="")
-            time.sleep(5)
+            print(" Reconnecting...", end="")
+            Log("Internet Connection Timeout Error.")
+            time.sleep(3)
             continue
         except requests.RequestException:
-            Log("General Error")
             if retry_count >= 3:
                 raise Exception(
                     "General Error, maximum retries already exhausted...")
-            print("\n **Trying to re-connect...", end="")
-            time.sleep(5)
+            print(" Reconnecting...", end="")
+            Log("General Connection Error")
+            time.sleep(3)
             continue
 
         except Exception:

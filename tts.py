@@ -47,7 +47,9 @@ class SpeechAssistant(Configuration):
         self.speaker = None
         self.restart_request = False
         self.bot = None
-        self.bot_command = None
+        self.bot_command = ""
+        self.bot_isAlive = False
+        self.handle_bot_commands_event = None
         self.init_bot()
 
     def Log(self, exception_title="", ex_type=logging.ERROR):
@@ -62,17 +64,18 @@ class SpeechAssistant(Configuration):
             linecache.checkcache(fname)
             target = linecache.getline(fname, lineno, f.f_globals)
 
-            line_len = len(str(message)) + 10
+            # line_len = len(str(message)) + 10
             log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
-            log_data += ("-" * line_len)
+            log_data += ("-" * 40)  # ("-" * line_len)
 
         else:
             log_data = exception_title
 
         if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-            print("-" * 23)
+            print("\n")
+            print("-" * 40)
             print(f"{self.RED} {exception_title} {self.COLOR_RESET}")
-            print("-" * 23)
+            print("-" * 40)
 
         if ex_type == logging.DEBUG:
             logger.debug(log_data)
@@ -91,10 +94,11 @@ class SpeechAssistant(Configuration):
             logger.critical(log_data)
             raise Exception(exception_title)
 
-    def listen_to_audio(self, ask=None):
+    def listen(self, ask=None):
         voice_text = ""
         listen_timeout = 3
         phrase_limit = 10
+        source_isVoice = True
 
         if self.isSleeping():
             listen_timeout = 2
@@ -111,8 +115,9 @@ class SpeechAssistant(Configuration):
                 if ask:
                     self.speak(ask)
 
-                if self.bot_command and "/" not in self.bot_command:
+                if self.bot_command and ("--" not in self.bot_command):
                     voice_text = self.bot_command
+                    source_isVoice = False
 
                 else:
                     # listening
@@ -120,6 +125,7 @@ class SpeechAssistant(Configuration):
                         source, timeout=listen_timeout, phrase_time_limit=phrase_limit)
                     # try convert audio to text/string data
                     voice_text = self.recognizer.recognize_google(audio)
+                    source_isVoice = True
 
                 self.not_available_counter = 0
 
@@ -155,14 +161,14 @@ class SpeechAssistant(Configuration):
                     # bypass the timed out exception, (timeout=3, if total silence for 3 secs.)
                     self.Log("Exception occurred while analyzing audio.")
 
-        if not self.isSleeping() and voice_text.strip():
+        if not self.isSleeping() and voice_text.strip() and not self.restart_request:
             print(f"{self.BLACK_GREEN}{self.master_name}:{self.GREEN} {voice_text}")
 
-        if (not self.isSleeping() and not self.bot_command and voice_text.strip()):
-            self.respond_to_bot(f"(I hear you say): \"{voice_text}\"")
+        if source_isVoice and ((not self.isSleeping() and voice_text.strip()) or (self.isSleeping() and f"hey {self.assistant_name}".lower() in voice_text.lower())):
+            self.respond_to_bot(f"(I heard you say): \"{voice_text}\"")
 
         if voice_text.strip():
-            self.bot.last_command = None
+            self.bot.last_command = ""
 
         return voice_text.strip()
 
@@ -172,86 +178,80 @@ class SpeechAssistant(Configuration):
     def isSleeping(self):
         return self.sleep_assistant
 
+    def kill_tts_events(self):
+        if self.handle_bot_commands_event:
+            self.handle_bot_commands_event.set()
+            self.bot.bot_isAlive = False
+
     def init_bot(self):
         try:
+            self.kill_tts_events()
             self.bot = TelegramBot()
-            self.bot_command = None
+            self.handle_bot_commands_event = Event()
 
             if check_connection("Telegram bot"):
-                Thread(target=self.poll_bot, daemon=True).start()
+                Thread(target=self.bot.poll, daemon=True).start()
                 Thread(target=self.handle_bot_commands, daemon=True).start()
 
         except Exception:
+            pass
             self.Log("Error while initiating telegram bot.")
-            time.sleep(5)
-            self.restart_request = True
-            self.init_bot()
+            self.kill_tts_events()
+            # raise Exception("Error while initiating telegram bot.")
 
     def respond_to_bot(self, audio_string):
+        if self.restart_request:
+            return
         # don't send response to bot with audio_string containing "filler" phrases.
-        if not is_match(audio_string, ["I'm here...", "I'm listening...", "(in mute)", "listening...", f"hey {self.assistant_name}"]):
+        if not is_match(audio_string, ["I'm here...", "I'm listening...", "(in mute)", "listening..."]):
+            # remove text colors and the assistant's
+            audio_string = audio_string.replace(
+                f"{self.BLACK_GREEN}", "").replace(f"{self.GREEN}", "")
             audio_string = audio_string.replace(f"{self.assistant_name}:", "")
             self.bot.send_message(audio_string)
 
-    def poll_bot(self):
-        poll_evt = Event()
-        while not poll_evt.is_set():
-            try:
-                if self.restart_request:
-                    poll_evt.set()
-                self.bot.poll()
-
-            except Exception:
-                poll_evt.set()
-                self.Log(
-                    "Exception occurred while polling bot, trying to re-connect...")
-                time.sleep(5)
-                os.system("python main.py")
-                self.restart_request = True
-                continue
-
     def handle_bot_commands(self):
-        poll_evt = Event()
-
-        while not poll_evt.is_set():
+        while not self.handle_bot_commands_event.is_set():
             try:
                 # get the latest command from bot
                 self.bot_command = self.bot.last_command
 
                 # handles the RESTART command sequence of virtual assistant application
-                if self.bot_command and ("/restart" in self.bot_command):
-                    self.bot_command = f"reset {self.assistant_name}"
+                if self.bot_command and ("--restart" in self.bot_command):
                     # lower the volume of music player (if it's currently playing)
                     # so listening microphone will not block our bot_command request
-                    self.skill.music_volume(30)
+                    self.skill.music_volume(50)
                     # set the restart flag to true
-                    self.restart_request = True
-                    poll_evt.set()
-                    break
+                    # self.restart_request = True
+                    self.bot_command = f"restart {self.assistant_name}"
+                    # break
 
                 elif self.bot_command:
                     # lower the volume of music player (if it's currently playing)
                     # so listening microphone will not block our bot_command request
-                    self.skill.music_volume(30)
+                    self.skill.music_volume(50)
                     # let's use a wakeup command if she's sleeping.
                     if self.isSleeping():
                         self.bot_command = f"hey {self.assistant_name} {self.bot_command}"
 
-                time.sleep(0.4)
+                time.sleep(0.3)
 
             except Exception:
+                self.kill_tts_events()
                 self.Log("Error while handling bot commands.")
-                self.restart_request = True
-                time.sleep(5)
-                continue
+                pass
+
+        self.kill_tts_events()
 
     def speak(self, audio_string, start_prompt=False, end_prompt=False, mute_prompt=False):
-        if audio_string.strip():
+        if self.restart_request:
+            return
+        elif audio_string.strip():
             try:
                 removeUrl = re.sub(r"https?:\/\/[^\s]+", "", audio_string)
                 # volume up the music player, if applicable
                 if not self.isSleeping():
-                    self.skill.music_volume(30)
+                    self.skill.music_volume(50)
                 force_delete = False
                 # init google's text-to-speech module
                 # tts = gTTS(text=audio_string, lang="en",

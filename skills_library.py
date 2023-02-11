@@ -7,7 +7,7 @@ import subprocess
 import sys
 import requests
 import subprocess
-import webbrowser
+# import webbrowser
 import wikipedia
 import wolframalpha
 import time
@@ -21,11 +21,20 @@ from helper import is_match, get_commands, clean_voice_data, extract_metadata, e
 from urllib.parse import quote
 from random import choice
 from datetime import datetime as dt
-from word2number import w2n
+# from word2number import w2n
 from settings import Configuration
 import platform
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
+formatter = logging.Formatter(
+    "%(asctime)s | %(levelname)s | %(message)s", "%m-%d-%Y %I:%M:%S %p")
+
+file_handler = logging.FileHandler("VirtualAssistant.log", mode="a")
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 
 class SkillsLibrary(Configuration):
@@ -58,9 +67,9 @@ class SkillsLibrary(Configuration):
             log_data = exception_title
 
         if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-            print("-" * 23)
+            print("-" * 40)
             print(f"{self.RED} {exception_title} {self.COLOR_RESET}")
-            print("-" * 23)
+            print("-" * 40)
 
         if ex_type == logging.DEBUG:
             logger.debug(log_data)
@@ -320,7 +329,7 @@ class SkillsLibrary(Configuration):
                             response = f"\nDefinition of \"{question}\" ({wolfram_meta[1]}) \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                         else:
                             # respond by showing list of information
-                            for deet in wolfram_response.split(" | "):
+                            for deet in wolfram_response.split("|"):
                                 response += f"{deet}.\n"
 
                             return f"Here's some information..\n{response}"
@@ -328,7 +337,7 @@ class SkillsLibrary(Configuration):
                     # we found an array of information, let's disect if necessary
                     elif wolfram_response.count("\n") > 3:
                         # respond by showing list of information
-                        for deet in wolfram_response.split(" | "):
+                        for deet in wolfram_response.split("|"):
                             response += f"{deet}.\n"
 
                         return f"Here's some information..\n{response}"
@@ -461,9 +470,9 @@ class SkillsLibrary(Configuration):
                 for res in response['choices']:
                     result += res['text']
 
-        except Exception as e:
+        except Exception:
             pass
-            self.Log(f"OpenAI Search Skill Error. {str(e)}")
+            self.Log("OpenAI Search Skill Error.")
 
         self.context += f"\n{result}"
 
@@ -800,7 +809,7 @@ class SkillsLibrary(Configuration):
                     file_count = 0
 
                     # confirm if the user, is looking for files/documents
-                    confirm = self.tts.listen_to_audio(
+                    confirm = self.tts.listen(
                         f"Would you me to look for files with \"{file_name}\"?")
 
                     if confirm.lower().strip() == "yes":
@@ -863,7 +872,8 @@ class SkillsLibrary(Configuration):
         #     return f"{choice(alternate_responses)} I set the brightness by {percentage}%"
 
         # except Exception:
-        self.Log("Screen Brightness Skill Error.")
+        # self.Log("Screen Brightness Skill Error.")
+        print("Skill not available")
         return ""
 
     def control_wifi(self, voice_data):
@@ -889,8 +899,8 @@ class SkillsLibrary(Configuration):
         #         return f"{choice(alternate_responses)} I {command} the Wi-Fi."
 
         # except Exception:
-        self.Log("Wi-Fi Skill Error.")
-
+        # self.Log("Wi-Fi Skill Error.")
+        print("Skill not available")
         return ""
 
     def control_system(self, voice_data):
@@ -907,17 +917,17 @@ class SkillsLibrary(Configuration):
         #         command = "shutdown /r /t 15"
 
         #     if command:
-        #         # confirmation = self.tts.listen_to_audio(f"\033[1;33;41m Are you sure to \"{'Restart' if '/r' in command else 'Shutdown'}\" your computer? (yes/no): ")
+        #         # confirmation = self.tts.listen(f"\033[1;33;41m Are you sure to \"{'Restart' if '/r' in command else 'Shutdown'}\" your computer? (yes/no): ")
 
-        #         # execute the shutdown/restart command if confirmed by user
+        #         # execute the shutdown--restart command if confirmed by user
         #         # if "yes" in confirmation.lower().strip():
         #         os.system(command)
         #         return f"Ok! {'Reboot' if '/r' in command else 'Shutdown'} sequence will commence in approximately 10 seconds..."
         #         # return f"{'Reboot' if '/r' in command else 'Shutdown'} is canceled."
 
         # except Exception:
-        self.Log("Shutdown/Restart System Skill Error.")
-
+        # self.Log("Shutdown--restart System Skill Error.")
+        print("Skill not available")
         return ""
 
     def wallpaper(self):
@@ -1106,8 +1116,8 @@ class SkillsLibrary(Configuration):
             news = NewsTicker()
 
             # execute daemon to fetch breaking news in background
-            news.fetch_news()
-            news.run_breaking_news_daemon()
+            # news.fetch_news()
+            # news.run_breaking_news_daemon()
 
             # get back to virtual assistant directory
             sys.path.append(self.ASSISTANT_DIR)

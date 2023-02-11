@@ -7,6 +7,7 @@
 				"Hi, I'm <assistant_name>, how can I help you?",
 				"What can I help you <boss_name>.",
 				"What's up!",
+				"Welcome back! What would you like to chat about?",
 				"My systems are online and fully operational.",
 				"My computing software is fully operational and ready for work."
 			]
@@ -81,11 +82,14 @@
 			"commands": [
 				"turn off <assistant_name>",
 				"<assistant_name> turn off",
+				"<assistant_name> shutdown",
+				"shutdown <assistant_name>",
 				"deactivate <assistant_name>",
 				"<assistant_name> deactivate",
 				"goodbye <assistant_name>",
 				"<assistant_name> goodbye",
-				"<assistant_name> restart"
+				"<assistant_name> restart",
+				"restart <assistant_name>"
 			]
 		},
 		{
@@ -398,7 +402,8 @@
 				"news about",
 				"news regarding",
 				"flash briefing",
-				"news briefing"
+				"news briefing",
+				"news feed"
 			]
 		},
 		{
