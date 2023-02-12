@@ -1,0 +1,120 @@
+02-12-2023 09:06:52 AM | ERROR | Exception occurred while trying to speak.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  os.remove(audio_file)
+Message: cannot access local variable 'audio_file' where it is not associated with a value
+Line:    303
+----------------------------------------
+02-12-2023 09:06:52 AM | ERROR | Exception occurred while trying to speak.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  os.remove(audio_file)
+Message: cannot access local variable 'audio_file' where it is not associated with a value
+Line:    303
+----------------------------------------
+02-12-2023 09:06:52 AM | ERROR | Error while starting virtual assistant.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/assitant.py
+Target:  _start_virtual_assistant()
+Message: Exception occurred while trying to speak.
+Line:    1151
+----------------------------------------
+02-12-2023 09:06:52 AM | ERROR | Error while starting virtual assistant.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/assitant.py
+Target:  _start_virtual_assistant()
+Message: Exception occurred while trying to speak.
+Line:    1151
+----------------------------------------
+02-12-2023 09:07:30 AM | ERROR | Exception occurred while trying to speak.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  os.remove(audio_file)
+Message: cannot access local variable 'audio_file' where it is not associated with a value
+Line:    303
+----------------------------------------
+02-12-2023 09:07:30 AM | ERROR | Exception occurred while trying to speak.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  os.remove(audio_file)
+Message: cannot access local variable 'audio_file' where it is not associated with a value
+Line:    303
+----------------------------------------
+02-12-2023 09:07:30 AM | ERROR | Error while starting virtual assistant.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/assitant.py
+Target:  _start_virtual_assistant()
+Message: Exception occurred while trying to speak.
+Line:    1151
+----------------------------------------
+02-12-2023 09:07:30 AM | ERROR | Error while starting virtual assistant.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/assitant.py
+Target:  _start_virtual_assistant()
+Message: Exception occurred while trying to speak.
+Line:    1151
+----------------------------------------
+02-12-2023 09:08:07 AM | ERROR | Exception occurred while trying to speak.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  os.remove(audio_file)
+Message: cannot access local variable 'audio_file' where it is not associated with a value
+Line:    303
+----------------------------------------
+02-12-2023 09:08:07 AM | ERROR | Exception occurred while trying to speak.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  os.remove(audio_file)
+Message: cannot access local variable 'audio_file' where it is not associated with a value
+Line:    303
+----------------------------------------
+02-12-2023 09:08:07 AM | ERROR | Error while starting virtual assistant.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/assitant.py
+Target:  _start_virtual_assistant()
+Message: Exception occurred while trying to speak.
+Line:    1151
+----------------------------------------
+02-12-2023 09:08:07 AM | ERROR | Error while starting virtual assistant.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/assitant.py
+Target:  _start_virtual_assistant()
+Message: Exception occurred while trying to speak.
+Line:    1151
+----------------------------------------
+02-12-2023 09:09:01 AM | ERROR | Exception occurred while trying to speak.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  os.remove(audio_file)
+Message: cannot access local variable 'audio_file' where it is not associated with a value
+Line:    304
+----------------------------------------
+02-12-2023 09:09:01 AM | ERROR | Exception occurred while trying to speak.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  os.remove(audio_file)
+Message: cannot access local variable 'audio_file' where it is not associated with a value
+Line:    304
+----------------------------------------
+02-12-2023 09:09:01 AM | ERROR | Error while starting virtual assistant.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/assitant.py
+Target:  _start_virtual_assistant()
+Message: Exception occurred while trying to speak.
+Line:    1151
+----------------------------------------
+02-12-2023 09:09:01 AM | ERROR | Error while starting virtual assistant.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/assitant.py
+Target:  _start_virtual_assistant()
+Message: Exception occurred while trying to speak.
+Line:    1151
+----------------------------------------
+02-12-2023 09:09:09 AM | ERROR | Internet Connection Error. You are not connected to the Internet.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1095ba110>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+Line:    167
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+02-12-2023 09:09:12 AM | ERROR | Internet Connection Error. You are not connected to the Internet.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/helper.py
+Target:  response = requests.get("http://google.com", timeout=300)
+Message: HTTPConnectionPool(host='google.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1095ba290>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+Line:    167
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+02-12-2023 09:09:15 AM | ERROR | Error while initiating telegram bot.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  if check_connection("Telegram bot"):
+Message: Connection error, maximum retries already exhausted...
+Line:    193
+----------------------------------------
+02-12-2023 09:09:15 AM | ERROR | Error while initiating telegram bot.
+File:    /Users/jairo/DEV/Python/VirtualAssistant/tts.py
+Target:  if check_connection("Telegram bot"):
+Message: Connection error, maximum retries already exhausted...
+Line:    193
+----------------------------------------

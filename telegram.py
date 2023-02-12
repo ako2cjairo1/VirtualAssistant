@@ -139,7 +139,7 @@ class TelegramBot(Configuration):
 
                 time.sleep(0.3)
 
-            self.kill_telegram_events()
+            # self.kill_telegram_events()
 
         except Exception:
             pass

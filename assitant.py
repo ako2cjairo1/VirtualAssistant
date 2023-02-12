@@ -841,17 +841,6 @@ class VirtualAssistant(SpeechAssistant):
                 active_hours = int((total_time.days * 24) +
                                    (total_time.seconds // 3600))
 
-                # # restart the application every 8 hours to re-authenticate Telegram bot
-                # if active_hours >= 6 and sec == 30:
-                #     self.restart_request = True
-                #     # log and send the restart request message to telegram bot
-                #     message = "Restart requested to re-authenticate Telegram bot..."
-                #     self.print(message)
-                #     # terminate virtual assistant
-                #     self.deactivate(self._get_commands("terminate")[0])
-                #     event.set()
-                #     break
-
                 # announce the hourly time
                 if time_ticker == 0 and (mn == 0 and sec == 0) and self.isSleeping() and self.notification:
                     self.speak(
@@ -888,11 +877,6 @@ class VirtualAssistant(SpeechAssistant):
 
                 ping_count += 1
 
-                if not self.bot.bot_isAlive:
-                    print(f"{self.assistant_name}(bot) was offline!")
-                    self.kill_tts_events()
-                    self.init_bot()
-
                 # Enable/Disable Notifications
                 if self.bot_command:
                     # get the baseline time when to request for a restart for Telegram bot re-authentication
@@ -918,8 +902,10 @@ class VirtualAssistant(SpeechAssistant):
                         print(
                             f"BOT COMMAND [{current_time.strftime('%I:%M:%S')}]: {self.bot_command}")
 
-                # if self.show_logs:
-                #     print(f"{self.bot.botId} Bot is alive? {self.bot.bot_isAlive}")
+                if not self.bot.bot_isAlive:
+                    print(f"{self.assistant_name}(bot) was offline!")
+                    self.kill_tts_events()
+                    self.init_bot()
 
                 # Restart request
                 if self.restart_request:
@@ -1005,8 +991,10 @@ class VirtualAssistant(SpeechAssistant):
                                     max_news += 1
 
                                     if max_news == 1:
-                                        os.system(
-                                            f"say 'Breaking News Alert!!'")
+                                        if self.platform == 'Darwin':
+                                            os.system(f"say 'Breaking News Alert!!'")
+                                        else:
+                                            self.speak("Breaking News Alert!!")
 
                                     self.skills.toast_notification(
                                         "* * * BREAKING NEWS * * *", bn["report"])
