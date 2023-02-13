@@ -28,7 +28,7 @@ class VirtualAssistant(SpeechAssistant):
         self.skills = None
         # init news scraper (daemon)
         self.news = None
-        self.platform = platform.uname().system
+        self.is_darwin_platform = True if platform.uname().system == "Darwin" else False
         self.threads = set()
         self.show_logs = False
         self.started = False
@@ -39,7 +39,7 @@ class VirtualAssistant(SpeechAssistant):
         print(message)
 
     def maximize_command_interface(self, maximize=True):
-        if (self.platform != "Darwin"):
+        if not self.is_darwin_platform:
             if maximize:
                 os.system(
                     "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 973 600 /siz 491 336 /TOP")
@@ -48,7 +48,7 @@ class VirtualAssistant(SpeechAssistant):
                     "CMDOW @ /ren \"Virtual Assistant - Brenda\" /MOV 1250 733 /siz 217 203 /NOT")
 
     def restart(self):
-        os.system("clear" if self.platform == "Darwin" else "cls")
+        os.system("clear" if self.is_darwin_platform else "cls")
         self.speak("Commencing restart...")
         time.sleep(2)
 
@@ -73,16 +73,16 @@ class VirtualAssistant(SpeechAssistant):
                 # delete the audio file after announcing to save mem space
                 os.remove(audio_file)
 
-        os.system("clear" if self.platform == "Darwin" else "cls")
+        os.system("clear" if self.is_darwin_platform else "cls")
         print("\nCleaning up...Done!")
         print("Updating libraries...")
         os.system('pip3 -q install -r Requirements.txt')
 
-        os.system("clear" if self.platform == "Darwin" else "cls")
+        os.system("clear" if self.is_darwin_platform else "cls")
         print("\nCleaning up...Done!")
         print("Updating libraries...Done!")
 
-        os.system("clear" if self.platform == "Darwin" else "cls")
+        os.system("clear" if self.is_darwin_platform else "cls")
         print(f"\nInitiating {self.assistant_name}...")
         # execute batch file that will open a new instance of virtual assistant
         os.system("python main.py")
@@ -102,7 +102,7 @@ class VirtualAssistant(SpeechAssistant):
                 self.restart_request = False
                 self.speak(choice(self._get_commands("terminate_response")))
                 self.mute_assistant(f"stop {self.assistant_name}")
-                self.print(f"\n{self.assistant_name} assistant DEACTIVATED.\n")
+                self.print(f"\n({self.assistant_name} is offline)\n")
                 # volume up the music player, if applicable
                 self.skills.music_volume(80)
                 # terminate and end the virtual assistant application
@@ -231,8 +231,6 @@ class VirtualAssistant(SpeechAssistant):
             ask_wikipedia = True
             ask_wolfram = True
             not_confirmation = True
-            use_calc = True
-            ask_the_time = True
             ask_gpt = False
             adjust_system_volume = False
             isPrompt = len(voice_data) <= 35
@@ -329,7 +327,6 @@ class VirtualAssistant(SpeechAssistant):
                         ask_wikipedia = False
                         ask_wolfram = False
                         not_confirmation = False
-                        use_calc = False
                         if "I couldn't find" not in music_response:
                             # mute and sleep assistant when playing music
                             self.sleep(True)
@@ -357,7 +354,6 @@ class VirtualAssistant(SpeechAssistant):
 
                     if system_responses:
                         response_message += system_responses
-                        use_calc = False
 
                 # commands for controlling system volume
                 system_volume_commands = self._get_commands("system volume")
@@ -392,7 +388,6 @@ class VirtualAssistant(SpeechAssistant):
                     ask_wikipedia = False
                     ask_wolfram = False
                     not_confirmation = False
-                    use_calc = False
 
                 # commands for creating a new project automation
                 create_project_commands = self._get_commands("create_project")
@@ -430,19 +425,6 @@ class VirtualAssistant(SpeechAssistant):
                         ask_wikipedia = False
                         ask_wolfram = False
                         not_confirmation = False
-                        use_calc = False
-
-                # commands for simple math calculations
-                # if use_calc and is_match(voice_data, self._get_commands("math_calculation")):
-                #     calc_response = self.skills.calculator(voice_data)
-
-                #     if calc_response:
-                #         response_message += calc_response
-                #         ask_google = False
-                #         ask_wikipedia = False
-                #         ask_wolfram = False
-                #         not_confirmation = False
-                #         use_calc = False
 
                 # commands to open apps
                 if isPrompt and is_match(voice_data, self._get_commands("open_apps")):
@@ -455,7 +437,6 @@ class VirtualAssistant(SpeechAssistant):
                         ask_wikipedia = False
                         ask_wolfram = False
                         not_confirmation = False
-                        use_calc = False
 
                 # commands to find local files and document
                 find_file_commands = self._get_commands("find_file")
@@ -471,7 +452,6 @@ class VirtualAssistant(SpeechAssistant):
                         ask_wikipedia = False
                         ask_wolfram = False
                         not_confirmation = False
-                        use_calc = False
 
                 preposition_words = self._get_commands("prepositions")
                 # commands for news briefing
@@ -762,8 +742,19 @@ class VirtualAssistant(SpeechAssistant):
                 self.speak(
                     f"{date_today_response_from_wolfram} {response_time}")
 
-            self.speak("Here's what's happening today.")
+            # what's weather forecast today from Wolfram|Alpha
+            weather_response_from_wolfram = self.skills.wolfram_search(
+                "what's the weather like?")
+            # sunrise/sunset forecast today from Wolfram|Alpha
+            sunrise_response_from_wolfram = self.skills.wolfram_search(
+                "when is the sunrise?").split("(")[0]
+            sunset_response_from_wolfram = self.skills.wolfram_search(
+                "when is the sunset?").split("(")[0]
+            if sunrise_response_from_wolfram and sunset_response_from_wolfram:
+                self.speak(
+                    f"{weather_response_from_wolfram}. \n{sunrise_response_from_wolfram} and {sunset_response_from_wolfram}")
 
+            self.speak("Here's what's happening today.")
             # breaking news, if there's any
             breaking_news_response = _breaking_news_report(on_demand=False)
             if breaking_news_response:
@@ -801,21 +792,6 @@ class VirtualAssistant(SpeechAssistant):
                 self.speak(
                     f"From TimeandDate.com, {title}\n{fun_holiday_info}\n{did_you_know}")
 
-            # what's weather forecast today from Wolfram|Alpha
-            weather_response_from_wolfram = self.skills.wolfram_search(
-                "what's the weather like?")
-            # if weather_response_from_wolfram:
-            #     self.speak(weather_response_from_wolfram)
-
-            # sunrise/sunset forecast today from Wolfram|Alpha
-            sunrise_response_from_wolfram = self.skills.wolfram_search(
-                "when is the sunrise?").split("(")[0]
-            sunset_response_from_wolfram = self.skills.wolfram_search(
-                "when is the sunset?").split("(")[0]
-            # if sunrise_response_from_wolfram and sunset_response_from_wolfram:
-            self.speak(
-                f"{weather_response_from_wolfram}. \n{sunrise_response_from_wolfram} and {sunset_response_from_wolfram}")
-
             if dt.now().hour <= 10:
                 music_response = self.skills.play_music(
                     choice(["post malone", "bazzi"]))
@@ -837,10 +813,7 @@ class VirtualAssistant(SpeechAssistant):
                 mn = current_time.minute
                 sec = current_time.second
 
-                total_time = current_time - start_time
-                active_hours = int((total_time.days * 24) +
-                                   (total_time.seconds // 3600))
-
+                    
                 # announce the hourly time
                 if time_ticker == 0 and (mn == 0 and sec == 0) and self.isSleeping() and self.notification:
                     self.speak(
@@ -854,13 +827,13 @@ class VirtualAssistant(SpeechAssistant):
 
                 # send "Fun Holiday" notification every 10:00:30 AM
                 if self.notification and time_ticker == 0 and ((hr == 10) and mn == 00 and sec == 30):
-                    title, message, _ = self.skills.fun_holiday()
-                    if title and message:
-                        title = f"⚠️ {title} 👍 "
-                        self.respond_to_bot(f"{title}\n{message}")
-                        if self.platform == "Darwin":
-                            subprocess.run(
-                                ['osascript', '-e', f"display notification '{message}' with title '{title}'"])
+                    title, message, fun_fact = self.skills.fun_holiday()
+
+                    if title and message and fun_fact:
+                        title = f"⚠️ {title}"
+                        body = f"{message}\n\n👍 {fun_fact}"
+                        if self.is_darwin_platform:
+                            self.skills.toast_notification(title,body)
 
                 if ping_count >= 10:
                     ping_count = 0
@@ -991,13 +964,13 @@ class VirtualAssistant(SpeechAssistant):
                                     max_news += 1
 
                                     if max_news == 1:
-                                        if self.platform == 'Darwin':
+                                        if self.is_darwin_platform:
                                             os.system(f"say 'Breaking News Alert!!'")
                                         else:
                                             self.speak("Breaking News Alert!!")
 
                                     self.skills.toast_notification(
-                                        "* * * BREAKING NEWS * * *", bn["report"])
+                                        "‼️ * * * BREAKING NEWS * * * ‼️", bn["report"])
                                     news_briefing.append(headline)
 
                         # set the breaking news as "reported"
@@ -1025,12 +998,12 @@ class VirtualAssistant(SpeechAssistant):
             announce_time = True
             # volume up the music player, if applicable
             # self.skills.music_volume(50)
-            os.system("clear" if self.platform == "Darwin" else "cls")
+            os.system("clear" if self.is_darwin_platform else "cls")
 
             if self.restart_request:
                 return False
 
-            self.print(f"\n\n\"{self.assistant_name}\" is active...")
+            self.print(f"\n\n\"{self.assistant_name}\" is now online!\n")
 
             Thread(target=_heart_beat, daemon=True).start()
 

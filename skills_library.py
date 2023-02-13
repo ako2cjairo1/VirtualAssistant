@@ -1,7 +1,7 @@
-from pygments.lexers import get_all_lexers, guess_lexer
-from pygments import highlight
-from pygments.formatters import TerminalFormatter
-from pygments.lexers import get_lexer_by_name, guess_lexer
+# from pygments.lexers import get_all_lexers, guess_lexer
+# from pygments import highlight
+# from pygments.formatters import TerminalFormatter
+# from pygments.lexers import get_lexer_by_name, guess_lexer
 import os
 import subprocess
 import sys
@@ -26,12 +26,12 @@ from settings import Configuration
 import platform
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
+# logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter(
     "%(asctime)s | %(levelname)s | %(message)s", "%m-%d-%Y %I:%M:%S %p")
 
-file_handler = logging.FileHandler("VirtualAssistant.log", mode="a")
+file_handler = logging.FileHandler("Skills.log", mode="a")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
@@ -41,7 +41,7 @@ class SkillsLibrary(Configuration):
 
     def __init__(self, tts, masters_name, assistants_name):
         super().__init__()
-        self.platform = platform.uname().system
+        self.is_darwin_platform = True if platform.uname().system == "Darwin" else False
         self.master_name = masters_name
         self.assistant_name = assistants_name
         self.tts = tts
@@ -49,9 +49,10 @@ class SkillsLibrary(Configuration):
 
     def Log(self, exception_title="", ex_type=logging.ERROR):
         log_data = ""
+        logger.setLevel(ex_type)
 
         if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-            (execution_type, message, tb) = sys.exc_info()
+            (_, message, tb) = sys.exc_info()
 
             f = tb.tb_frame
             lineno = tb.tb_lineno
@@ -67,9 +68,11 @@ class SkillsLibrary(Configuration):
             log_data = exception_title
 
         if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-            print("-" * 40)
+            title_len = len(exception_title)
+            print("\n")
+            print("-" * title_len)
             print(f"{self.RED} {exception_title} {self.COLOR_RESET}")
-            print("-" * 40)
+            print("-" * title_len)
 
         if ex_type == logging.DEBUG:
             logger.debug(log_data)
@@ -424,33 +427,34 @@ class SkillsLibrary(Configuration):
         # if no answers found return a blank response
         return response.strip()
 
-    def highlight_code_snippets(self, text):
-        import re
+    # def highlight_code_snippets(self, text):
+    #     import re
 
-        from pygments import highlight
-        code_snippets = re.findall(
-            r'(```[\s\S]+?```|```[\s\S]+|[\s\S]+?```)', text)
-        for code in code_snippets:
-            code = re.sub(r'```', '', code)
-            lexer = None
-            for lexer_name, _, _ in get_all_lexers():
-                try:
-                    lexer = get_lexer_by_name(lexer_name, stripall=True)
-                    lexer.analyse_text(code)
-                    break
-                except:
-                    pass
-            if lexer:
-                print(highlight(code, lexer, TerminalFormatter()))
-            else:
-                print(code)
+    #     from pygments import highlight
+    #     code_snippets = re.findall(
+    #         r'(```[\s\S]+?```|```[\s\S]+|[\s\S]+?```)', text)
+    #     for code in code_snippets:
+    #         code = re.sub(r'```', '', code)
+    #         lexer = None
+    #         for lexer_name, _, _ in get_all_lexers():
+    #             try:
+    #                 lexer = get_lexer_by_name(lexer_name, stripall=True)
+    #                 lexer.analyse_text(code)
+    #                 break
+    #             except:
+    #                 pass
+    #         if lexer:
+    #             print(highlight(code, lexer, TerminalFormatter()))
+    #         else:
+    #             print(code)
 
-        print(text)
+    #     print(text)
 
     def openai(self, voice_data):
         result = ""
 
         try:
+            self.Log(f"{self.master_name}: {voice_data}", logging.INFO)
             self.context += f"\n{voice_data}"
 
             openai.api_key = self.OPENAI_TOKEN
@@ -475,6 +479,8 @@ class SkillsLibrary(Configuration):
             self.Log("OpenAI Search Skill Error.")
 
         self.context += f"\n{result}"
+
+        self.Log(f"{self.assistant_name}: {result}", logging.INFO)
 
         return result
 
@@ -724,7 +730,7 @@ class SkillsLibrary(Configuration):
                     app_names.append("Wi-Fi Manager")
 
                 elif is_match(app, ["pse-ticker", "pse"]):
-                    if self.platform == "Darwin":
+                    if self.is_darwin_platform:
                         opensrcipt = f"""osascript -e 'tell application "iTerm" to set newWindow to (create window with default profile)' -e 'tell application "iTerm" to tell newWindow to set newSession to (current session of last tab)' -e 'tell application "iTerm" to tell newSession to write text "cd {self.PSE_DIR};clear;python main.py"'"""
 
                         os.system(opensrcipt)
@@ -973,7 +979,7 @@ class SkillsLibrary(Configuration):
 
             alternate_responses = self._get_commands("acknowledge response")
 
-            if self.platform == "Darwin":
+            if self.is_darwin_platform:
                 try:
                     subprocess.run(
                         ["osascript", "-e", f'tell application "Music" to play (every track whose artist is "{voice_data}")'])
@@ -1048,7 +1054,7 @@ class SkillsLibrary(Configuration):
     def music_volume(self, volume):
 
         try:
-            if self.platform == "Darwin":
+            if self.is_darwin_platform:
                 # subprocess.run(
                 #     ["osascript", "-e", f'tell application "Music" to set sound volume to {volume}'])
                 subprocess.run(
@@ -1131,8 +1137,8 @@ class SkillsLibrary(Configuration):
 
     def toast_notification(self, title, message, duration=600):
         try:
-            self.tts.respond_to_bot(f"‼️ {title} ‼️ \n{message}")
-            if self.platform == "Darwin":
+            self.tts.respond_to_bot(f"{title}\n{message}")
+            if self.is_darwin_platform:
                 subprocess.run(
                     ['osascript', '-e', f'display notification "{message}" with title "{title}"'])
 
@@ -1166,7 +1172,7 @@ class SkillsLibrary(Configuration):
             self.Log("Fun Holiday Skill Error.")
 
     def system_volume(self, vol):
-        if self.platform == "Darwin":
+        if self.is_darwin_platform:
             subprocess.run(
                 ["osascript", "-e", f"set volume output volume {vol}"])
         else:

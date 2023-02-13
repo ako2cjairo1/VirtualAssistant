@@ -139,9 +139,7 @@ class TelegramBot(Configuration):
 
                 time.sleep(0.3)
 
-            # self.kill_telegram_events()
-
-        except Exception:
+        except Exception as ex:
             pass
-            print(f"[BOT] Error polling bot, trying again...")
             self.kill_telegram_events()
+            raise Exception(f"[BOT] Error polling bot, trying again... {ex}")

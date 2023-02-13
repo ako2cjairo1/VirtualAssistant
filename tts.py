@@ -18,7 +18,7 @@ from threading import Event, Thread
 from datetime import datetime as dt
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
+# logger.setLevel(logging.ERROR)
 
 formatter = logging.Formatter(
     "%(asctime)s | %(levelname)s | %(message)s", "%m-%d-%Y %I:%M:%S %p")
@@ -54,9 +54,10 @@ class SpeechAssistant(Configuration):
 
     def Log(self, exception_title="", ex_type=logging.ERROR):
         log_data = ""
+        logger.setLevel(ex_type)
 
         if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
-            (execution_type, message, tb) = sys.exc_info()
+            (_, message, tb) = sys.exc_info()
 
             f = tb.tb_frame
             lineno = tb.tb_lineno
@@ -64,18 +65,19 @@ class SpeechAssistant(Configuration):
             linecache.checkcache(fname)
             target = linecache.getline(fname, lineno, f.f_globals)
 
-            # line_len = len(str(message)) + 10
+            line_len = len(str(message)) + 10
             log_data = f"{exception_title}\n{'File:'.ljust(9)}{fname}\n{'Target:'.ljust(9)}{target.strip()}\n{'Message:'.ljust(9)}{message}\n{'Line:'.ljust(9)}{lineno}\n"
-            log_data += ("-" * 40)  # ("-" * line_len)
+            log_data += ("-" * line_len)
 
         else:
             log_data = exception_title
 
         if ex_type == logging.ERROR or ex_type == logging.CRITICAL:
+            title_len = len(exception_title)
             print("\n")
-            print("-" * 40)
+            print("-" * title_len)
             print(f"{self.RED} {exception_title} {self.COLOR_RESET}")
-            print("-" * 40)
+            print("-" * title_len)
 
         if ex_type == logging.DEBUG:
             logger.debug(log_data)
@@ -194,9 +196,9 @@ class SpeechAssistant(Configuration):
                 Thread(target=self.bot.poll, daemon=True).start()
                 Thread(target=self.handle_bot_commands, daemon=True).start()
 
-        except Exception:
+        except Exception as ex:
             pass
-            self.Log("Error while initiating telegram bot.")
+            self.Log(f"Error while initiating telegram bot. {ex}", logging.INFO)
             self.kill_tts_events()
             # raise Exception("Error while initiating telegram bot.")
 
@@ -238,10 +240,8 @@ class SpeechAssistant(Configuration):
                 self.Log("Error while handling bot commands.")
                 pass
 
-        # self.kill_tts_events()
-
     def speak(self, audio_string, start_prompt=False, end_prompt=False, mute_prompt=False):
-        isGTTS = False if self.skill.platform == "Darwin" else True
+        isGTTS = False if self.skill.is_darwin_platform else True
         
         if self.restart_request:
             return
