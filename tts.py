@@ -133,8 +133,8 @@ class SpeechAssistant(Configuration):
                 self.not_available_counter = 0
 
             except sr.UnknownValueError:
-                self.Log(
-                    f"{self.assistant_name} could not understand what you have said.", logging.WARNING)
+                # self.Log(
+                #     f"{self.assistant_name} could not understand what you have said.", logging.WARNING)
 
                 if self.isSleeping() and self.not_available_counter >= 3:
                     message = f"\"{self.assistant_name}\" is active again."

@@ -125,8 +125,9 @@ class TelegramBot(Configuration):
 
                 # print(f"{self.botId}")
 
+                if updates == None: self.kill_telegram_events()
                 # if successful update and must have result count
-                if updates["ok"] and len(updates["result"]) > 0:
+                if updates and updates["ok"] and len(updates["result"]) > 0:
                     # increment update_id based from the last update index
                     self.last_update_id = self.get_last_update_id(updates) + 1
 
