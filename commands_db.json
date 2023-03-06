@@ -18,7 +18,12 @@
 		},
 		{
 			"name": "wakeup_responses",
-			"commands": ["I'm listening...", "I'm here...", "How can I help you <boss_name>?"]
+			"commands": [
+				"I'm listening...",
+				"I'm here...",
+				"How can I help you <boss_name>?",
+				"Ask me anything!"
+			]
 		},
 		{
 			"name": "mute",
@@ -75,7 +80,13 @@
 		},
 		{
 			"name": "greeting_responses",
-			"commands": ["Very well, thanks", "I'm fine", "I'm great!", "Hi", "Hello"]
+			"commands": [
+				"Very well, thanks",
+				"I'm fine",
+				"I'm great!",
+				"Hi",
+				"Hello"
+			]
 		},
 		{
 			"name": "terminate",
@@ -94,7 +105,12 @@
 		},
 		{
 			"name": "night mode",
-			"commands": ["good night <assistant_name>", "night mode", "goodnight", "good night"]
+			"commands": [
+				"good night <assistant_name>",
+				"night mode",
+				"goodnight",
+				"good night"
+			]
 		},
 		{
 			"name": "day mode",
@@ -326,7 +342,12 @@
 		},
 		{
 			"name": "my_photos",
-			"commands": ["show me my photos", "show me my", "find my photos", "my photos"]
+			"commands": [
+				"show me my photos",
+				"show me my",
+				"find my photos",
+				"my photos"
+			]
 		},
 		{
 			"name": "wifi",
@@ -362,7 +383,11 @@
 		},
 		{
 			"name": "time",
-			"commands": ["what time is it", "what's the time", "what is the time"]
+			"commands": [
+				"what time is it",
+				"what's the time",
+				"what is the time"
+			]
 		},
 		{
 			"name": "open_apps",
@@ -370,7 +395,13 @@
 		},
 		{
 			"name": "find_file",
-			"commands": ["find files of", "find file of", "files for", "files", "documents"]
+			"commands": [
+				"find files of",
+				"find file of",
+				"files for",
+				"files",
+				"documents"
+			]
 		},
 		{
 			"name": "news",
@@ -403,7 +434,8 @@
 				"news regarding",
 				"flash briefing",
 				"news briefing",
-				"news feed"
+				"news feed",
+				"newsfeed"
 			]
 		},
 		{

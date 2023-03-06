@@ -77,19 +77,39 @@ class TelegramBot(Configuration):
             self.kill_telegram_events()
 
     def send_message(self, text, reply_markup=None):
+        def send(message):
+            try:
+                message = urllib.parse.quote_plus(message)
+                url = self.url + \
+                    f"sendMessage?text={message}&chat_id={self.TELEGRAM_CHAT_ID}"  # &parse_mode=Markdown"
+
+                if reply_markup:
+                    url += f"&reply_markup={reply_markup}"
+
+                self.get_url(url)
+            except Exception as ex:
+                pass
+                print(f"[BOT] Error sending message. {ex}")
+                
+
         try:
-            text = urllib.parse.quote_plus(text)
-            url = self.url + \
-                f"sendMessage?text={text}&chat_id={self.TELEGRAM_CHAT_ID}"  # &parse_mode=Markdown"
+            max_text_part = 4000
+            if len(text) > max_text_part:
+                start_text_part = 0
+                for i in range(10):
+                    text_part = text[start_text_part:max_text_part*(i+1)]
+                    if len(text_part) > 0:
+                        send(text_part)
+                        start_text_part = max_text_part * (i+1)
+                    else:
+                        break
+            else:
+                send(text)                
+            
 
-            if reply_markup:
-                url += f"&reply_markup={reply_markup}"
-
-            self.get_url(url)
-
-        except Exception:
+        except Exception as err:
             pass
-            # print(f"[BOT] Error while sending message.")
+            print(f"[BOT] Error while sending message. {err}")
             self.kill_telegram_events()
 
     def refresh_poll(self):

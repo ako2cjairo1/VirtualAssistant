@@ -10,7 +10,7 @@ def create_instance():
 
     try:
         brenda = VirtualAssistant(
-            masters_name="Dave", assistants_name="Jarvis", listen_timeout=10)
+            masters_name="Dave", assistants_name="Jarvis", listen_timeout=60)
         brenda.activate()
 
     except Exception as ex:

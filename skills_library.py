@@ -26,7 +26,7 @@ from settings import Configuration
 import platform
 
 logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
+logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter(
     "%(asctime)s | %(levelname)s | %(message)s", "%m-%d-%Y %I:%M:%S %p")
@@ -47,7 +47,7 @@ class SkillsLibrary(Configuration):
         self.tts = tts
         self.context = ""
 
-    def Log(self, exception_title="", ex_type=logging.ERROR):
+    def Log(self, exception_title="", ex_type=logging.INFO):
         log_data = ""
         logger.setLevel(ex_type)
 
@@ -85,7 +85,7 @@ class SkillsLibrary(Configuration):
 
         elif ex_type == logging.ERROR:
             logger.error(log_data)
-            raise Exception(exception_title)
+            # raise Exception(exception_title)
 
         elif ex_type == logging.CRITICAL:
             logger.critical(log_data)
@@ -325,27 +325,27 @@ class SkillsLibrary(Configuration):
                         response = wolfram_response.replace(
                             "Q: ", "").replace("A: ", "\n\n")
 
-                    # we found an array of information, let's disect if necessary
-                    elif wolfram_response.count("|") > 2:
+                    # we found an array of information, let's dissect if necessary
+                    elif wolfram_response.count("\n") > 2:
                         if is_match(wolfram_response, parts_of_speech):
                             # responding to definition of terms, and using the first answer in the list as definition
                             response = f"\nDefinition of \"{question}\" ({wolfram_meta[1]}) \nIt means... {wolfram_meta[-1].strip().capitalize()}."
                         else:
                             # respond by showing list of information
-                            for deet in wolfram_response.split("|"):
-                                response += f"{deet}.\n"
+                            for deet in wolfram_response.split("\n"):
+                                response += f"- {deet}.\n"
 
-                            return f"Here's some information..\n{response}"
+                            return f"Here's some information...\n{response}"
 
-                    # we found an array of information, let's disect if necessary
+                    # we found an array of information, let's dissect if necessary
                     elif wolfram_response.count("\n") > 3:
                         # respond by showing list of information
-                        for deet in wolfram_response.split("|"):
-                            response += f"{deet}.\n"
+                        for deet in wolfram_response.split("\n"):
+                            response += f"- {deet}.\n"
 
                         return f"Here's some information..\n{response}"
 
-                    # we found at least 1 set of defition, disect further if necessary
+                    # we found at least 1 set of definition, dissect further if necessary
                     elif is_match(wolfram_response, ["|"]):
                         # extract the 12 hour time value
                         if is_match(voice_data, ["time"]):
@@ -427,6 +427,16 @@ class SkillsLibrary(Configuration):
         # if no answers found return a blank response
         return response.strip()
 
+    def open_msn(self, section="weather/forecast"):
+        Thread(target=execute_map, args=("open browser", [
+               f"https://www.msn.com/en-ph/{section}"],), daemon=True).start()
+        return True
+
+    def open_browser(self, url="https://google.com"):
+        Thread(target=execute_map, args=(
+            "open browser", [url],), daemon=True).start()
+        return True
+
     # def highlight_code_snippets(self, text):
     #     import re
 
@@ -460,12 +470,12 @@ class SkillsLibrary(Configuration):
             openai.api_key = self.OPENAI_TOKEN
             response = openai.Completion.create(
                 engine="text-davinci-003",
-                temperature=0.7,
-                max_tokens=256,
+                temperature=0,
                 top_p=1,
+                max_tokens=2000,
                 frequency_penalty=0,
                 presence_penalty=0,
-                prompt=self.context
+                prompt=f"\n[Remove pre-text and post-text, return only the main response.]\n{self.context}"
             )
 
             if len(response['choices']) == 1:
@@ -474,15 +484,22 @@ class SkillsLibrary(Configuration):
                 for res in response['choices']:
                     result += res['text']
 
-        except Exception:
+            self.Log(
+                f"\nPROMPT: {self.context}\n\nOPENAI RESPONSE: {response}")
+            self.Log(
+                f"\n----------------------------------------------------------------------------\n")
+
+            self.context += f"\n{result}"
+
+            return result.strip()
+
+        except Exception as ex:
+            if "maximum context length" in str(ex):
+                self.context = ""
+                return self.openai(voice_data)
+
             pass
-            self.Log("OpenAI Search Skill Error.")
-
-        self.context += f"\n{result}"
-
-        self.Log(f"{self.assistant_name}: {result}", logging.INFO)
-
-        return result
+            self.Log(f"OpenAI Search Skill Error. {ex}")
 
     def wikipedia_search(self, wiki_keyword, voice_data):
         result = ""
@@ -498,127 +515,12 @@ class SkillsLibrary(Configuration):
                 self.Log(
                     "Wikipedia Search Skill (handled)", logging.INFO)
 
-                # if ("who" or "who's") in voice_data.lower():
-                #     result = "I don't know who that is but,"
-                # else:
-                #     result = "I don't know what that is but,"
-
-                # return self.openai(wiki_keyword.strip())
-
             except Exception:
                 self.Log("Wikipedia Search Skill Error.")
 
         return result
 
     def calculator(self, voice_data):
-        # operator = ""
-        # number1 = 0
-        # percentage = 0
-        # answer = None
-        # equation = ""
-
-        # try:
-        #     # evaluate if there are square root or cube root questions, replace with single word
-        #     evaluated_voice_data = voice_data.replace(",", "").replace("power of", "power#of").replace(
-        #         "square root", "square#root").replace("cube root", "cube#root").split(" ")
-
-        #     for word in evaluated_voice_data:
-        #         if is_match(word, ["+", "plus", "add"]):
-        #             operator = " + " if not word.replace(
-        #                 "+", "").isdigit() else word
-        #             equation += operator
-        #         elif is_match(word, ["-", "minus", "subtract"]):
-        #             operator = " - " if not word.replace(
-        #                 "-", "").isdigit() else word
-        #             equation += operator
-        #         elif is_match(word, ["x", "times", "multiply", "multiplied"]):
-        #             operator = " * "
-        #             equation += operator
-        #         elif is_match(word, ["/", "divide", "divided"]):
-        #             operator = " / "
-        #             equation += operator
-        #         elif is_match(word, ["^", "power#of"]):
-        #             operator = " ^ "
-        #             equation += operator
-        #         elif is_match(word, ["square#root"]):
-        #             equation += "x2"
-        #         elif is_match(word, ["cube#root"]):
-        #             equation += "x3"
-        #         elif is_match(word, ["percent", "%"]):
-        #             operator = "%"
-        #             if not word.isdigit() and "%" in word:
-        #                 equation += f"{word} of "
-        #                 percentage = w2n.word_to_num(word.replace("%", ""))
-        #             else:
-        #                 equation += "% of "
-        #                 percentage = number1
-        #             number1 = 0
-        #         elif is_match(word, ["dot", "point", "."]):
-        #             equation += word
-
-        #         # try to convert words to numbers
-        #         elif word.isdigit() or is_match(word, ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "zero"]):
-        #             # build the equation
-        #             equation += str(w2n.word_to_num(word)).replace(" ", "")
-
-        #             # store number value for special equations (percentage, square root, cube root)
-        #             if percentage or ("x2" in equation) or ("x3" in equation):
-        #                 number1 = word
-
-        #     if percentage and int(number1) > 0:
-        #         equation = f"{percentage}*.01*{number1}"
-        #         # evaluate percentage equation
-        #         answer = float(eval(equation))
-        #         # create a readable equation
-        #         equation = f"{percentage}% of {number1}"
-
-        #     # no percentage computation was made,
-        #     # just return equivalent value of percent
-        #     if (answer is None) and percentage:
-        #         return f"{percentage}% is {percentage * .01}"
-
-        #     if "x2" in equation:
-        #         equation = f"{number1}**(1./2.)"
-        #     elif "x3" in equation:
-        #         equation = f"{number1}**(1./3.)"
-        #     elif "^" in equation:
-        #         # can't evaluate
-        #         return ""
-
-        #     if (answer is None) and equation:
-        #         try:
-        #             # evaluate the equation made
-        #             answer = eval(equation.replace(",", ""))
-        #         except ZeroDivisionError:
-        #             return choice(["The answer is somewhere between infinity, negative infinity, and undefined.", "The answer is undefined."])
-        #         except Exception:
-        #             self.Log(
-        #                 "Calculator Skill Exception (handled).", logging.INFO)
-        #             return ""
-
-        #     if answer is not None:
-        #         with_decimal_point = float('{:.02f}'.format(answer))
-
-        #         # check answer for decimal places,
-        #         # convert to whole number if decimal point value is ".00"
-        #         positive_float = int(
-        #             (str(with_decimal_point).split('.'))[1]) > 0
-
-        #         format_answer = with_decimal_point if positive_float else int(
-        #             answer)
-
-        #         # bring back the readable format of square root and cube root
-        #         equation = equation.replace(f"{number1}**(1./2.)", f"square root of {number1}").replace(
-        #             f"{number1}**(1./3.)", f"cube root of {number1}")
-
-        #         equation = [equation, "The answer"]
-
-        #         return f"{choice(equation)} is {'approximately ' if positive_float else ''}{format_answer}"
-        #     else:
-        #         return ""
-
-        # except Exception:
-        # self.Log("Calculator Skill Error.")
         return ""
 
     def open_application(self, voice_data):
@@ -976,7 +878,6 @@ class SkillsLibrary(Configuration):
                 voice_data, ["music", "songs"]) else False
             meta_data = voice_data.lower().replace("&", "and").replace(
                 "music", "").replace("songs", "").strip()
-
             alternate_responses = self._get_commands("acknowledge response")
 
             if self.is_darwin_platform:

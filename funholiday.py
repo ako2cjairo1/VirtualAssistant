@@ -1,4 +1,5 @@
 import os
+import sys
 from settings import Configuration
 
 settings = Configuration()
@@ -50,4 +51,4 @@ try:
 
 except Exception as ex:
     print(f"Fun Holiday Skill Error. {str(ex)}")
-exit()
+sys.exit()

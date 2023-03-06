@@ -1,8 +1,6 @@
 import os
-import subprocess
 import sys
 import time
-import logging
 from threading import Event, Thread
 from datetime import datetime as dt
 from random import choice, randint
@@ -32,6 +30,7 @@ class VirtualAssistant(SpeechAssistant):
         self.threads = set()
         self.show_logs = False
         self.started = False
+        self.session_id = dt.now().strftime('%I%M%S')
 
     def print(self, message):
         if not f"{self.master_name}:".lower() in message.lower():
@@ -61,7 +60,6 @@ class VirtualAssistant(SpeechAssistant):
 
         # reset global flags
         self.restart_request = False
-        self.started = False
 
         # make sure we're in the correct directory of batch file to execute
         os.chdir(self.ASSISTANT_DIR)
@@ -86,7 +84,7 @@ class VirtualAssistant(SpeechAssistant):
         print(f"\nInitiating {self.assistant_name}...")
         # execute batch file that will open a new instance of virtual assistant
         os.system("python main.py")
-        exit()
+        sys.exit()
 
     def deactivate(self, voice_data=""):
         # commands to terminate virtual assistant
@@ -106,7 +104,6 @@ class VirtualAssistant(SpeechAssistant):
                 # volume up the music player, if applicable
                 self.skills.music_volume(80)
                 # terminate and end the virtual assistant application
-                exit()
                 sys.exit()
 
     def mute_assistant(self, voice_data):
@@ -231,7 +228,7 @@ class VirtualAssistant(SpeechAssistant):
             ask_wikipedia = True
             ask_wolfram = True
             not_confirmation = True
-            ask_gpt = False
+            ask_gpt = True
             adjust_system_volume = False
             isPrompt = len(voice_data) <= 35
 
@@ -309,27 +306,31 @@ class VirtualAssistant(SpeechAssistant):
                 music_control_commands = self._get_commands("control_music")
                 if isPrompt and is_match(voice_data, music_commands + music_control_commands):
 
-                    if is_match(voice_data, music_control_commands) and not is_match(voice_data, music_commands):
-                        setting_response = self.skills.music_setting(
-                            voice_data)
-                        if setting_response:
-                            self.speak(setting_response)
-                            self.sleep(True)
-                            return True
+                    # if is_match(voice_data, music_control_commands) and not is_match(voice_data, music_commands):
+                    # setting_response = self.skills.music_setting(
+                    #     voice_data)
+                    # if setting_response:
+                    #     self.speak(setting_response)
+                    #     self.sleep(True)
+                    # return True
 
-                    music_keyword = extract_metadata(
-                        voice_data, music_commands)
-                    music_response = self.skills.play_music(music_keyword)
+                    # music_keyword = extract_metadata(
+                    #     voice_data, music_commands)
+                    # music_response = self.skills.play_music(music_keyword)
 
-                    if music_response:
-                        response_message += music_response
-                        ask_google = False
-                        ask_wikipedia = False
-                        ask_wolfram = False
-                        not_confirmation = False
-                        if "I couldn't find" not in music_response:
-                            # mute and sleep assistant when playing music
-                            self.sleep(True)
+                    if self.skills.open_browser("https://youtu.be/D9ZXhB0C9QE"):
+                        self.speak(
+                            choice(self._get_commands("acknowledge response")))
+                        self.sleep(True)
+                        return True
+                        # response_message += music_response
+                        # ask_google = False
+                        # ask_wikipedia = False
+                        # ask_wolfram = False
+                        # not_confirmation = False
+                        # if "I couldn't find" not in music_response:
+                        #     # mute and sleep assistant when playing music
+                        #     self.sleep(True)
 
                 # commands for controlling screen brightness, wi-fi and to shutdown/restart system
                 if isPrompt and is_match(voice_data, (self._get_commands("brightness") + self._get_commands("wifi") + self._get_commands("system_shutdown_restart"))):
@@ -384,6 +385,7 @@ class VirtualAssistant(SpeechAssistant):
                     response_message += choice(
                         self._get_commands("acknowledge response"))
                     adjust_system_volume = True
+                    ask_gpt = False
                     ask_google = False
                     ask_wikipedia = False
                     ask_wolfram = False
@@ -496,7 +498,7 @@ class VirtualAssistant(SpeechAssistant):
 
                             news_found = True
                             self.speak(
-                                f"Here are your latest news briefing{about}.")
+                                f"Here's your latest news briefing{about}.")
                             for i in range(0, number_of_results):
                                 news_item = news_briefing[i]
                                 report = news_item["report"]
@@ -624,7 +626,7 @@ class VirtualAssistant(SpeechAssistant):
                 confirmation_commands = self._get_commands("confirmation")
 
                 # try wolfram for answers
-                if ask_wolfram and isPrompt and not any(word for word in voice_data.split() if word in confirmation_commands):
+                if ask_wolfram and not any(word for word in voice_data.split() if word in confirmation_commands):
                     # using commands from google to extract useful meta data for wolfram search
                     wolfram_response = self.skills.wolfram_search(voice_data)
 
@@ -640,8 +642,9 @@ class VirtualAssistant(SpeechAssistant):
 
                     if wolfram_response:
                         if 'weather' in voice_data:
+                            self.skills.open_msn("weather/forecast")
                             ask_gpt = False
-                        response_message += f"{wolfram_response}"
+                        response_message += f"{wolfram_response}\n"
                         ask_wikipedia = False
                         ask_google = False
                         not_confirmation = False
@@ -669,14 +672,14 @@ class VirtualAssistant(SpeechAssistant):
                             wiki_result = ""
 
                     if wiki_result:
-                        response_message += f"\nfrom Wikipedia. {wiki_result}"
+                        response_message += f"\nfrom Wikipedia. {wiki_result}\n"
                         # don't search into google we found answer from wikipedia
                         ask_google = False
                         not_confirmation = False
 
                 # commands for youtube
                 google_commands = self._get_commands("google")
-                if ask_google and (isPrompt or 'stock price' in voice_data) and is_match(voice_data, google_commands):
+                if ask_google and ('stock price' in voice_data) and is_match(voice_data, google_commands):
                     # extract youtube keyword to search
                     google_keyword = extract_metadata(
                         voice_data, google_commands)
@@ -686,8 +689,10 @@ class VirtualAssistant(SpeechAssistant):
                     # we got response from youtube, now append it to list of response_message
                     if google_response:
                         response_message += f"{google_response}\n"
+
                         # don't search into google we found answer from google
                         if 'stock price' in voice_data:
+                            self.skills.open_msn("money")
                             ask_gpt = False
                         not_confirmation = False
                         ask_google = True
@@ -707,8 +712,8 @@ class VirtualAssistant(SpeechAssistant):
                         # we don't need further contextual answers
                         return
 
-                if not response_message or ask_gpt and not ask_google:
-                    response_message += f"{self.skills.openai(voice_data)}"
+                if ask_gpt:
+                    response_message += self.skills.openai(voice_data)
 
                 # we did not found any response
                 if not response_message:
@@ -728,7 +733,7 @@ class VirtualAssistant(SpeechAssistant):
             except Exception:
                 pass
                 self.Log("Error formulating response.")
-                self.respond_to_bot("Error formulating response.")
+                # self.respond_to_bot("Error formulating response.")
 
         def _happening_today():
             # get updates from news channels
@@ -751,33 +756,45 @@ class VirtualAssistant(SpeechAssistant):
             sunset_response_from_wolfram = self.skills.wolfram_search(
                 "when is the sunset?").split("(")[0]
             if sunrise_response_from_wolfram and sunset_response_from_wolfram:
+                # open the source article in webbrowser.
+                self.skills.open_msn("weather/forecast")
                 self.speak(
                     f"{weather_response_from_wolfram}. \n{sunrise_response_from_wolfram} and {sunset_response_from_wolfram}")
 
             self.speak("Here's what's happening today.")
+            self.skills.open_msn("news")
             # breaking news, if there's any
             breaking_news_response = _breaking_news_report(on_demand=False)
             if breaking_news_response:
                 self.speak(breaking_news_response.replace("Here's the ", ""))
-            else:
-                # top latest news today
-                news_briefing = self.news.cast_latest_news()
-                number_of_results = len(news_briefing)
-                if number_of_results > 0:
-                    if number_of_results > 2:
-                        number_of_results = 3
 
-                    # self.speak(f"Here are the latest news today:")
-                    for i in range(0, number_of_results):
-                        # let's get the redirected url (if possible) from link we have
-                        redirect_url = requests.get(
-                            news_briefing[i]["source url"])
-                        # open the source article in webbrowser.
-                        Thread(target=execute_map, args=(
-                            "open browser", [redirect_url.url],), daemon=True).start()
-                        # send the link to bot
-                        self.respond_to_bot(redirect_url.url)
-                        self.speak(f"{news_briefing[i]['report']}")
+            news_briefing = self.news.cast_latest_news()
+            number_of_results = len(news_briefing)
+            if number_of_results > 2:
+                number_of_results = 3
+
+            for i in range(0, number_of_results):
+                news_item = news_briefing[i]
+                report = news_item["report"]
+                url = news_item["source url"]
+                is_bn = news_item["breaking_news"]
+
+                # let's get the redirected url (if possible) from link we have
+                redirect_url = requests.get(url)
+
+                # open the source article in webbrowser.
+                Thread(target=execute_map, args=(
+                    "open browser", [redirect_url.url],), daemon=True).start()
+
+                # tagged as breaking news
+                if is_bn == "true":
+                    self.breaking_news_reported.append(
+                        news_item["headline"])
+                    report = f"This is a Breaking News!!\n{report}"
+
+                # send the link to bot
+                self.speak(
+                    f"{report}\n{redirect_url.url}")
 
             # what happened today in history from Wolfram|Alpha
             response_from_wolfram = self.skills.wolfram_search(
@@ -793,27 +810,25 @@ class VirtualAssistant(SpeechAssistant):
                     f"From TimeandDate.com, {title}\n{fun_holiday_info}\n{did_you_know}")
 
             if dt.now().hour <= 10:
-                music_response = self.skills.play_music(
-                    choice(["post malone", "bazzi"]))
-                if music_response:
+                # music_response = self.skills.play_music(
+                #     choice(["post malone", "bazzi"]))
+                if self.skills.open_browser("https://youtu.be/D9ZXhB0C9QE"):
                     self.speak("Now playing your morning music...")
                     # mute and sleep assistant when playing music
                     self.sleep(True)
 
-        def _heart_beat():
-            event = Event()
+        def _heart_beat(evt):
             start_time = dt.now()
             time_ticker = 0
             ping_count = 0
-            self.threads.add(event)
+            start_count = 0
 
-            while not event.is_set():
+            while not evt.is_set():
                 current_time = dt.now()
                 hr = current_time.hour
                 mn = current_time.minute
                 sec = current_time.second
 
-                    
                 # announce the hourly time
                 if time_ticker == 0 and (mn == 0 and sec == 0) and self.isSleeping() and self.notification:
                     self.speak(
@@ -833,22 +848,32 @@ class VirtualAssistant(SpeechAssistant):
                         title = f"⚠️ {title}"
                         body = f"{message}\n\n👍 {fun_fact}"
                         if self.is_darwin_platform:
-                            self.skills.toast_notification(title,body)
+                            self.skills.toast_notification(title, body)
 
                 if ping_count >= 10:
                     ping_count = 0
                     if self.show_logs:
                         print(
-                            f"{self.assistant_name}(bot) online? {self.bot.refresh_poll()}")
+                            f"[ {current_time.strftime('%I:%M:%S')} - {self.session_id} ] {self.assistant_name}(bot) online? {self.bot.refresh_poll()}")
+                        print(
+                            f"[ {current_time.strftime('%I:%M:%S')} - {self.session_id} ] start_count {start_count}")
                     else:
                         self.bot.refresh_poll()
 
-                    # restart if application didn't get to start
-                    if not self.started:
-                        self.restart_request = True
-                        print(f"{self.assistant_name} didn't get to start..")
+                # restart if application didn't get to start
+                if not self.started:
+                    self.restart_request = True
+                    print(
+                        f"[ {current_time.strftime('%I:%M:%S')} - {self.session_id} ] {self.assistant_name} didn't get to respond...")
 
                 ping_count += 1
+                start_count += 1
+
+                if start_count >= 200:
+                    start_count = 0
+                    self.started = False
+                elif self.started:
+                    start_count = 0
 
                 # Enable/Disable Notifications
                 if self.bot_command:
@@ -861,6 +886,8 @@ class VirtualAssistant(SpeechAssistant):
                             self.bot.last_command = None
                         elif "log" in self.bot_command:
                             self.show_logs = False
+                            print(
+                                f"[ {current_time.strftime('%I:%M:%S')} - {self.session_id} ] Logging = {self.show_logs}]")
                         self.bot.last_command = ""
 
                     elif "--enable" in self.bot_command:
@@ -869,25 +896,32 @@ class VirtualAssistant(SpeechAssistant):
                             self.bot.last_command = None
                         elif "log" in self.bot_command:
                             self.show_logs = True
+                            print(
+                                f"[ {current_time.strftime('%I:%M:%S')} - {self.session_id} ] Logging = {self.show_logs}")
                         self.bot.last_command = ""
 
                     if self.show_logs:
                         print(
-                            f"BOT COMMAND [{current_time.strftime('%I:%M:%S')}]: {self.bot_command}")
+                            f"[ {current_time.strftime('%I:%M:%S')} - {self.session_id} ] bot_command: {self.bot_command[:50]}..")
 
                 if not self.bot.bot_isAlive:
                     print(f"{self.assistant_name}(bot) was offline!")
                     self.kill_tts_events()
-                    self.init_bot()
+                    if self.init_bot() and self.isSleeping():
+                        print(
+                            f"[ {current_time.strftime('%I:%M:%S')} - {self.session_id} ] {self.assistant_name} is on sentry mode")
 
                 # Restart request
                 if self.restart_request:
                     self.deactivate("restart")
                     break
 
+                if not self.isSleeping() and self.show_logs:
+                    print(
+                        f"[ {current_time.strftime('%I:%M:%S')} - {self.session_id} ] isSleeping = {self.isSleeping()}]")
+
                 if time_ticker >= 1:
                     time_ticker = 0
-
                 time.sleep(1)
 
         def is_within_an_hour_ago(bn_time):
@@ -940,13 +974,11 @@ class VirtualAssistant(SpeechAssistant):
 
             return response
 
-        def _breaking_news_notification(timeout):
-            event = Event()
+        def _breaking_news_notification(timeout, evt):
             timeout_counter = 0
-            self.threads.add(event)
 
             try:
-                while not event.is_set():
+                while not evt.is_set():
                     if self.restart_request:
                         # event.set()
                         break
@@ -965,7 +997,8 @@ class VirtualAssistant(SpeechAssistant):
 
                                     if max_news == 1:
                                         if self.is_darwin_platform:
-                                            os.system(f"say 'Breaking News Alert!!'")
+                                            os.system(
+                                                f"say 'Breaking News Alert!!'")
                                         else:
                                             self.speak("Breaking News Alert!!")
 
@@ -982,7 +1015,7 @@ class VirtualAssistant(SpeechAssistant):
                     time.sleep(1)
 
             except Exception:
-                event.set()
+                evt.set()
                 self.Log("Error while sending Breaking News notification.")
                 pass
 
@@ -996,6 +1029,7 @@ class VirtualAssistant(SpeechAssistant):
             sleep_counter = 0
             listen_time = 1
             announce_time = True
+            self.started = True
             # volume up the music player, if applicable
             # self.skills.music_volume(50)
             os.system("clear" if self.is_darwin_platform else "cls")
@@ -1005,12 +1039,17 @@ class VirtualAssistant(SpeechAssistant):
 
             self.print(f"\n\n\"{self.assistant_name}\" is now online!\n")
 
-            Thread(target=_heart_beat, daemon=True).start()
+            heart_beat_event = Event()
+            Thread(target=_heart_beat, args=(
+                heart_beat_event,), daemon=True).start()
+            self.threads.add(heart_beat_event)
 
             # announce breaking news notification
             # every minute (60 sec)
+            breaking_news_notification_event = Event()
             Thread(target=_breaking_news_notification,
-                   args=(self.BREAKING_NEWS_TIMEOUT,), daemon=True).start()
+                   args=(self.BREAKING_NEWS_TIMEOUT, breaking_news_notification_event,), daemon=True).start()
+            self.threads.add(breaking_news_notification_event)
 
             # play speaking prompt sound effect and say greetings
             self.speak(choice(self._get_commands(
@@ -1019,6 +1058,11 @@ class VirtualAssistant(SpeechAssistant):
             try:
                 while True:
                     self.started = True
+                    if self.show_logs:
+                        print(
+                            f"[ {dt.now().strftime('%I:%M:%S')} - {self.session_id} ] Sentry Mode? {self.started}")
+                        print(
+                            f"[ {dt.now().strftime('%I:%M:%S')} - {self.session_id} ] Listen Timeout ({listen_time} oo {self.listen_timeout})")
 
                     if self.restart_request:
                         break
@@ -1055,7 +1099,7 @@ class VirtualAssistant(SpeechAssistant):
 
                         if listen_time == 1:
                             self.print(f"{self.assistant_name}: listening...")
-                        elif listen_time == randint(2, (self.listen_timeout - 2)):
+                        elif listen_time == randint(2, listen_time):
                             self.speak(
                                 choice(["I'm here...", "I'm listening..."]), start_prompt=False)
 
@@ -1074,7 +1118,7 @@ class VirtualAssistant(SpeechAssistant):
 
                             # listen for deactivation commands, and terminate virtual assistant
                             elif self.deactivate(voice_data):
-                                return exit()
+                                sys.exit()
 
                             # play end prompt sound effect
                             self.speak("<end prompt>", end_prompt=True)
@@ -1120,14 +1164,10 @@ class VirtualAssistant(SpeechAssistant):
                     super(), self.master_name, self.assistant_name)
                 # init news scraper (daemon)
                 self.news = self.skills.news_scraper()
-
                 _start_virtual_assistant()
 
         except Exception as ex:
-            self.Log("Error while starting virtual assistant.")
-            # time.sleep(5)
+            self.Log(f"Error while starting virtual assistant.")
             self.skill.music_volume(50)
             # set the restart flag to true
             self.restart()
-            # terminate virtual assistant
-            # self.deactivate(self._get_commands("terminate")[0])
