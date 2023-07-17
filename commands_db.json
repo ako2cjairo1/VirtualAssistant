@@ -14,7 +14,11 @@
 		},
 		{
 			"name": "wakeup",
-			"commands": ["hey <assistant_name>", "ok <assistant_name>"]
+			"commands": [
+				"hey <assistant_name>",
+				"ok <assistant_name>",
+				"<assistant_name>"
+			]
 		},
 		{
 			"name": "wakeup_responses",

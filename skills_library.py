@@ -1,17 +1,11 @@
-# from pygments.lexers import get_all_lexers, guess_lexer
-# from pygments import highlight
-# from pygments.formatters import TerminalFormatter
-# from pygments.lexers import get_lexer_by_name, guess_lexer
 import os
 import subprocess
 import sys
 import requests
 import subprocess
-# import webbrowser
 import wikipedia
 import wolframalpha
 import time
-# import wmi  # (screen brightness) Windows Management Instrumentation module
 import linecache
 import logging
 import concurrent.futures as task
@@ -21,7 +15,6 @@ from helper import is_match, get_commands, clean_voice_data, extract_metadata, e
 from urllib.parse import quote
 from random import choice
 from datetime import datetime as dt
-# from word2number import w2n
 from settings import Configuration
 import platform
 
@@ -85,7 +78,6 @@ class SkillsLibrary(Configuration):
 
         elif ex_type == logging.ERROR:
             logger.error(log_data)
-            # raise Exception(exception_title)
 
         elif ex_type == logging.CRITICAL:
             logger.critical(log_data)
@@ -210,7 +202,6 @@ class SkillsLibrary(Configuration):
                                 elif "(" in cond:
                                     conditions.append(
                                         cond[:cond.index("(")].strip())
-                                # conditions.append(cond.strip())
 
                             if max_temp and min_temp:
                                 if len(conditions) > 2:
@@ -405,7 +396,6 @@ class SkillsLibrary(Configuration):
                                     numeric_response = "{:,}".format(
                                         int(wolfram_response))
 
-                                # response = f"{question} is {numeric_response}"
                                 response = numeric_response
                             else:
                                 response = wolfram_response
@@ -432,33 +422,10 @@ class SkillsLibrary(Configuration):
                f"https://www.msn.com/en-ph/{section}"],), daemon=True).start()
         return True
 
-    def open_browser(self, url="https://google.com"):
+    def open_browser(self, urls=["https://google.com"]):
         Thread(target=execute_map, args=(
-            "open browser", [url],), daemon=True).start()
+            "open browser", urls,), daemon=True).start()
         return True
-
-    # def highlight_code_snippets(self, text):
-    #     import re
-
-    #     from pygments import highlight
-    #     code_snippets = re.findall(
-    #         r'(```[\s\S]+?```|```[\s\S]+|[\s\S]+?```)', text)
-    #     for code in code_snippets:
-    #         code = re.sub(r'```', '', code)
-    #         lexer = None
-    #         for lexer_name, _, _ in get_all_lexers():
-    #             try:
-    #                 lexer = get_lexer_by_name(lexer_name, stripall=True)
-    #                 lexer.analyse_text(code)
-    #                 break
-    #             except:
-    #                 pass
-    #         if lexer:
-    #             print(highlight(code, lexer, TerminalFormatter()))
-    #         else:
-    #             print(code)
-
-    #     print(text)
 
     def openai(self, voice_data):
         result = ""
@@ -494,7 +461,7 @@ class SkillsLibrary(Configuration):
             return result.strip()
 
         except Exception as ex:
-            if "maximum context length" in str(ex):
+            if "maximum context length" in str(ex) or "exceeded you current quota" in str(ex):
                 self.context = ""
                 return self.openai(voice_data)
 
@@ -640,7 +607,7 @@ class SkillsLibrary(Configuration):
                         # change directory to PSE library resides
                         os.chdir(self.PSE_DIR)
                         # open PSE ticker in new window
-                        # os.system('start cmd /k \"start_PSE.bat\"')
+                        os.system('start cmd /k \"start_PSE.bat\"')
                         # get back to virtual assistant directory after command execution
                         os.chdir(self.ASSISTANT_DIR)
 
@@ -769,74 +736,64 @@ class SkillsLibrary(Configuration):
         return response_message
 
     def screen_brightness(self, voice_data):
-        # try:
-        #     percentage = int([val for val in voice_data.replace(
-        #         '%', '').split(' ') if val.isdigit()][0]) if True else 50
-        #     # set the screen brightness (in percentage)
-        #     # wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
-        #     #     0].WmiSetBrightness(percentage, 0)
+        try:
+            percentage = int([val for val in voice_data.replace(
+                '%', '').split(' ') if val.isdigit()][0]) if True else 50
+            # set the screen brightness (in percentage)
+            # wmi.WMI(namespace="wmi").WmiMonitorBrightnessMethods()[
+            #     0].WmiSetBrightness(percentage, 0)
 
-        #     alternate_responses = self._get_commands("acknowledge response")
-        #     return f"{choice(alternate_responses)} I set the brightness by {percentage}%"
+            alternate_responses = self._get_commands("acknowledge response")
+            return f"{choice(alternate_responses)} I set the brightness by {percentage}%"
 
-        # except Exception:
-        # self.Log("Screen Brightness Skill Error.")
-        print("Skill not available")
-        return ""
+        except Exception:
+            self.Log("Screen Brightness Skill Error.")
 
     def control_wifi(self, voice_data):
-        # command = ""
-        # try:
-        #     if is_match(voice_data, ["on", "open", "enable"]):
-        #         # if "on" in voice_data or "open" in voice_data:
-        #         command = "enabled"
-        #     if is_match(voice_data, ["off", "close", "disable"]):
-        #         # elif "off" in voice_data or "close" in voice_data:
-        #         command = "disabled"
+        command = ""
+        try:
+            if is_match(voice_data, ["on", "open", "enable"]):
+                # if "on" in voice_data or "open" in voice_data:
+                command = "enabled"
+            if is_match(voice_data, ["off", "close", "disable"]):
+                # elif "off" in voice_data or "close" in voice_data:
+                command = "disabled"
 
-        #     if command:
-        #         os.system(f"netsh interface set interface \"Wi-Fi\" {command}")
+            if command:
+                os.system(f"netsh interface set interface \"Wi-Fi\" {command}")
 
-        #         if "disabled" in command:
-        #             # announce before going off-line
-        #             self.print(
-        #                 f"\033[1;33;41m {self.assistant_name} is Offline...")
+                if "disabled" in command:
+                    # announce before going off-line
+                    self.print(
+                        f"\033[1;33;41m {self.assistant_name} is Offline...")
 
-        #         alternate_responses = self._get_commands(
-        #             "acknowledge response")
-        #         return f"{choice(alternate_responses)} I {command} the Wi-Fi."
+                alternate_responses = self._get_commands(
+                    "acknowledge response")
+                return f"{choice(alternate_responses)} I {command} the Wi-Fi."
 
-        # except Exception:
-        # self.Log("Wi-Fi Skill Error.")
-        print("Skill not available")
-        return ""
+        except Exception:
+            self.Log("Wi-Fi Skill Error.")
 
     def control_system(self, voice_data):
-        # command = ""
-        # confirmation = "no"
+        command = ""
+        confirmation = "no"
 
-        # try:
-        #     if "shutdown" in voice_data:
-        #         # shudown command sequence for 15 seconds
-        #         command = "shutdown /s /t 15"
+        try:
+            if "shutdown" in voice_data:
+                # shutdown command sequence for 15 seconds
+                command = "shutdown /s /t 15"
 
-        #     elif is_match(voice_data, ["restart", "reboot"]):
-        #         # restart command sequence for 15 seconds
-        #         command = "shutdown /r /t 15"
+            elif is_match(voice_data, ["restart", "reboot"]):
+                # restart command sequence for 15 seconds
+                command = "shutdown /r /t 15"
 
-        #     if command:
-        #         # confirmation = self.tts.listen(f"\033[1;33;41m Are you sure to \"{'Restart' if '/r' in command else 'Shutdown'}\" your computer? (yes/no): ")
+            if command:
+                # execute the shutdown--restart command if confirmed by user
+                os.system(command)
+                return f"Ok! {'Reboot' if '/r' in command else 'Shutdown'} sequence will commence in approximately 10 seconds..."
 
-        #         # execute the shutdown--restart command if confirmed by user
-        #         # if "yes" in confirmation.lower().strip():
-        #         os.system(command)
-        #         return f"Ok! {'Reboot' if '/r' in command else 'Shutdown'} sequence will commence in approximately 10 seconds..."
-        #         # return f"{'Reboot' if '/r' in command else 'Shutdown'} is canceled."
-
-        # except Exception:
-        # self.Log("Shutdown--restart System Skill Error.")
-        print("Skill not available")
-        return ""
+        except Exception:
+            self.Log("Shutdown--restart System Skill Error.")
 
     def wallpaper(self):
         try:
@@ -935,8 +892,8 @@ class SkillsLibrary(Configuration):
                         alternate_responses = self._get_commands(
                             "acknowledge response")
                         response = f"{choice(alternate_responses)} Now playing \"{meta_data.capitalize()}\" {'music...' if music_word_found else '...'}"
-                    # else:
-                    #     response = f"I couldn't find \"{meta_data.capitalize()}\" in your music."
+                    else:
+                        response = f"I couldn't find \"{meta_data.capitalize()}\" in your music."
 
                 if songWasFound:
                     mp.player_status("close")
@@ -956,8 +913,6 @@ class SkillsLibrary(Configuration):
 
         try:
             if self.is_darwin_platform:
-                # subprocess.run(
-                #     ["osascript", "-e", f'tell application "Music" to set sound volume to {volume}'])
                 subprocess.run(
                     ["osascript", "-e", f'tell application "Spotify" to set sound volume to {volume}'])
             else:
@@ -968,9 +923,6 @@ class SkillsLibrary(Configuration):
                 mp = MusicPlayer()
                 # change the directory to location of batch file to execute
                 os.chdir(self.UTILS_DIR)
-
-                # mp.music_player_volume(volume)
-
                 # get back to virtual assistant directory
                 os.chdir(self.ASSISTANT_DIR)
 
@@ -1021,10 +973,6 @@ class SkillsLibrary(Configuration):
 
             # change the directory to location of batch file to execute
             news = NewsTicker()
-
-            # execute daemon to fetch breaking news in background
-            # news.fetch_news()
-            # news.run_breaking_news_daemon()
 
             # get back to virtual assistant directory
             sys.path.append(self.ASSISTANT_DIR)
